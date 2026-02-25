@@ -31,7 +31,6 @@ export default function CompaniesPage() {
                 setLoading(false);
             }
         };
-        fetchLeads(); // Wait, I copy-pasted wrong function name in my thought, fixing it.
         fetchCompanies();
     }, [search]);
 
