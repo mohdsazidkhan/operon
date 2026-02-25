@@ -1,189 +1,194 @@
 'use client';
 
-import { Star, Trash2, Archive, Reply, Search, Mail, Inbox, Send, AlertCircle, Bookmark, ChevronDown, MoreVertical, Plus, Paperclip } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import {
+    Inbox, Send, Drafts, Trash2, AlertCircle, Star,
+    MoreVertical, RefreshCw, Search, Filter,
+    Archive, Mail, Tag, ChevronLeft, ChevronRight,
+    Paperclip, Trash
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const emails = [
-    { id: 1, from: 'Jennifer Adams', email: 'j.adams@neural.io', subject: 'Vector Audit Follow-up', preview: "Analysis core protocols finalized successfully. The team identifies high-gradient potential in the Q4 roadmap. When can we initialize technical review?", time: '10:32 AM', read: false, starred: false, label: 'Neural' },
-    { id: 2, from: 'Nina Patel', email: 'nina@ecomhub.com', subject: 'EcomHub — Scaling Proposal', preview: "Protocol evaluation completed. High-velocity metrics observed. Requesting synchronous sync to finalize resource allocation and pricing matrix.", time: '9:15 AM', read: false, starred: true, label: 'Sales' },
-    { id: 3, from: 'David Chen', email: 'david@operon.io', subject: 'Temporal Request Approved', preview: "Authorized leave sequence for March 20–25 is logged in the temporal registry. Sync all pending vectors before initialization.", time: 'Yesterday', read: true, starred: false, label: 'System' },
-    { id: 4, from: 'Sophia Turner', email: 'sophia@operon.io', subject: 'Fiscal Report Ready', preview: "The Q1 expenditure matrix has been compiled. Validation required for finalized capital disbursement protocols.", time: 'Yesterday', read: true, starred: false, label: 'Finance' },
-    { id: 5, from: 'Daniel Wu', email: 'daniel.wu@bizsuite.com', subject: 'Core Inquiry: BizSuite', preview: "Evaluating operational infrastructures for fiscal year 2025. OPERON telemetry shows optimal sector penetration. Requesting detailed demo.", time: 'Mar 14', read: true, starred: false, label: 'Lead' },
-];
+import toast from 'react-hot-toast';
 
 export default function EmailPage() {
-    const [selectedEmail, setSelectedEmail] = useState(emails[0]);
-    const [activeFolder, setActiveFolder] = useState('Inbox');
+    const [activeFolder, setActiveFolder] = useState('inbox');
+    const [selectedEmail, setSelectedEmail] = useState(null);
+    const [emails, setEmails] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+
+    const folders = [
+        { id: 'inbox', label: 'INBOX', icon: Inbox, count: emails.filter(e => !e.isRead && e.folder === 'inbox').length },
+        { id: 'sent', label: 'SENT', icon: Send, count: 0 },
+        { id: 'drafts', label: 'DRAFTS', icon: Mail, count: 0 },
+        { id: 'trash', label: 'TRASH', icon: Trash2, count: 0 },
+        { id: 'spam', label: 'SPAM', icon: AlertCircle, count: 0 },
+    ];
+
+    const fetchEmails = async () => {
+        try {
+            const res = await fetch(`/api/emails?folder=${activeFolder}&search=${search}`);
+            const data = await res.json();
+            if (data.success) {
+                setEmails(data.data);
+            }
+        } catch (err) {
+            toast.error('Quantum link failure: Could not retrieve email ledger');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEmails();
+    }, [activeFolder, search]);
+
+    const handleSend = async () => {
+        const email = prompt('TARGET PROTOCOL (Email Address):');
+        if (!email) return;
+        const subject = prompt('DATA PACKET HEADER (Subject):');
+        const content = prompt('SEQUENCE CONTENT:');
+
+        try {
+            const res = await fetch('/api/emails', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender: { name: 'Current User', email: 'user@operon.ai' },
+                    recipients: [{ email }],
+                    subject,
+                    content,
+                    folder: 'inbox' // Simulating for demo simplicity
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Packet transmitted successfully');
+                fetchEmails();
+            }
+        } catch (err) {
+            toast.error('Transmission failure');
+        }
+    };
 
     return (
         <div className="h-[calc(100vh-140px)] flex flex-col animate-in fade-in duration-700">
-            {/* Header Area */}
-            <div className="flex flex-wrap items-end justify-between gap-6 px-2 mb-6">
+            {/* Context Header */}
+            <div className="mb-6 flex items-center justify-between px-2">
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Quantum Mail</h1>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-1 flex items-center gap-2">
-                        <Mail size={12} className="text-primary-500" />
-                        Asynchronous Data Propagation • Encrypted Stream
+                        <Archive size={12} className="text-primary-500" />
+                        Authenticated Vector Stream Active
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="h-12 px-8 rounded-2xl bg-white text-slate-950 font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all flex items-center gap-3">
-                        <Plus size={16} /> Sequence Message
+                    <button
+                        onClick={handleSend}
+                        className="h-14 px-8 rounded-2xl bg-primary-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary-500/20 hover:scale-105 transition-all flex items-center gap-3"
+                    >
+                        Compose Packet
                     </button>
                 </div>
             </div>
 
             <div className="flex-1 flex bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 shadow-2xl overflow-hidden">
-                {/* Sidebar - Nav Ledger */}
-                <div className="w-20 lg:w-64 border-r border-slate-800 flex flex-col bg-slate-950/20 p-4">
-                    <div className="space-y-2 mt-4">
-                        {[
-                            { name: 'Inbox', icon: Inbox, count: 2 },
-                            { name: 'Starred', icon: Star, count: 1 },
-                            { name: 'Sent', icon: Send, count: 0 },
-                            { name: 'Archive', icon: Archive, count: 0 },
-                            { name: 'Trash', icon: Trash2, count: 0 },
-                        ].map(folder => (
+                {/* Sidebar - Folder Ledger */}
+                <div className="w-80 border-r border-slate-800 bg-slate-950/20 flex flex-col">
+                    <div className="p-8 space-y-2">
+                        {folders.map(folder => (
                             <button
-                                key={folder.name}
-                                onClick={() => setActiveFolder(folder.name)}
+                                key={folder.id}
+                                onClick={() => setActiveFolder(folder.id)}
                                 className={cn(
-                                    'w-full flex items-center gap-4 p-4 rounded-2xl transition-all group relative overflow-hidden',
-                                    activeFolder === folder.name ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/10' : 'text-slate-600 hover:text-white hover:bg-white/5'
+                                    'w-full flex items-center justify-between p-4 rounded-2xl transition-all group',
+                                    activeFolder === folder.id ? 'bg-primary-500/10 border border-primary-500/20' : 'hover:bg-white/[0.03] border border-transparent'
                                 )}
                             >
-                                <folder.icon size={18} className={cn(activeFolder === folder.name ? 'text-white' : 'group-hover:text-primary-400')} />
-                                <span className="hidden lg:block text-[10px] font-black uppercase tracking-widest">{folder.name}</span>
-                                {folder.count > 0 && activeFolder !== folder.name && (
-                                    <span className="hidden lg:flex ml-auto w-5 h-5 rounded-lg bg-slate-900 border border-slate-800 text-[9px] font-black text-primary-500 items-center justify-center">
-                                        {folder.count}
-                                    </span>
+                                <div className="flex items-center gap-4">
+                                    <folder.icon size={18} className={cn(activeFolder === folder.id ? 'text-primary-500' : 'text-slate-600 group-hover:text-slate-400')} />
+                                    <span className={cn('text-[10px] font-black uppercase tracking-widest', activeFolder === folder.id ? 'text-white' : 'text-slate-600 group-hover:text-slate-400')}>{folder.label}</span>
+                                </div>
+                                {folder.count > 0 && (
+                                    <div className="px-2 py-0.5 rounded-lg bg-primary-500 text-[9px] font-black text-white">{folder.count}</div>
                                 )}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* List Ledger */}
-                <div className="w-80 lg:w-96 border-r border-slate-800 flex flex-col bg-slate-950/10">
+                {/* Email Ledger - Infinite Stream */}
+                <div className="w-96 border-r border-slate-800 flex flex-col">
                     <div className="p-6 border-b border-slate-800 bg-slate-900/40">
                         <div className="relative group">
                             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-primary-500 transition-colors" />
                             <input
-                                className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-[9px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all placeholder:text-slate-900"
-                                placeholder="QUERY INBOX..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="QUERY ARCHIVE..."
+                                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-slate-900 border border-slate-800 text-[9px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all placeholder:text-slate-800"
                             />
                         </div>
                     </div>
-                    <div className="flex-1 overflow-y-auto divide-y divide-slate-800/50">
-                        {emails.map(email => (
+                    <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-950/10">
+                        {loading && emails.length === 0 ? (
+                            <div className="py-12 text-center text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] animate-pulse">Decrypting Segment...</div>
+                        ) : emails.map(email => (
                             <button
-                                key={email.id}
+                                key={email._id}
                                 onClick={() => setSelectedEmail(email)}
                                 className={cn(
-                                    'w-full flex items-start gap-4 p-6 text-left transition-all relative group overflow-hidden',
-                                    selectedEmail.id === email.id ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]',
-                                    !email.read && 'after:absolute after:left-0 after:top-0 after:bottom-0 after:w-1 after:bg-primary-500'
+                                    'w-full p-6 border-b border-slate-800/50 text-left transition-all relative group',
+                                    selectedEmail?._id === email._id ? 'bg-primary-500/5' : 'hover:bg-white/[0.02]',
+                                    !email.isRead && 'after:absolute after:left-0 after:top-0 after:bottom-0 after:w-1 after:bg-primary-500'
                                 )}
                             >
-                                <div className="shrink-0 w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover:border-primary-500/50 group-hover:text-primary-400 transition-all">
-                                    {email.from[0]}
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-[10px] font-black text-white uppercase tracking-tight truncate max-w-[140px]">{email.sender.name}</span>
+                                    <span className="text-[9px] font-black text-slate-700 uppercase">{new Date(email.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className={cn('text-[11px] uppercase tracking-tight truncate', !email.read ? 'font-black text-white' : 'font-bold text-slate-500')}>{email.from}</p>
-                                        <span className="text-[9px] font-bold text-slate-800 uppercase italic shrink-0">{email.time}</span>
-                                    </div>
-                                    <p className={cn('text-[10px] uppercase tracking-widest truncate mb-1', !email.read ? 'font-black text-primary-400 shadow-primary-500/50' : 'font-bold text-slate-600')}>{email.subject}</p>
-                                    <p className="text-[9px] text-slate-700 font-bold uppercase tracking-wider truncate italic">{email.preview}</p>
-                                </div>
+                                <h3 className={cn('text-[11px] mb-2 uppercase tracking-tight truncate', email.isRead ? 'text-slate-500 font-bold' : 'text-white font-black')}>{email.subject}</h3>
+                                <p className="text-[10px] font-bold text-slate-600 lowercase tracking-tight line-clamp-2 leading-relaxed">{email.content.substring(0, 100)}...</p>
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Detail View */}
-                <div className="flex-1 flex flex-col bg-slate-950/30 overflow-hidden relative">
-                    {/* Detail Header */}
-                    <div className="p-8 border-b border-slate-800 bg-slate-900/40">
-                        <div className="flex items-start justify-between mb-8 group">
-                            <div>
-                                <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic group-hover:text-primary-400 transition-colors">{selectedEmail.subject}</h2>
-                                <div className="flex items-center gap-3 mt-3">
-                                    <span className="px-3 py-1 rounded-lg bg-primary-500/10 border border-primary-500/20 text-[9px] font-black text-primary-400 uppercase tracking-widest">{selectedEmail.label}</span>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
-                                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Protocol Version: 9.4.2</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {[Star, Archive, Trash2, MoreVertical].map((Icon, idx) => (
-                                    <button
-                                        key={idx}
-                                        className={cn(
-                                            'p-3 rounded-2xl bg-slate-900 border border-slate-800 transition-all hover:scale-105',
-                                            idx === 0 && selectedEmail.starred ? 'text-amber-500' : 'text-slate-600 hover:text-white'
-                                        )}
-                                    >
-                                        <Icon size={18} />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-[1.5rem] bg-gradient-to-br from-primary-500 to-indigo-600 p-px">
-                                <div className="w-full h-full rounded-[1.4rem] bg-slate-950 flex items-center justify-center text-white font-black text-lg">
-                                    {selectedEmail.from[0]}
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-xs font-black text-white uppercase tracking-widest">{selectedEmail.from}</p>
-                                    <span className="text-[9px] font-black text-slate-800 uppercase italic tracking-widest">{selectedEmail.time}</span>
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1 italic">&lt;{selectedEmail.email}&gt;</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Email Content */}
-                    <div className="flex-1 overflow-y-auto p-12 scrollbar-hide">
-                        <div className="max-w-3xl">
-                            <p className="text-sm font-black text-slate-300 leading-[1.8] tracking-tight uppercase mb-8">
-                                {selectedEmail.preview}
-                            </p>
-                            <p className="text-xs font-bold text-slate-500 leading-relaxed uppercase tracking-widest mb-12">
-                                Quantum transmission log indicates successful vector injection. <br />
-                                System integrity state: Nominal. <br /><br />
-                                Strategic directives await your validation cycle. <br /><br />
-                                Integrity Hash: 0x8249F2EE94B <br />
-                                Protocol Agent: Neural-Auto-Gen
-                            </p>
-
-                            <div className="flex gap-4">
-                                <div className="p-6 rounded-[2rem] border border-slate-800 bg-slate-900/40 w-64 group cursor-pointer hover:border-primary-500/50 transition-all">
-                                    <div className="flex items-center gap-4 mb-3">
-                                        <div className="p-3 rounded-xl bg-slate-950 text-emerald-400 group-hover:scale-110 transition-transform"><Paperclip size={18} /></div>
-                                        <p className="text-[10px] font-black text-white uppercase tracking-tight">Strategy_Map.pdf</p>
+                {/* Tactical Detail View */}
+                <div className="flex-1 flex flex-col bg-slate-950/30 relative">
+                    {selectedEmail ? (
+                        <>
+                            <div className="p-8 border-b border-slate-800 flex items-center justify-between bg-slate-900/20">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-primary-500 font-black text-xl shadow-inner uppercase">
+                                        {selectedEmail.sender.name[0]}
                                     </div>
-                                    <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">2.4 MB • PDF Document</p>
+                                    <div>
+                                        <h2 className="text-xs font-black text-white uppercase tracking-widest mb-1">{selectedEmail.sender.name}</h2>
+                                        <p className="text-[10px] font-black text-slate-600 lowercase tracking-widest">{selectedEmail.sender.email} • TO: ME</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    {[RefreshCw, Archive, Trash].map((Icon, i) => (
+                                        <button key={i} className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-700 hover:text-white transition-all"><Icon size={18} /></button>
+                                    ))}
                                 </div>
                             </div>
+                            <div className="flex-1 p-10 overflow-y-auto scrollbar-hide">
+                                <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-10 italic">{selectedEmail.subject}</h1>
+                                <div className="prose prose-invert max-w-none">
+                                    <p className="text-sm font-black text-slate-300 leading-relaxed tracking-tight whitespace-pre-wrap">{selectedEmail.content}</p>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="text-center group">
+                                <Archive size={48} className="mx-auto text-slate-800 group-hover:text-primary-500/20 transition-all duration-700" />
+                                <p className="mt-6 text-[10px] font-black text-slate-800 uppercase tracking-[0.5em]">Select Segment to Decrypt</p>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Quick Resolve Footer */}
-                    <div className="p-8 border-t border-slate-800 bg-slate-900/40">
-                        <div className="flex items-center gap-4">
-                            <button className="h-14 px-10 rounded-[1.5rem] bg-primary-500 text-white text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-primary-500/20 flex items-center gap-3 hover:scale-105 transition-all active:scale-95">
-                                <Reply size={16} /> Execute Reply
-                            </button>
-                            <button className="h-14 px-8 rounded-[1.5rem] border border-slate-800 bg-slate-950 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:text-white hover:border-slate-700 transition-all">
-                                Forward Sequence
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

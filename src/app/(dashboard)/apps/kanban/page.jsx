@@ -1,3 +1,5 @@
+'use client';
+
 import { Plus, MoreHorizontal, UserCircle2, Calendar, Tag, AlertCircle, GripVertical, Search, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';

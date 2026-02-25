@@ -1,33 +1,59 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Search, MoreVertical, Phone, Video, Info, Paperclip, Smile, ShieldCheck, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const chats = [
-    { id: '1', name: 'Jennifer Adams', avatar: 'https://i.pravatar.cc/150?u=1', role: 'Lead Neural Dev', unread: 3, lastMessage: 'Neural pipeline analysis finalized.', time: '2m ago', online: true },
-    { id: '2', name: 'Alex Morgan', avatar: 'https://i.pravatar.cc/150?u=2', role: 'Strategic Architect', unread: 0, lastMessage: 'Sync protocol version 9.4 released.', time: '1h ago', online: true },
-    { id: '3', name: 'Emma Wilson', avatar: 'https://i.pravatar.cc/150?u=3', role: 'Growth Lead', unread: 0, lastMessage: 'Expansion vectors mapped.', time: '3h ago', online: false },
-    { id: '4', name: 'Daniel Wu', avatar: 'https://i.pravatar.cc/150?u=4', role: 'Backend Core', unread: 1, lastMessage: 'Database cluster scaled.', time: '5m ago', online: true },
-];
-
-const initialMessages = [
-    { id: 1, from: 'them', text: "Hey! Have you reviewed the new lead assignments?", time: '10:12 AM' },
-    { id: 2, from: 'me', text: "Confirmed. The DataFlow AI lead shows peak conversion potential.", time: '10:14 AM' },
-    { id: 3, from: 'them', text: "Agreed. Nina Patel also shows high-velocity engagement metrics.", time: '10:15 AM' },
-    { id: 4, from: 'me', text: "I'll schedule a neural sync this week. Prepare the protocol templates.", time: '10:17 AM' },
-    { id: 5, from: 'them', text: "Templates ready by EOD.", time: '10:18 AM' },
-];
+import toast from 'react-hot-toast';
 
 export default function ChatPage() {
+    const [chats, setChats] = useState([
+        { id: 'general', name: 'Global Neural Channel', role: 'System-wide', online: true }
+    ]);
     const [activeChat, setActiveChat] = useState(chats[0]);
     const [msgInput, setMsgInput] = useState('');
-    const [messages, setMessages] = useState(initialMessages);
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const handleSend = () => {
+    const fetchMessages = async () => {
+        try {
+            const res = await fetch(`/api/messages?channelId=${activeChat.id}`);
+            const data = await res.json();
+            if (data.success) {
+                setMessages(data.data);
+            }
+        } catch (err) {
+            toast.error('Neural uplink failure: Could not retrieve data packets');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMessages();
+        const interval = setInterval(fetchMessages, 5000); // Polling for real-time feel
+        return () => clearInterval(interval);
+    }, [activeChat]);
+
+    const handleSend = async () => {
         if (!msgInput.trim()) return;
-        setMessages([...messages, { id: Date.now(), from: 'me', text: msgInput, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
-        setMsgInput('');
+
+        try {
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: msgInput,
+                    channelId: activeChat.id
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setMsgInput('');
+                fetchMessages();
+            }
+        } catch (err) {
+            toast.error('Packet transmission failure');
+        }
     };
 
     return (
@@ -67,23 +93,17 @@ export default function ChatPage() {
                                 )}
                             >
                                 <div className="relative flex-shrink-0">
-                                    <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-slate-800 group-hover:ring-primary-500/50 transition-all duration-500">
-                                        <img src={chat.avatar} alt={chat.name} className="w-full h-full object-cover" />
+                                    <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-slate-800 group-hover:ring-primary-500/50 transition-all duration-500 bg-slate-800 flex items-center justify-center text-primary-500 font-black">
+                                        {chat.name[0]}
                                     </div>
                                     {chat.online && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-slate-900 shadow-xl shadow-emerald-500/20" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                         <p className="text-xs font-black text-white uppercase tracking-tight truncate">{chat.name}</p>
-                                        <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">{chat.time}</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate leading-tight">{chat.lastMessage}</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate leading-tight">{chat.role}</p>
                                 </div>
-                                {chat.unread > 0 && (
-                                    <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-lg shadow-primary-500/20 shrink-0">
-                                        <span className="text-[9px] font-black text-white">{chat.unread}</span>
-                                    </div>
-                                )}
                             </button>
                         ))}
                     </div>
@@ -94,8 +114,8 @@ export default function ChatPage() {
                     {/* Active Context Header */}
                     <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/20">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl overflow-hidden border border-primary-500/30">
-                                <img src={activeChat.avatar} alt={activeChat.name} className="w-full h-full object-cover" />
+                            <div className="w-12 h-12 rounded-2xl overflow-hidden border border-primary-500/30 bg-slate-800 flex items-center justify-center text-white font-black">
+                                {activeChat.name[0]}
                             </div>
                             <div>
                                 <h2 className="text-xs font-black text-white uppercase tracking-[0.2em]">{activeChat.name}</h2>
@@ -105,29 +125,27 @@ export default function ChatPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            {[Phone, Video, Info, MoreVertical].map((Icon, idx) => (
-                                <button key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-600 hover:text-white hover:border-slate-700 transition-all">
-                                    <Icon size={18} />
-                                </button>
-                            ))}
-                        </div>
                     </div>
 
                     {/* Chat Ledger */}
                     <div className="flex-1 overflow-y-auto p-10 space-y-8 scroll-smooth scrollbar-hide">
-                        {messages.map((m, idx) => (
-                            <div key={idx} className={cn('flex flex-col max-w-[70%] group', m.from === 'me' ? 'ml-auto items-end' : 'items-start')}>
+                        {loading && messages.length === 0 ? (
+                            <div className="py-12 text-center text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] animate-pulse">Decrypting Stream...</div>
+                        ) : messages.map((m, idx) => (
+                            <div key={m._id} className={cn('flex flex-col max-w-[70%] group', m.sender?._id === activeChat.id ? 'items-start' : 'ml-auto items-end')}>
                                 <div className={cn(
                                     'p-6 rounded-[2.5rem] relative overflow-hidden',
-                                    m.from === 'me'
+                                    m.sender?._id !== activeChat.id
                                         ? 'bg-primary-500 text-white rounded-tr-none shadow-2xl shadow-primary-500/10'
                                         : 'bg-slate-900/60 border border-slate-800 text-slate-200 rounded-tl-none'
                                 )}>
                                     <p className="text-sm font-black leading-relaxed tracking-tight">{m.text}</p>
-                                    <div className={cn('absolute top-0 right-0 w-8 h-8 opacity-10', m.from === 'me' ? 'bg-white' : 'bg-primary-500')}></div>
+                                    <div className={cn('absolute top-0 right-0 w-8 h-8 opacity-10', m.sender?._id !== activeChat.id ? 'bg-white' : 'bg-primary-500')}></div>
                                 </div>
-                                <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.2em] mt-3">{m.time}</p>
+                                <div className="flex items-center gap-3 mt-3">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{m.sender?.name || 'SYSTEM'}</span>
+                                    <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.2em]">{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                </div>
                             </div>
                         ))}
                     </div>

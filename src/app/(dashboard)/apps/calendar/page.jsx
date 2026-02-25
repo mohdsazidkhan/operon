@@ -1,23 +1,19 @@
 'use client';
 
-import { useState } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, MapPin, Users, Clock, Settings, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { cn, formatDate } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-const eventLog = [
-    { id: 1, title: 'Neural Pipeline Audit', date: 15, time: '10:00 AM', color: 'bg-primary-500', shadow: 'shadow-primary-500/20' },
-    { id: 2, title: 'Q1 Strategy Vectoring', date: 18, time: '02:00 PM', color: 'bg-indigo-500', shadow: 'shadow-indigo-500/20' },
-    { id: 3, title: 'Personnel Sync Protocol', date: 20, time: '11:30 AM', color: 'bg-emerald-500', shadow: 'shadow-emerald-500/20' },
-    { id: 4, title: 'Capital Alloc. Review', date: 22, time: '09:00 AM', color: 'bg-amber-500', shadow: 'shadow-amber-500/20' },
-    { id: 5, title: 'Asset Scaling Demo', date: 25, time: '04:30 PM', color: 'bg-rose-500', shadow: 'shadow-rose-500/20' },
-];
-
 export default function CalendarPage() {
     const [currentDate, setCurrentDate] = useState(new Date(2024, 2, 1));
     const [selectedDay, setSelectedDay] = useState(15);
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -29,8 +25,52 @@ export default function CalendarPage() {
         return day > 0 && day <= daysInMonth ? day : null;
     });
 
+    const fetchEvents = async () => {
+        try {
+            const res = await fetch(`/api/events?search=${search}`);
+            const data = await res.json();
+            if (data.success) {
+                setEvents(data.data);
+            }
+        } catch (err) {
+            toast.error('Temporal link failure: Could not retrieve event stream');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, [search]);
+
     const shiftMonth = (delta) => {
         setCurrentDate(new Date(year, month + delta, 1));
+    };
+
+    const handleCreateEvent = async () => {
+        const title = prompt('INITIALIZE NEW CHRONOLOGICAL CYCLE (Event Title):');
+        if (!title) return;
+
+        try {
+            const res = await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title,
+                    startDate: new Date(year, month, selectedDay),
+                    type: 'event',
+                    color: 'bg-primary-500',
+                    shadow: 'shadow-primary-500/20'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Cycle recorded successfully');
+                fetchEvents();
+            }
+        } catch (err) {
+            toast.error('Failed to record new cycle');
+        }
     };
 
     return (
@@ -45,7 +85,10 @@ export default function CalendarPage() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="h-14 px-8 rounded-2xl bg-primary-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary-500/20 hover:scale-105 transition-all flex items-center gap-3">
+                    <button
+                        onClick={handleCreateEvent}
+                        className="h-14 px-8 rounded-2xl bg-primary-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary-500/20 hover:scale-105 transition-all flex items-center gap-3"
+                    >
                         <Plus size={18} /> Record New Cycle
                     </button>
                 </div>
@@ -74,8 +117,11 @@ export default function CalendarPage() {
                             <div key={d} className="bg-slate-950 py-6 text-center text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">{d}</div>
                         ))}
                         {cells.map((day, i) => {
-                            const event = day && eventLog.find(e => e.date === day);
-                            const activeDay = day === 15;
+                            const dayEvents = day && events.filter(e => {
+                                const d = new Date(e.startDate);
+                                return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year;
+                            });
+                            const activeDay = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
                             const isSelected = day === selectedDay;
 
                             return (
@@ -95,13 +141,13 @@ export default function CalendarPage() {
                                                     'text-xs font-black tracking-tight flex items-center justify-center w-8 h-8 rounded-xl transition-all',
                                                     activeDay ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/20' : isSelected ? 'bg-white text-slate-950' : 'text-slate-600 group-hover:text-slate-400'
                                                 )}>{day}</span>
-                                                {event && <div className={cn('w-1.5 h-1.5 rounded-full animate-pulse', event.color)}></div>}
+                                                {dayEvents?.length > 0 && <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-primary-500"></div>}
                                             </div>
-                                            {event && (
-                                                <div className={cn('p-2.5 rounded-xl text-[9px] font-black text-white uppercase tracking-wider leading-tight border transition-transform group-hover:scale-105', event.color, event.shadow, 'border-white/5')}>
+                                            {dayEvents?.map(event => (
+                                                <div key={event._id} className={cn('p-2.5 rounded-xl text-[9px] font-black text-white uppercase tracking-wider leading-tight border transition-transform group-hover:scale-105 mb-1', event.color || 'bg-primary-500', event.shadow || 'shadow-primary-500/20', 'border-white/5')}>
                                                     {event.title}
                                                 </div>
-                                            )}
+                                            ))}
                                         </>
                                     )}
                                 </div>
@@ -119,14 +165,18 @@ export default function CalendarPage() {
                             Upcoming Flux
                         </h3>
                         <div className="space-y-4">
-                            {eventLog.map(e => (
-                                <div key={e.id} className="flex items-center gap-5 p-5 rounded-[2rem] bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer group/item">
-                                    <div className={cn('w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xl transition-transform group-hover/item:scale-110', e.color, e.shadow)}>
-                                        <span className="text-sm font-black text-white italic">{e.date}</span>
+                            {loading ? (
+                                <div className="py-12 text-center text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] animate-pulse">Decrypting Flux...</div>
+                            ) : events.length === 0 ? (
+                                <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest text-center py-8 italic">No imminent events detected</p>
+                            ) : events.slice(0, 5).map(e => (
+                                <div key={e._id} className="flex items-center gap-5 p-5 rounded-[2rem] bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer group/item">
+                                    <div className={cn('w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xl transition-transform group-hover/item:scale-110', e.color || 'bg-primary-500', e.shadow || 'shadow-primary-500/20')}>
+                                        <span className="text-sm font-black text-white italic">{new Date(e.startDate).getDate()}</span>
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-[11px] font-black text-white uppercase tracking-tight truncate group-hover/item:text-primary-400 transition-colors">{e.title}</p>
-                                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1 italic">{e.time}</p>
+                                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1 italic">{e.startTime || 'All Day'}</p>
                                     </div>
                                 </div>
                             ))}
@@ -142,14 +192,11 @@ export default function CalendarPage() {
                         <div className="relative group">
                             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-primary-500 transition-colors" />
                             <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
                                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950 border border-slate-800 text-[9px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all"
                                 placeholder="QUERY EVENT HASH..."
                             />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 mt-6">
-                            {['Audit', 'Recruit', 'Sales', 'Fiscal'].map(tag => (
-                                <button key={tag} className="py-3 px-4 rounded-xl bg-slate-900 border border-slate-800 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-all ring-primary-500/10 hover:ring-2">#{tag}</button>
-                            ))}
                         </div>
                     </div>
                 </div>
