@@ -1,1 +1,126 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── Design Token Themes ─── */
+:root {
+    /* Violet (default) */
+    --primary-50: #f5f3ff;
+    --primary-100: #ede9fe;
+    --primary-200: #ddd6fe;
+    --primary-300: #c4b5fd;
+    --primary-400: #a78bfa;
+    --primary-500: #8b5cf6;
+    --primary-600: #7c3aed;
+    --primary-700: #6d28d9;
+    --primary-800: #5b21b6;
+    --primary-900: #4c1d95;
+
+    /* Surfaces */
+    --surface: #020617;
+    --surface-raised: #0f172a;
+    --surface-overlay: #1e293b;
+    --border: #1e293b;
+    --border-strong: #334155;
+
+    /* Text */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Accent Glows */
+    --glow-primary: rgba(139, 92, 246, 0.5);
+}
+
+.theme-indigo {
+    --primary-500: #6366f1;
+    --glow-primary: rgba(99, 102, 241, 0.5);
+}
+
+.theme-rose {
+    --primary-500: #f43f5e;
+    --glow-primary: rgba(244, 63, 94, 0.5);
+}
+
+.theme-emerald {
+    --primary-500: #10b981;
+    --glow-primary: rgba(16, 185, 129, 0.5);
+}
+
+.theme-amber {
+    --primary-500: #f59e0b;
+    --glow-primary: rgba(245, 158, 11, 0.5);
+}
+
+/* ─── Base Styles ─── */
+* {
+    border-color: var(--border);
+}
+
+body {
+    background-color: var(--surface);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+/* ─── Utility Classes ─── */
+.glass-morphism {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-400), var(--primary-600));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.glow-box {
+    box-shadow: 0 0 20px var(--glow-primary);
+}
+
+/* ─── Animations ─── */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.hover-glow {
+    transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 15px var(--glow-primary);
+    border-color: var(--primary-500);
+}
+
+/* ─── Chart customization ─── */
+.apexcharts-tooltip {
+    @apply !bg-slate-900 !border-slate-800 !text-white !rounded-xl !shadow-2xl;
+}
+
+.apexcharts-active {
+    filter: drop-shadow(0 0 8px var(--glow-primary));
+}
