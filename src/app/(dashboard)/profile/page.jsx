@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Mail, Shield, Key, Bell, Camera, ChevronRight, CheckCircle2, Globe, Github, Twitter, Linkedin, Briefcase, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
+import { User, Mail, Shield, Key, Bell, Camera, ChevronRight, CheckCircle2, Globe, Github, Twitter, Linkedin, Briefcase, MapPin, Calendar, Edit3, Save, X, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ProfilePage() {

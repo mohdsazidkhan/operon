@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Mail, Phone, Building2, Eye, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Mail, Phone, Building2, Eye, MoreHorizontal, Users } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 
 export default function ContactsPage() {
