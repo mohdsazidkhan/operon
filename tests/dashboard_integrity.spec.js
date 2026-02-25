@@ -8,9 +8,9 @@ test.describe('Dashboard Data Integrity', () => {
     });
 
     test('Overview dashboard should render correctly', async ({ page }) => {
-        await expect(page.locator('h1')).toContainText('Architecture Overview');
+        await expect(page.locator('h1')).toContainText('Neural Command Center');
         // Check if KPIs are rendered
-        await expect(page.locator('p:has-text("Institutional Valuation")')).toBeVisible();
+        await expect(page.locator('p:has-text("Portfolio Valuation")')).toBeVisible();
     });
 
     test('Sales dashboard should render correctly', async ({ page }) => {

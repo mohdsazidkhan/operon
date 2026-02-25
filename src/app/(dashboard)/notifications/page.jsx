@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, AlertTriangle, Info, CheckCircle, Shield, ArrowRight, MoreHorizontal, Search, Settings, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +13,14 @@ const initialNotifications = [
 ];
 
 export default function NotificationsPage() {
+    const [mounted, setMounted] = useState(false);
     const [notifications, setNotifications] = useState(initialNotifications);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return <div className="p-10 text-slate-800 uppercase tracking-widest text-[10px] font-black">Decrypting Notification Stream...</div>;
 
     const markAllRead = () => {
         setNotifications(notifications.map(n => ({ ...n, read: true })));

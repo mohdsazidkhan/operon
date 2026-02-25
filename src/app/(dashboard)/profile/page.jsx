@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Mail, Shield, Key, Bell, Camera, ChevronRight, CheckCircle2, Globe, Github, Twitter, Linkedin, Briefcase, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ProfilePage() {
+    const [mounted, setMounted] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [profile, setProfile] = useState({
         name: 'Sazid Ahmed',
@@ -16,6 +17,12 @@ export default function ProfilePage() {
         dept: 'Core Engineering',
         rank: 'Elite-S'
     });
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return <div className="p-10 text-slate-800 uppercase tracking-widest text-[10px] font-black">Decrypting Identity Profile...</div>;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">

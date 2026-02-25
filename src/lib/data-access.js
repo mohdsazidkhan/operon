@@ -8,26 +8,37 @@ import Contact from '@/models/Contact';
 import Deal from '@/models/Deal';
 
 export async function getDashboardStats() {
-    await dbConnect();
-    const [products, employees, leads, orders] = await Promise.all([
-        Product.countDocuments(),
-        Employee.countDocuments(),
-        Lead.countDocuments(),
-        Order.countDocuments()
-    ]);
+    try {
+        await dbConnect();
+        const [products, employees, leads, orders] = await Promise.all([
+            Product.countDocuments(),
+            Employee.countDocuments(),
+            Lead.countDocuments(),
+            Order.countDocuments()
+        ]);
 
-    const totalRevenue = await Order.aggregate([
-        { $match: { type: 'sale', status: 'delivered' } },
-        { $group: { _id: null, total: { $sum: '$total' } } }
-    ]);
+        const totalRevenue = await Order.aggregate([
+            { $match: { type: 'sale', status: 'delivered' } },
+            { $group: { _id: null, total: { $sum: '$total' } } }
+        ]);
 
-    return {
-        products,
-        employees,
-        leads,
-        orders,
-        revenue: totalRevenue[0]?.total || 0
-    };
+        return {
+            products: products || 0,
+            employees: employees || 0,
+            leads: leads || 0,
+            orders: orders || 0,
+            revenue: totalRevenue[0]?.total || 0
+        };
+    } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        return {
+            products: 0,
+            employees: 0,
+            leads: 0,
+            orders: 0,
+            revenue: 0
+        };
+    }
 }
 
 export async function getProducts(query = {}) {

@@ -1,4 +1,4 @@
-import { CreditCard, ArrowUpRight, ArrowDownRight, Activity, Wallet, PieChart, BarChart3, Landmark } from 'lucide-react';
+import { CreditCard, ArrowUpRight, ArrowDownRight, Activity, Wallet, PieChart, BarChart3, Landmark, TrendingUp } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import { PLVarianceChart, CashPropagationChart, OverheadSegregationChart } from '@/components/dashboard/FinanceCharts';
 
