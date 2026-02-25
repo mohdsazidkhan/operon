@@ -11,7 +11,7 @@ export default async function FinanceDashboard() {
         { title: 'Capital Delta', value: 81283, change: '-5.3%', up: true, icon: Wallet, color: 'text-amber-400', bg: 'bg-amber-500/10' },
     ];
 
-    function TrendingUp({ size, className }) { return <Activity size={size} className={className} />; }
+    function FinanceTrendingUp({ size, className }) { return <Activity size={size} className={className} />; }
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
