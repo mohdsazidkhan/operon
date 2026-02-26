@@ -14,13 +14,36 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: 'Please provide email and password' }, { status: 400 });
         }
 
-        const user = await User.findOne({ email }).select('+password');
-        if (!user || !(await user.matchPassword(password))) {
-            return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
+        // Check for Demo Credentials from .env
+        const demoEmail = process.env.email;
+        const demoPassword = process.env.password;
+        let user;
+
+        if (email === demoEmail && password === demoPassword) {
+            // If demo credentials match, find the user in DB or use a dummy one if not exists
+            user = await User.findOne({ email });
+            if (!user) {
+                // Create a dummy user object if not found in DB
+                user = {
+                    _id: '000000000000000000000000', // Mock ObjectId
+                    name: 'Demo Administrator',
+                    email: demoEmail,
+                    role: 'super_admin',
+                    avatar: '',
+                    isDemo: true // Flag to identify demo session
+                };
+            }
+        } else {
+            user = await User.findOne({ email }).select('+password');
+            if (!user || !(await user.matchPassword(password))) {
+                return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
+            }
         }
 
-        user.lastLogin = Date.now();
-        await user.save({ validateBeforeSave: false });
+        if (user.save) {
+            user.lastLogin = Date.now();
+            await user.save({ validateBeforeSave: false });
+        }
 
         const token = generateToken(user._id);
 

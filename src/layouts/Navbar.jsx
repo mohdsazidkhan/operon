@@ -25,7 +25,7 @@ const formatRelativeTime = (date) => {
 
 const demoNotifications = [
     { _id: '1', title: 'New Lead Assigned', message: 'A new lead from Google has been assigned to you.', type: 'assignment', read: false, createdAt: new Date() },
-    { _id: '2', title: 'Invoice Paid', message: 'Invoice #INV-2024-001 has been paid by Acme Corp.', type: 'success', read: true, createdAt: new Date(Date.now() - 3600000) },
+    { _id: '2', title: 'Invoice Paid', message: `Invoice #INV-${new Date().getFullYear()}-001 has been paid by Acme Corp.`, type: 'success', read: true, createdAt: new Date(Date.now() - 3600000) },
 ];
 
 export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {

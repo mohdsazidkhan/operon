@@ -1,6 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+@theme {
+    --color-primary-50: var(--primary-50);
+    --color-primary-100: var(--primary-100);
+    --color-primary-200: var(--primary-200);
+    --color-primary-300: var(--primary-300);
+    --color-primary-400: var(--primary-400);
+    --color-primary-500: var(--primary-500);
+    --color-primary-600: var(--primary-600);
+    --color-primary-700: var(--primary-700);
+    --color-primary-800: var(--primary-800);
+    --color-primary-900: var(--primary-900);
+
+    --color-surface: var(--surface);
+    --color-surface-raised: var(--surface-raised);
+    --color-surface-overlay: var(--surface-overlay);
+
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted: var(--text-muted);
+
+    --color-border: var(--border);
+}
+
 /* ─── Design Token Themes ─── */
 :root {
     /* Violet (default) */
@@ -195,72 +218,55 @@ body {
 }
 
 /* ─── Utility Classes ─── */
-.glass-morphism {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+/* ─── Advanced Aesthetics ─── */
+.bg-mesh {
+    background-color: var(--surface);
+    background-image:
+        radial-gradient(at 0% 0%, var(--primary-500) 0, transparent 50%),
+        radial-gradient(at 50% 0%, var(--primary-400) 0, transparent 50%),
+        radial-gradient(at 100% 0%, var(--primary-600) 0, transparent 50%),
+        radial-gradient(at 0% 100%, var(--primary-700) 0, transparent 50%),
+        radial-gradient(at 50% 100%, var(--primary-500) 0, transparent 50%),
+        radial-gradient(at 100% 100%, var(--primary-400) 0, transparent 50%);
+    background-size: 200% 200%;
+    animation: mesh 10s ease infinite;
 }
 
-.glass-panel {
-    background: var(--card-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--card-border);
-}
-
-.text-gradient-primary {
-    background: linear-gradient(135deg, var(--primary-400), var(--primary-600));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.glow-box {
-    box-shadow: 0 0 20px var(--glow-primary);
-}
-
-/* ─── Animations ─── */
-@keyframes float {
+@keyframes mesh {
     0% {
-        transform: translateY(0px);
+        background-position: 0% 50%;
     }
 
     50% {
-        transform: translateY(-10px);
+        background-position: 100% 50%;
     }
 
     100% {
-        transform: translateY(0px);
+        background-position: 0% 50%;
     }
 }
 
-.animate-float {
-    animation: float 6s ease-in-out infinite;
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 }
 
-.hover-glow {
-    transition: all 0.3s ease;
+.input-premium {
+    @apply transition-all duration-300 border-[var(--border)] bg-[var(--surface-overlay)]/50 focus:bg-[var(--surface)] focus:border-[var(--primary-500)] focus:ring-4 focus:ring-[var(--primary-500)]/10 outline-none;
 }
 
-.hover-glow:hover {
-    box-shadow: 0 0 15px var(--glow-primary);
-    border-color: var(--primary-500);
+.button-premium {
+    @apply relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:grayscale;
 }
 
-/* ─── Chart customization ─── */
-.apexcharts-tooltip {
-    background-color: var(--surface-raised) !important;
-    border-color: var(--border) !important;
-    color: var(--text-primary) !important;
-    border-radius: 0.75rem !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+.button-premium::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-1000;
 }
 
-.dark .apexcharts-tooltip {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-}
-
-.apexcharts-active {
-    filter: drop-shadow(0 0 8px var(--glow-primary));
+.button-premium:hover::after {
+    @apply translate-x-full;
 }
