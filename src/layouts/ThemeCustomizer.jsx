@@ -14,12 +14,12 @@ const themes = [
 ];
 
 export default function ThemeCustomizer({ open, onClose }) {
-    const { isDark, colorTheme, toggleDark, setColorTheme, logoSize, setLogoSize } = useThemeStore();
+    const { isDark, colorTheme, toggleDark, setColorTheme, logoSize, setLogoSize, isRTL, toggleRTL } = useThemeStore();
 
     if (!open) return null;
 
     return (
-        <div className="fixed right-0 top-0 bottom-0 w-72 bg-[var(--surface)] border-l border-[var(--border)] shadow-2xl z-50 animate-slide-in flex flex-col">
+        <div className="fixed end-0 top-0 bottom-0 w-72 bg-[var(--surface)] border-s border-[var(--border)] shadow-2xl z-50 animate-slide-in flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
                 <div>
@@ -32,6 +32,31 @@ export default function ThemeCustomizer({ open, onClose }) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {/* Direction */}
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)] mb-3">Layout Direction</p>
+                    <div className="grid grid-cols-2 gap-2">
+                        {[{ label: 'LTR', rtl: false }, { label: 'RTL', rtl: true }].map(({ label, rtl }) => (
+                            <button
+                                key={label}
+                                onClick={() => { if (isRTL !== rtl) toggleRTL(); }}
+                                className={cn(
+                                    'flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all text-sm font-medium',
+                                    isRTL === rtl
+                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                                        : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-primary-300'
+                                )}
+                            >
+                                <div className={cn('w-10 h-7 rounded-md border flex gap-1 p-1', rtl ? 'flex-row-reverse' : 'flex-row')}>
+                                    <div className="w-1/3 h-full bg-slate-300 dark:bg-slate-600 rounded-sm" />
+                                    <div className="w-2/3 h-full bg-primary-200 dark:bg-primary-800 rounded-sm" />
+                                </div>
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Mode */}
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)] mb-3">Mode</p>

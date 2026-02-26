@@ -77,7 +77,7 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                     >
                         <Search size={15} />
                         <span>Search...</span>
-                        <kbd className="ml-4 text-xs bg-[var(--border)] px-1.5 py-0.5 rounded">⌘K</kbd>
+                        <kbd className="ms-4 text-xs bg-[var(--border)] px-1.5 py-0.5 rounded">⌘K</kbd>
                     </button>
                 </div>
 
@@ -102,7 +102,7 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                             )}
                         </button>
                         {showNotifs && (
-                            <div className="absolute right-0 mt-2 w-80 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">
+                            <div className="absolute end-0 mt-2 w-80 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">
                                 <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                                     <span className="font-semibold text-[var(--text-primary)]">Notifications</span>
                                     <span className="text-xs text-[var(--primary-500)] font-medium cursor-pointer">Mark all read</span>
@@ -144,7 +144,7 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                             <ChevronDown size={14} className="text-[var(--muted)] hidden md:block" />
                         </button>
                         {showProfile && (
-                            <div className="absolute right-0 mt-2 w-52 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">
+                            <div className="absolute end-0 mt-2 w-52 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">
                                 <div className="px-4 py-3 border-b border-[var(--border)]">
                                     <p className="text-sm font-semibold text-[var(--text-primary)]">{user?.name}</p>
                                     <p className="text-xs text-[var(--muted)]">{user?.email}</p>

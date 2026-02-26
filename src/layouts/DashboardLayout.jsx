@@ -30,7 +30,7 @@ function Breadcrumb() {
 }
 
 export default function DashboardLayout({ children }) {
-    const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar } = useThemeStore();
+    const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar, isRTL } = useThemeStore();
     const [customizerOpen, setCustomizerOpen] = useState(false);
 
     return (
@@ -46,7 +46,12 @@ export default function DashboardLayout({ children }) {
             </div>
 
             {/* Sidebar - Mobile */}
-            <div className={cn('fixed inset-y-0 left-0 z-50 flex flex-col lg:hidden transition-transform duration-300', sidebarOpen ? 'translate-x-0' : '-translate-x-full', 'w-64')}>
+            <div className={cn(
+                'fixed inset-y-0 start-0 z-50 flex flex-col lg:hidden transition-transform duration-300 w-64',
+                isRTL
+                    ? (sidebarOpen ? 'translate-x-0' : 'translate-x-full')
+                    : (sidebarOpen ? 'translate-x-0' : '-translate-x-full')
+            )}>
                 <Sidebar collapsed={false} />
             </div>
 

@@ -9,6 +9,7 @@ export const useThemeStore = create(
             sidebarCollapsed: false,
             sidebarOpen: true, // mobile drawer
             logoSize: 30, // height in pixels
+            isRTL: false,
 
             toggleDark: () => set((s) => {
                 const dark = !s.isDark;
@@ -16,6 +17,13 @@ export const useThemeStore = create(
                     document.documentElement.classList.toggle('dark', dark);
                 }
                 return { isDark: dark };
+            }),
+            toggleRTL: () => set((s) => {
+                const rtl = !s.isRTL;
+                if (typeof window !== 'undefined') {
+                    document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+                }
+                return { isRTL: rtl };
             }),
             setColorTheme: (theme) => set(() => {
                 if (typeof window !== 'undefined') {
@@ -33,6 +41,7 @@ export const useThemeStore = create(
                 if (state && typeof window !== 'undefined') {
                     document.documentElement.classList.toggle('dark', state.isDark);
                     document.documentElement.setAttribute('data-theme', state.colorTheme);
+                    document.documentElement.setAttribute('dir', state.isRTL ? 'rtl' : 'ltr');
                 }
             },
         }

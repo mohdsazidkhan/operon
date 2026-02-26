@@ -98,7 +98,7 @@ export default function Sidebar({ collapsed }) {
                 {collapsed && (
                     <Link href="/dashboard" className="flex items-center justify-center w-full">
                         <img
-                            src={isDark ? "/logo-dark.png" : "/logo-light.png"}
+                            src={isDark ? "/logo-dark-sm.png" : "/logo-light-sm.png"}
                             alt="O"
                             style={{ height: `${Math.min(logoSize, 50)}px`, width: `${Math.min(logoSize, 50)}px` }}
                             className="object-contain"
