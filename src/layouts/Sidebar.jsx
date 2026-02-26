@@ -69,7 +69,7 @@ const navSections = [
 
 export default function Sidebar({ collapsed }) {
     const pathname = usePathname();
-    const { setSidebarOpen } = useThemeStore();
+    const { isDark, logoSize, setSidebarOpen } = useThemeStore();
     const [expandedSections, setExpandedSections] = useState(['DASHBOARDS', 'CRM', 'ERP', 'HRMS', 'APPS']);
 
     const toggleSection = (label) => {
@@ -84,15 +84,26 @@ export default function Sidebar({ collapsed }) {
             collapsed ? 'w-16' : 'w-64'
         )}>
             {/* Logo */}
-            <div className="flex items-center justify-between h-16 px-4 border-b border-white/10">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--sidebar-border)]">
                 {!collapsed && (
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold text-sm">O</div>
-                        <span className="text-white font-bold text-xl tracking-tight">OPERON</span>
-                    </div>
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                        <img
+                            src={isDark ? "/logo-dark.png" : "/logo-light.png"}
+                            alt="OPERON Logo"
+                            style={{ height: `${logoSize}px` }}
+                            className="w-auto object-contain"
+                        />
+                    </Link>
                 )}
                 {collapsed && (
-                    <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold text-sm mx-auto">O</div>
+                    <Link href="/dashboard" className="flex items-center justify-center w-full">
+                        <img
+                            src={isDark ? "/logo-dark.png" : "/logo-light.png"}
+                            alt="O"
+                            style={{ height: `${Math.min(logoSize, 50)}px`, width: `${Math.min(logoSize, 50)}px` }}
+                            className="object-contain"
+                        />
+                    </Link>
                 )}
             </div>
 
@@ -103,7 +114,7 @@ export default function Sidebar({ collapsed }) {
                         {!collapsed && (
                             <button
                                 onClick={() => toggleSection(section.label)}
-                                className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider hover:text-slate-400 transition-colors"
+                                className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-[var(--sidebar-text)] uppercase tracking-wider hover:text-[var(--sidebar-text-hover)] transition-colors"
                             >
                                 <span>{section.label}</span>
                                 {expandedSections.includes(section.label)
@@ -124,12 +135,12 @@ export default function Sidebar({ collapsed }) {
                                             className={cn(
                                                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
                                                 isActive
-                                                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/20'
-                                                    : 'text-slate-400 hover:text-white hover:bg-white/5',
+                                                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-text)] border border-primary-500/20'
+                                                    : 'text-[var(--sidebar-text)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--surface-overlay)]',
                                                 collapsed && 'justify-center'
                                             )}
                                         >
-                                            <item.icon size={18} className={cn('flex-shrink-0', isActive ? 'text-primary-400' : 'text-slate-500 group-hover:text-white')} />
+                                            <item.icon size={18} className={cn('flex-shrink-0', isActive ? 'text-[var(--sidebar-item-active-text)]' : 'text-[var(--sidebar-text)] group-hover:text-[var(--sidebar-text-hover)]')} />
                                             {!collapsed && <span>{item.label}</span>}
                                         </Link>
                                     );
@@ -141,14 +152,19 @@ export default function Sidebar({ collapsed }) {
             </nav>
 
             {/* Footer */}
-            {!collapsed && (
-                <div className="p-4 border-t border-white/10">
-                    <Link href="/settings" className="flex items-center gap-2 text-slate-500 hover:text-white text-sm transition-colors">
-                        <Settings size={16} />
-                        <span>Settings</span>
-                    </Link>
-                </div>
-            )}
+            <div className="p-2 border-t border-[var(--sidebar-border)]">
+                <Link
+                    href="/settings"
+                    className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--sidebar-text)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--surface-overlay)] transition-colors",
+                        collapsed && "justify-center"
+                    )}
+                    title={collapsed ? "Settings" : undefined}
+                >
+                    <Settings size={18} />
+                    {!collapsed && <span>Settings</span>}
+                </Link>
+            </div>
         </aside>
     );
 }

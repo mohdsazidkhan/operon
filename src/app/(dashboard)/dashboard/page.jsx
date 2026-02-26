@@ -6,23 +6,23 @@ import { MainRevenueChart, FunnelChart } from '@/components/dashboard/OverviewCh
 function KPICard({ title, value, change, icon: Icon, iconColor, trend, bgGradient }) {
     const isUp = change >= 0;
     return (
-        <div className={cn('bg-slate-900/50 backdrop-blur-xl rounded-[2rem] p-7 border border-slate-800 shadow-2xl relative overflow-hidden group transition-all hover:border-slate-700', bgGradient)}>
+        <div className={cn('bg-[var(--card-bg)] backdrop-blur-xl rounded-[2rem] p-7 border border-[var(--card-border)] shadow-2xl relative overflow-hidden group transition-all hover:border-primary-500/30', bgGradient)}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-all duration-700"></div>
             <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110 duration-500', iconColor)}>
                     <Icon size={24} className="text-white" />
                 </div>
                 <div className="text-right">
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 mb-1">{title}</p>
-                    <p className="text-3xl font-black text-white tracking-tighter">{value}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--text-muted)] mb-1">{title}</p>
+                    <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter">{value}</p>
                 </div>
             </div>
             <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/50 border border-slate-800/50">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--surface-overlay)] border border-[var(--border)]">
                     {isUp ? <ArrowUpRight size={14} className="text-emerald-500" /> : <ArrowDownRight size={14} className="text-rose-500" />}
                     <span className={cn('text-xs font-black', isUp ? 'text-emerald-500' : 'text-rose-500')}>{Math.abs(change)}%</span>
                 </div>
-                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest italic">vs last cycle</span>
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic opacity-70">vs last cycle</span>
             </div>
         </div>
     );
@@ -36,13 +36,13 @@ export default async function OverviewDashboard() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">Neural Command Center</h1>
+                    <h1 className="text-4xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Neural Command Center</h1>
                     <div className="flex items-center gap-4 mt-2">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20">
                             <Activity size={12} className="text-primary-500 animate-pulse" />
                             <span className="text-[10px] font-black text-primary-500 uppercase tracking-widest">System Health: Nominal</span>
                         </div>
-                        <p className="text-slate-500 text-[11px] font-bold uppercase tracking-[0.3em]">
+                        <p className="text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-[0.3em]">
                             <Calendar size={12} className="inline mr-2" />
                             Cycle {formatDate(new Date())}
                         </p>
@@ -66,16 +66,16 @@ export default async function OverviewDashboard() {
             {/* Main Data Visuals */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Primary Chart */}
-                <div className="lg:col-span-2 bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 shadow-2xl p-8 relative overflow-hidden group">
+                <div className="lg:col-span-2 bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent opacity-50"></div>
                     <div className="flex items-center justify-between mb-8 relative z-10">
                         <div>
-                            <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Fiscal Trajectory</h3>
-                            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">Bi-Annual Revenue Performance Indicator</p>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Fiscal Trajectory</h3>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Bi-Annual Revenue Performance Indicator</p>
                         </div>
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950/50 border border-slate-800">
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--surface-overlay)] border border-[var(--border)]">
                             <div className="w-2 h-2 rounded-full bg-primary-500 shadow-[0_0_8px_#8b5cf6]"></div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Feed</span>
+                            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Live Feed</span>
                         </div>
                     </div>
                     <div className="h-[320px]">
@@ -84,10 +84,10 @@ export default async function OverviewDashboard() {
                 </div>
 
                 {/* Vertical Funnel */}
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 shadow-2xl p-8 group">
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8 group">
                     <div className="mb-8">
-                        <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Intelligence Funnel</h3>
-                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">Conversion Architecture Analysis</p>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Intelligence Funnel</h3>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Conversion Architecture Analysis</p>
                     </div>
                     <div className="h-[320px]">
                         <FunnelChart />
@@ -98,13 +98,13 @@ export default async function OverviewDashboard() {
             {/* Tactical Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Event Log */}
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 shadow-2xl p-8 relative overflow-hidden">
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8 relative overflow-hidden">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></div>
                             Chronological Telemetry
                         </h3>
-                        <Activity size={16} className="text-slate-700" />
+                        <Activity size={16} className="text-[var(--text-muted)]" />
                     </div>
                     <div className="space-y-6 relative">
                         <div className="absolute left-3.5 top-0 bottom-0 w-px bg-gradient-to-b from-primary-500/50 via-slate-800 to-transparent"></div>
@@ -118,10 +118,10 @@ export default async function OverviewDashboard() {
                                 <div className="absolute left-[11px] w-2.5 h-2.5 rounded-full bg-slate-950 border-2 border-primary-500 top-1 shadow-[0_0_10px_#8b5cf6] group-hover:scale-125 transition-transform"></div>
                                 <div className="flex-1">
                                     <div className="flex justify-between items-start">
-                                        <p className="text-xs font-black text-slate-300 uppercase tracking-tight group-hover:text-primary-400 transition-colors">{a.text}</p>
-                                        <span className="text-[9px] font-black text-slate-800 group-hover:text-primary-900 transition-colors font-mono">{a.val}</span>
+                                        <p className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-tight group-hover:text-primary-500 transition-colors">{a.text}</p>
+                                        <span className="text-[9px] font-black text-[var(--text-muted)] group-hover:text-primary-600 transition-colors font-mono">{a.val}</span>
                                     </div>
-                                    <p className="text-[10px] font-bold text-slate-600 mt-1 uppercase tracking-widest">{a.time}</p>
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase tracking-widest opacity-80">{a.time}</p>
                                 </div>
                             </div>
                         ))}
@@ -129,10 +129,10 @@ export default async function OverviewDashboard() {
                 </div>
 
                 {/* Priority Assets */}
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 shadow-2xl p-8">
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Priority Acquisitions</h3>
-                        <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 hover:text-white transition-colors underline decoration-slate-800 underline-offset-8">Expand View</button>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Priority Acquisitions</h3>
+                        <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 hover:text-white hover:bg-primary-500 transition-colors underline-offset-8 px-2 py-1 rounded-lg">Expand View</button>
                     </div>
                     <div className="grid grid-cols-1 gap-4">
                         {[
@@ -145,11 +145,11 @@ export default async function OverviewDashboard() {
                                     {asset.name[0]}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-black text-white uppercase tracking-wider truncate group-hover:text-primary-400 transition-colors">{asset.name}</p>
-                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-1">{asset.industry}</p>
+                                    <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-wider truncate group-hover:text-primary-500 transition-colors">{asset.name}</p>
+                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-1">{asset.industry}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-white tracking-tighter">{asset.valuation}</p>
+                                    <p className="text-sm font-black text-[var(--text-primary)] tracking-tighter">{asset.valuation}</p>
                                     <span className={cn('text-[10px] font-black uppercase italic', asset.trend.startsWith('+') ? 'text-emerald-500' : 'text-rose-500')}>{asset.trend}</span>
                                 </div>
                             </div>

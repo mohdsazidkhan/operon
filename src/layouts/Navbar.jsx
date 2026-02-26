@@ -28,7 +28,7 @@ const demoNotifications = [
     { _id: '2', title: 'Invoice Paid', message: 'Invoice #INV-2024-001 has been paid by Acme Corp.', type: 'success', read: true, createdAt: new Date(Date.now() - 3600000) },
 ];
 
-export default function Navbar({ onToggleSidebar }) {
+export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
     const { isDark, toggleDark } = useThemeStore();
     const { user, logout } = useAuthStore();
     const router = useRouter();
@@ -84,8 +84,13 @@ export default function Navbar({ onToggleSidebar }) {
                 {/* Right */}
                 <div className="flex items-center gap-2">
                     {/* Dark mode */}
-                    <button onClick={toggleDark} className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] transition-colors text-[var(--text-secondary)]">
+                    <button onClick={toggleDark} title="Toggle Dark/Light Mode" className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] transition-colors text-[var(--text-secondary)]">
                         {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
+
+                    {/* Customizer */}
+                    <button onClick={onOpenCustomizer} title="Theme Settings" className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] transition-colors text-[var(--text-secondary)]">
+                        <Settings size={18} />
                     </button>
 
                     {/* Notifications */}

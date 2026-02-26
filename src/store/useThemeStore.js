@@ -8,6 +8,7 @@ export const useThemeStore = create(
             colorTheme: 'violet', // violet | blue | rose | orange | green | slate
             sidebarCollapsed: false,
             sidebarOpen: true, // mobile drawer
+            logoSize: 30, // height in pixels
 
             toggleDark: () => set((s) => {
                 const dark = !s.isDark;
@@ -22,6 +23,7 @@ export const useThemeStore = create(
                 }
                 return { colorTheme: theme };
             }),
+            setLogoSize: (size) => set({ logoSize: size }),
             toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
             setSidebarOpen: (open) => set({ sidebarOpen: open }),
         }),

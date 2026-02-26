@@ -15,17 +15,64 @@
     --primary-800: #5b21b6;
     --primary-900: #4c1d95;
 
-    /* Surfaces */
+    /* Surfaces - Light Mode */
+    --surface: #ffffff;
+    --surface-raised: #f8fafc;
+    --surface-overlay: #f1f5f9;
+    --navbar-bg: rgba(255, 255, 255, 0.8);
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+
+    /* Text - Light Mode */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+
+    /* Sidebar - Light Mode */
+    --sidebar-bg: #f8fafc;
+    --sidebar-border: #e2e8f0;
+    --sidebar-text: #64748b;
+    --sidebar-text-hover: #0f172a;
+    --sidebar-item-active-bg: rgba(139, 92, 246, 0.1);
+    --sidebar-item-active-text: #8b5cf6;
+
+    /* Semantic - Light Mode */
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: #e2e8f0;
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.05);
+
+    /* Accent Glows */
+    --glow-primary: rgba(139, 92, 246, 0.3);
+}
+
+.dark {
+    /* Surfaces - Dark Mode */
     --surface: #020617;
     --surface-raised: #0f172a;
     --surface-overlay: #1e293b;
+    --navbar-bg: rgba(2, 6, 23, 0.8);
     --border: #1e293b;
     --border-strong: #334155;
 
-    /* Text */
+    /* Text - Dark Mode */
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
+
+    /* Sidebar - Dark Mode */
+    --sidebar-bg: #020617;
+    --sidebar-border: rgba(255, 255, 255, 0.1);
+    --sidebar-text: #94a3b8;
+    --sidebar-text-hover: #ffffff;
+    --sidebar-item-active-bg: rgba(139, 92, 246, 0.2);
+    --sidebar-item-active-text: #a78bfa;
+
+    /* Semantic - Dark Mode */
+    --card-bg: rgba(15, 23, 42, 0.4);
+    --card-border: #1e293b;
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.05);
 
     /* Accent Glows */
     --glow-primary: rgba(139, 92, 246, 0.5);
@@ -51,6 +98,22 @@
     --glow-primary: rgba(245, 158, 11, 0.5);
 }
 
+@layer utilities {
+    .animate-spin-slow {
+        animation: spin 3s linear infinite;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* ─── Base Styles ─── */
 * {
     border-color: var(--border);
@@ -65,17 +128,17 @@ body {
 
 /* ─── Utility Classes ─── */
 .glass-morphism {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
 }
 
 .glass-panel {
-    background: rgba(30, 41, 59, 0.4);
+    background: var(--card-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--card-border);
 }
 
 .text-gradient-primary {

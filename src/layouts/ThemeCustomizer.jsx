@@ -14,7 +14,7 @@ const themes = [
 ];
 
 export default function ThemeCustomizer({ open, onClose }) {
-    const { isDark, colorTheme, toggleDark, setColorTheme } = useThemeStore();
+    const { isDark, colorTheme, toggleDark, setColorTheme, logoSize, setLogoSize } = useThemeStore();
 
     if (!open) return null;
 
@@ -74,6 +74,26 @@ export default function ThemeCustomizer({ open, onClose }) {
                                 <span className="text-xs text-[var(--text-secondary)]">{label}</span>
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                {/* Logo Size */}
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Logo Size</p>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400">{logoSize}px</span>
+                    </div>
+                    <input
+                        type="range"
+                        min="20"
+                        max="100"
+                        value={logoSize}
+                        onChange={(e) => setLogoSize(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-[var(--surface-overlay)] rounded-lg appearance-none cursor-pointer accent-primary-500"
+                    />
+                    <div className="flex justify-between mt-2">
+                        <span className="text-[9px] text-[var(--muted)] font-bold">Small</span>
+                        <span className="text-[9px] text-[var(--muted)] font-bold">Large</span>
                     </div>
                 </div>
 
