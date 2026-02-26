@@ -105,11 +105,11 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                             <div className="absolute right-0 mt-2 w-80 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">
                                 <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                                     <span className="font-semibold text-[var(--text-primary)]">Notifications</span>
-                                    <span className="text-xs text-primary-500 font-medium cursor-pointer">Mark all read</span>
+                                    <span className="text-xs text-[var(--primary-500)] font-medium cursor-pointer">Mark all read</span>
                                 </div>
                                 <div className="divide-y divide-[var(--border)] max-h-72 overflow-y-auto">
                                     {demoNotifications.map(n => (
-                                        <div key={n._id} className={cn('px-4 py-3 hover:bg-[var(--surface-overlay)] cursor-pointer', !n.read && 'bg-primary-50 dark:bg-primary-900/10')}>
+                                        <div key={n._id} className={cn('px-4 py-3 hover:bg-[var(--surface-overlay)] cursor-pointer', !n.read && 'bg-[var(--primary-500)]/10')}>
                                             <div className="flex items-start gap-3">
                                                 <span className={cn('mt-0.5 text-sm', notifTypeColor[n.type] || 'text-slate-500')}>●</span>
                                                 <div className="flex-1 min-w-0">
@@ -117,13 +117,13 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                                                     <p className="text-xs text-[var(--muted)] mt-0.5 line-clamp-2">{n.message}</p>
                                                     <p className="text-xs text-[var(--muted)] mt-1">{formatRelativeTime(n.createdAt)}</p>
                                                 </div>
-                                                {!n.read && <div className="w-2 h-2 bg-primary-500 rounded-full mt-1.5 flex-shrink-0" />}
+                                                {!n.read && <div className="w-2 h-2 bg-[var(--primary-500)] rounded-full mt-1.5 flex-shrink-0" />}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="px-4 py-2 border-t border-[var(--border)]">
-                                    <Link href="/apps/notifications" onClick={() => setShowNotifs(false)} className="text-xs text-primary-500 hover:text-primary-600 font-medium">View all notifications →</Link>
+                                    <Link href="/apps/notifications" onClick={() => setShowNotifs(false)} className="text-xs text-[var(--primary-500)] hover:text-[var(--primary-600)] font-medium">View all notifications →</Link>
                                 </div>
                             </div>
                         )}
@@ -135,7 +135,7 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                             <img
                                 src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=7c3aed&color=fff`}
                                 alt={user?.name}
-                                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary-500/30"
+                                className="w-8 h-8 rounded-full object-cover ring-2 ring-[var(--primary-500)]/30"
                             />
                             <div className="hidden md:block text-left">
                                 <p className="text-sm font-medium text-[var(--text-primary)] leading-none">{user?.name || 'Admin User'}</p>

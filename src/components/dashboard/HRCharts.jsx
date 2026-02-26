@@ -1,16 +1,18 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useThemeStore } from '@/store/useThemeStore';
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export function SectorAllocationChart({ total }) {
+    const { isDark } = useThemeStore();
     const deptChart = {
         options: {
             chart: { type: 'donut', background: 'transparent' },
             labels: ['Engineering', 'Sales', 'Marketing', 'Finance', 'HR'],
             colors: ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444'],
             stroke: { show: false },
-            legend: { position: 'bottom', labels: { colors: '#94a3b8' }, markers: { radius: 12 } },
+            legend: { position: 'bottom', labels: { colors: 'var(--text-secondary)' }, markers: { radius: 12 } },
             plotOptions: {
                 pie: {
                     donut: {
@@ -18,15 +20,16 @@ export function SectorAllocationChart({ total }) {
                         labels: {
                             show: true,
                             total: {
-                                show: true, label: 'Force Size', color: '#94a3b8', fontSize: '11px',
+                                show: true, label: 'Force Size', color: 'var(--text-muted)', fontSize: '11px',
                                 formatter: () => total || 15
                             },
-                            value: { color: '#fff', fontSize: '18px', fontWeight: 800 }
+                            value: { color: 'var(--text-primary)', fontSize: '18px', fontWeight: 800 }
                         }
                     }
                 }
             },
-            theme: { mode: 'dark' }
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: [6, 4, 2, 2, 1],
     };
@@ -34,6 +37,7 @@ export function SectorAllocationChart({ total }) {
 }
 
 export function AttendanceDeltaChart() {
+    const { isDark } = useThemeStore();
     const attendanceChart = {
         options: {
             chart: { type: 'bar', toolbar: { show: false }, background: 'transparent', stacked: true },
@@ -41,13 +45,14 @@ export function AttendanceDeltaChart() {
             plotOptions: { bar: { borderRadius: 6, columnWidth: '40%' } },
             xaxis: {
                 categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                labels: { style: { colors: '#64748b', fontWeight: 600 } },
+                labels: { style: { colors: 'var(--text-muted)', fontWeight: 600 } },
                 axisBorder: { show: false }
             },
-            yaxis: { labels: { style: { colors: '#64748b' } } },
-            grid: { borderColor: '#1e293b', strokeDashArray: 4 },
-            legend: { show: true, position: 'top', horizontalAlign: 'right', labels: { colors: '#94a3b8' } },
-            theme: { mode: 'dark' }
+            yaxis: { labels: { style: { colors: 'var(--text-muted)' } } },
+            grid: { borderColor: 'var(--border)', strokeDashArray: 4 },
+            legend: { show: true, position: 'top', horizontalAlign: 'right', labels: { colors: 'var(--text-secondary)' } },
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: [
             { name: 'Present', data: [12, 13, 11, 14, 10] },

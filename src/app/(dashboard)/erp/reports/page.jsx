@@ -20,22 +20,22 @@ export default function FinanceReportsPage() {
                 }
             },
             xaxis: {
-                categories: ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024 (Est)'],
-                labels: { style: { colors: '#64748b', fontWeight: 600 } },
+                categories: [`Q1 ${new Date().getFullYear()}`, `Q2 ${new Date().getFullYear()}`, `Q3 ${new Date().getFullYear()}`, `Q4 ${new Date().getFullYear()} (Est)`],
+                labels: { style: { colors: 'var(--text-muted)', fontWeight: 600 } },
                 axisBorder: { show: false }
             },
             yaxis: {
                 labels: {
                     formatter: v => `$${(v / 1000).toFixed(0)}k`,
-                    style: { colors: '#64748b', fontWeight: 600 }
+                    style: { colors: 'var(--text-muted)', fontWeight: 600 }
                 },
                 grid: { show: false }
             },
-            grid: { borderColor: '#1e293b', strokeDashArray: 4 },
+            grid: { borderColor: 'var(--border)', strokeDashArray: 4 },
             legend: {
                 position: 'top',
                 horizontalAlign: 'right',
-                labels: { colors: '#94a3b8', fontWeight: 600 },
+                labels: { colors: 'var(--text-muted)', fontWeight: 600 },
                 itemMargin: { horizontal: 20 }
             },
             theme: { mode: 'dark' },
@@ -59,17 +59,15 @@ export default function FinanceReportsPage() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Institutional Fiscal Intelligence</h1>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
-                        <PieChart size={12} className="text-primary-500" />
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Institutional Fiscal Intelligence</h1>
+                    <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+                        <PieChart size={12} className="text-[var(--primary-500)]" />
                         Quarterly P&L Vectoring • Fiscal Audit Active
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="h-12 px-6 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition-all flex items-center gap-2">
-                        <Calendar size={14} /> Fiscal Year 2024
-                    </button>
-                    <button className="h-12 w-12 rounded-2xl bg-white text-slate-950 flex items-center justify-center hover:bg-primary-400 transition-all shadow-xl shadow-white/5">
+                    <Calendar size={14} /> Fiscal Year {new Date().getFullYear()}
+                    <button className="h-12 w-12 rounded-2xl bg-[var(--text-primary)] text-[var(--surface)] flex items-center justify-center hover:bg-[var(--primary-500)] hover:text-white transition-all shadow-xl shadow-black/10">
                         <Download size={18} />
                     </button>
                 </div>
@@ -78,28 +76,28 @@ export default function FinanceReportsPage() {
             {/* Tactical Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((s, i) => (
-                    <div key={i} className="bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] border border-slate-800 p-8 shadow-2xl group relative overflow-hidden">
+                    <div key={i} className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl group relative overflow-hidden">
                         <div className={cn("absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-10 -mr-8 -mt-8", s.bg.replace('bg-', 'bg-'))}></div>
                         <div className="flex items-center justify-between mb-4 relative z-10">
-                            <div className={cn('p-3 rounded-2xl bg-slate-950 border border-slate-800', s.color)}>
+                            <div className={cn('p-3 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)]', s.color)}>
                                 <s.icon size={20} />
                             </div>
                             <span className={cn('text-[9px] font-black uppercase tracking-widest', s.color)}>{s.trend}</span>
                         </div>
-                        <p className="text-3xl font-black text-white tracking-tighter relative z-10">{s.raw ? s.val : formatCurrency(s.val)}</p>
-                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1 relative z-10">{s.label}</p>
+                        <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter relative z-10">{s.raw ? s.val : formatCurrency(s.val)}</p>
+                        <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-1 relative z-10">{s.label}</p>
                     </div>
                 ))}
             </div>
 
             {/* Main Analytical Chart */}
-            <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-10 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary-500)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
                 <div className="flex items-center justify-between mb-10 relative z-10">
                     <div>
-                        <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">Quarterly Revenue vs Expenditure Core</h3>
-                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Cross-sectional Fiscal Stream Visualization</p>
+                        <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Quarterly Revenue vs Expenditure Core</h3>
+                        <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mt-1">Cross-sectional Fiscal Stream Visualization</p>
                     </div>
                 </div>
 
@@ -110,8 +108,8 @@ export default function FinanceReportsPage() {
 
             {/* Bottom Insights */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pb-12">
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] border border-slate-800 p-8 shadow-2xl">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-4">Key Performance Vectors</h4>
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl">
+                    <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-6 border-b border-[var(--border)] pb-4">Key Performance Vectors</h4>
                     <div className="space-y-6">
                         {[
                             { name: 'Operating Margin Flow', val: '46.9%', status: 'optimal' },
@@ -119,20 +117,20 @@ export default function FinanceReportsPage() {
                             { name: 'Customer LTV:CAC', val: '4.8x', status: 'high' }
                         ].map((item, i) => (
                             <div key={i} className="flex items-center justify-between">
-                                <span className="text-sm font-black text-white uppercase tracking-tighter">{item.name}</span>
+                                <span className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tighter">{item.name}</span>
                                 <div className="flex items-center gap-4">
-                                    <span className="text-sm font-black text-primary-400">{item.val}</span>
+                                    <span className="text-sm font-black text-[var(--primary-500)]">{item.val}</span>
                                     <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">{item.status}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] border border-slate-800 p-8 shadow-2xl flex flex-col items-center justify-center text-center">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mb-4">Institutional Audit Integrity</p>
-                    <p className="text-xs text-slate-300 font-bold uppercase tracking-widest leading-relaxed max-w-sm">
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl flex flex-col items-center justify-center text-center">
+                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.5em] mb-4">Institutional Audit Integrity</p>
+                    <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest leading-relaxed max-w-sm">
                         Fiscal data vectors are cryptographically signed and immutable. <br />
-                        <span className="text-primary-500">Verified by OPERON-CORE-FINANCE</span>
+                        <span className="text-[var(--primary-500)]">Verified by OPERON-CORE-FINANCE</span>
                     </p>
                 </div>
             </div>

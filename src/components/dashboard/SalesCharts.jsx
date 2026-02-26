@@ -1,9 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useThemeStore } from '@/store/useThemeStore';
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export function PipelineDensityChart({ data }) {
+    const { isDark } = useThemeStore();
     const pipelineChart = {
         options: {
             chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
@@ -16,22 +18,23 @@ export function PipelineDensityChart({ data }) {
             },
             dataLabels: {
                 enabled: true, offsetY: -20,
-                style: { fontSize: '10px', colors: ['#94a3b8'], fontWeight: 700 }
+                style: { fontSize: '10px', colors: ['var(--text-muted)'], fontWeight: 700 }
             },
             xaxis: {
                 categories: ['Prospecting', 'Qual', 'Proposal', 'Nego', 'Won', 'Lost'],
-                labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } },
+                labels: { style: { colors: 'var(--text-muted)', fontSize: '10px', fontWeight: 600 } },
                 axisBorder: { show: false }
             },
             yaxis: {
                 labels: {
                     formatter: v => `$${(v / 1000).toFixed(0)}k`,
-                    style: { colors: '#64748b', fontWeight: 600 }
+                    style: { colors: 'var(--text-muted)', fontWeight: 600 }
                 }
             },
-            grid: { borderColor: '#1e293b', strokeDashArray: 4 },
+            grid: { borderColor: 'var(--border)', strokeDashArray: 4 },
             legend: { show: false },
-            theme: { mode: 'dark' }
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: [{ name: 'Value', data: data || [38000, 72000, 125000, 48000, 305000, 15000] }],
     };
@@ -39,13 +42,14 @@ export function PipelineDensityChart({ data }) {
 }
 
 export function ResolutionMatrixChart({ data }) {
+    const { isDark } = useThemeStore();
     const winLossChart = {
         options: {
             chart: { type: 'donut', background: 'transparent' },
             colors: ['#10b981', '#f43f5e', '#f59e0b'],
             labels: ['Won', 'Lost', 'In Progress'],
             stroke: { show: false },
-            legend: { position: 'bottom', labels: { colors: '#94a3b8' }, markers: { radius: 12 } },
+            legend: { position: 'bottom', labels: { colors: 'var(--text-secondary)' }, markers: { radius: 12 } },
             plotOptions: {
                 pie: {
                     donut: {
@@ -53,15 +57,16 @@ export function ResolutionMatrixChart({ data }) {
                         labels: {
                             show: true,
                             total: {
-                                show: true, label: 'Win Rate', color: '#94a3b8', fontSize: '12px', fontWeight: 700,
+                                show: true, label: 'Win Rate', color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700,
                                 formatter: () => '63%'
                             },
-                            value: { color: '#fff', fontSize: '20px', fontWeight: 800 }
+                            value: { color: 'var(--text-primary)', fontSize: '20px', fontWeight: 800 }
                         }
                     }
                 }
             },
-            theme: { mode: 'dark' }
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: data || [305000, 15000, 178000],
     };
@@ -69,6 +74,7 @@ export function ResolutionMatrixChart({ data }) {
 }
 
 export function RevenueTrajectoryChart() {
+    const { isDark } = useThemeStore();
     const monthlyChart = {
         options: {
             chart: { type: 'line', toolbar: { show: false }, background: 'transparent' },
@@ -76,17 +82,18 @@ export function RevenueTrajectoryChart() {
             stroke: { curve: 'smooth', width: 4 },
             xaxis: {
                 categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                labels: { style: { colors: '#64748b', fontSize: '10px' } }
+                labels: { style: { colors: 'var(--text-muted)', fontSize: '10px' } }
             },
             yaxis: {
                 labels: {
                     formatter: v => `$${(v / 1000).toFixed(0)}k`,
-                    style: { colors: '#64748b' }
+                    style: { colors: 'var(--text-muted)' }
                 }
             },
-            grid: { borderColor: '#1e293b', strokeDashArray: 4 },
-            legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#94a3b8' }, markers: { radius: 12 } },
-            theme: { mode: 'dark' }
+            grid: { borderColor: 'var(--border)', strokeDashArray: 4 },
+            legend: { position: 'top', horizontalAlign: 'right', labels: { colors: 'var(--text-secondary)' }, markers: { radius: 12 } },
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: [
             { name: 'Revenue', data: [18400, 22100, 29800, 24500, 31200, 28900, 35400, 38200, 29700, 42100, 38600, 45000] },

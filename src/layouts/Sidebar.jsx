@@ -135,7 +135,7 @@ export default function Sidebar({ collapsed }) {
                                             className={cn(
                                                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
                                                 isActive
-                                                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-text)] border border-primary-500/20'
+                                                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-text)] border border-[var(--primary-300)]/20'
                                                     : 'text-[var(--sidebar-text)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--surface-overlay)]',
                                                 collapsed && 'justify-center'
                                             )}

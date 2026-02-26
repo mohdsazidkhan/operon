@@ -29,7 +29,7 @@ export default function LeavesPage() {
     const stats = [
         { label: 'Authorized', count: leaves.filter(l => l.status === 'approved').length, color: 'text-emerald-500', bg: 'bg-emerald-500/5', border: 'border-emerald-500/10' },
         { label: 'Awaiting Review', count: leaves.filter(l => l.status === 'pending').length, color: 'text-amber-500', bg: 'bg-amber-500/5', border: 'border-amber-500/10' },
-        { label: 'Cumulative Absence', count: leaves.filter(l => l.status === 'approved').reduce((s, l) => s + (l.days || 0), 0), color: 'text-primary-500', bg: 'bg-primary-500/5', border: 'border-primary-500/10' },
+        { label: 'Cumulative Absence', count: leaves.filter(l => l.status === 'approved').reduce((s, l) => s + (l.days || 0), 0), color: 'text-[var(--primary-500)]', bg: 'bg-[var(--primary-500)]/5', border: 'border-[var(--primary-500)]/10' },
     ];
 
     const handleAction = async (id, action) => {
@@ -48,12 +48,12 @@ export default function LeavesPage() {
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Time-Off Protocol</h1>
-                    <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.3em] mt-2">
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Time-Off Protocol</h1>
+                    <p className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-[0.3em] mt-2">
                         Resource Availability Ledger • {leaves.length} Applications Detected
                     </p>
                 </div>
-                <button className="flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl shadow-primary-500/20">
+                <button className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl shadow-[var(--primary-500)]/20">
                     <Plus size={16} /> Lodge Application
                 </button>
             </div>
@@ -61,26 +61,26 @@ export default function LeavesPage() {
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {stats.map((s, i) => (
-                    <div key={i} className={cn('rounded-3xl p-6 border backdrop-blur-sm shadow-xl relative overflow-hidden group', s.bg, s.border)}>
+                    <div key={i} className={cn('rounded-3xl p-6 border backdrop-blur-sm shadow-xl relative overflow-hidden group', s.bg, i === 2 ? 'border-[var(--primary-500)]/10' : s.border)}>
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-white/10 transition-all duration-500"></div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">{s.label}</p>
-                        <p className={cn('text-3xl font-black tracking-tight', s.color)}>{s.count} <span className="text-xs uppercase ml-1 italic">{i === 2 ? 'Days' : 'Files'}</span></p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] mb-2">{s.label}</p>
+                        <p className={cn('text-3xl font-black tracking-tight', i === 2 ? 'text-[var(--primary-500)]' : s.color)}>{s.count} <span className="text-xs uppercase ml-1 italic">{i === 2 ? 'Days' : 'Files'}</span></p>
                     </div>
                 ))}
             </div>
 
             {/* Toolbar */}
-            <div className="flex bg-slate-900/50 p-2 rounded-3xl border border-slate-800 backdrop-blur-sm">
+            <div className="flex bg-[var(--surface-overlay)] p-2 rounded-3xl border border-[var(--border)] backdrop-blur-sm">
                 <div className="relative flex-1">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="SEARCH BY PERSONNEL NAME OR REASON..."
-                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950/50 border border-slate-800 text-[10px] font-black uppercase tracking-[0.2em] text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all placeholder:text-slate-800"
+                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[var(--surface-overlay)]/50 border border-[var(--border)] text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/20 transition-all placeholder:text-[var(--text-muted)]"
                     />
                 </div>
-                <button className="px-6 py-4 rounded-2xl bg-slate-800 text-slate-400 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest border border-slate-700 ml-3">
+                <button className="px-6 py-4 rounded-2xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all font-black text-[10px] uppercase tracking-widest border border-[var(--border)] ml-3">
                     <Filter size={16} /> Filter
                 </button>
             </div>
@@ -89,15 +89,15 @@ export default function LeavesPage() {
             <div className="space-y-4 pb-12">
                 {loading ? (
                     Array(4).fill(0).map((_, i) => (
-                        <div key={i} className="h-28 bg-slate-900/50 animate-pulse rounded-[2rem] border border-slate-800"></div>
+                        <div key={i} className="h-28 bg-[var(--surface-overlay)]/50 animate-pulse rounded-[2rem] border border-[var(--border)]"></div>
                     ))
                 ) : leaves.length === 0 ? (
-                    <div className="py-20 text-center bg-slate-900/40 rounded-[2.5rem] border border-slate-800 border-dashed">
-                        <Calendar size={48} className="mx-auto text-slate-800 mb-4 opacity-50" />
-                        <h3 className="text-xs font-black text-slate-700 uppercase tracking-widest italic">Zero application delta</h3>
+                    <div className="py-20 text-center bg-[var(--surface-overlay)]/40 rounded-[2.5rem] border border-[var(--border)] border-dashed">
+                        <Calendar size={48} className="mx-auto text-[var(--text-muted)] mb-4 opacity-50" />
+                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest italic">Zero application delta</h3>
                     </div>
                 ) : leaves.map(leave => (
-                    <div key={leave._id} className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 p-6 shadow-2xl hover:border-slate-700 transition-all group relative overflow-hidden flex flex-wrap items-center gap-8">
+                    <div key={leave._id} className="bg-[var(--card-bg)] backdrop-blur-xl rounded-[2.5rem] border border-[var(--card-border)] p-6 shadow-2xl hover:border-[var(--primary-500)]/30 transition-all group relative overflow-hidden flex flex-wrap items-center gap-8">
                         {/* Glow effect for status */}
                         <div className={cn(
                             'absolute top-0 right-0 w-40 h-40 blur-[100px] -mr-20 -mt-20 opacity-10',
@@ -105,34 +105,34 @@ export default function LeavesPage() {
                         )}></div>
 
                         <div className="flex items-center gap-4 min-w-[240px] flex-1">
-                            <div className="w-14 h-14 rounded-2xl overflow-hidden ring-4 ring-slate-950 shadow-2xl shrink-0 group-hover:scale-105 transition-transform duration-500">
+                            <div className="w-14 h-14 rounded-2xl overflow-hidden ring-4 ring-[var(--surface-raised)] shadow-2xl shrink-0 group-hover:scale-105 transition-transform duration-500">
                                 <img src={leave.employee?.avatar || 'https://i.pravatar.cc/150'} alt="" className="w-full h-full object-cover" />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-sm font-black text-white group-hover:text-primary-400 transition-colors uppercase tracking-tight">{leave.employee?.name}</p>
-                                <p className="text-[10px] font-bold text-slate-500 line-clamp-1 italic mt-0.5">{leave.reason}</p>
+                                <p className="text-sm font-black text-[var(--text-primary)] group-hover:text-[var(--primary-500)] transition-colors uppercase tracking-tight">{leave.employee?.name}</p>
+                                <p className="text-[10px] font-bold text-[var(--text-muted)] line-clamp-1 italic mt-0.5">{leave.reason}</p>
                             </div>
                         </div>
 
                         <div className="text-center px-4">
-                            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1.5">Category</p>
-                            <span className="text-[10px] font-black text-slate-200 uppercase bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700">{leave.type}</span>
+                            <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Category</p>
+                            <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase bg-[var(--surface-overlay)] px-3 py-1 rounded-lg border border-[var(--border)]">{leave.type}</span>
                         </div>
 
                         <div className="text-center px-4">
-                            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1.5">Quantifier</p>
-                            <p className="text-sm font-black text-white">{leave.days} <span className="text-[9px] text-slate-500 uppercase">Days</span></p>
+                            <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Quantifier</p>
+                            <p className="text-sm font-black text-[var(--text-primary)]">{leave.days} <span className="text-[9px] text-[var(--text-muted)] uppercase">Days</span></p>
                         </div>
 
                         <div className="flex items-center gap-6 px-4">
                             <div className="text-center">
-                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1.5">Initiation</p>
-                                <p className="text-[11px] font-bold text-slate-400">{formatDate(leave.startDate)}</p>
+                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Initiation</p>
+                                <p className="text-[11px] font-bold text-[var(--text-muted)]">{formatDate(leave.startDate)}</p>
                             </div>
-                            <ArrowRight size={14} className="text-slate-800" />
+                            <ArrowRight size={14} className="text-[var(--border)]" />
                             <div className="text-center">
-                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1.5">Termination</p>
-                                <p className="text-[11px] font-bold text-slate-400">{formatDate(leave.endDate)}</p>
+                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Termination</p>
+                                <p className="text-[11px] font-bold text-[var(--text-muted)]">{formatDate(leave.endDate)}</p>
                             </div>
                         </div>
 
@@ -163,7 +163,7 @@ export default function LeavesPage() {
                                     </button>
                                 </div>
                             )}
-                            <button className="p-2 text-slate-700 hover:text-white transition-colors">
+                            <button className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                                 <MoreVertical size={18} />
                             </button>
                         </div>

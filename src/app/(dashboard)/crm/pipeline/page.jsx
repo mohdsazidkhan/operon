@@ -5,7 +5,7 @@ import { Plus, DollarSign, MoreVertical, Star, Clock, AlertCircle } from 'lucide
 import { formatCurrency, cn } from '@/lib/utils';
 
 const STAGES = [
-    { key: 'prospecting', label: 'Prospecting', color: 'border-slate-700 bg-slate-900/40' },
+    { key: 'prospecting', label: 'Prospecting', color: 'border-[var(--border)] bg-[var(--surface-overlay)]/40' },
     { key: 'qualification', label: 'Qualification', color: 'border-blue-500/20 bg-blue-500/5' },
     { key: 'proposal', label: 'Proposal', color: 'border-purple-500/20 bg-purple-500/5' },
     { key: 'negotiation', label: 'Negotiation', color: 'border-amber-500/20 bg-amber-500/5' },
@@ -15,16 +15,16 @@ const STAGES = [
 
 function DealCard({ deal }) {
     return (
-        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-800 p-4 shadow-lg cursor-grab active:cursor-grabbing hover:border-primary-500/50 transition-all group">
+        <div className="bg-[var(--card-bg)] backdrop-blur-sm rounded-xl border border-[var(--card-border)] p-4 shadow-lg cursor-grab active:cursor-grabbing hover:border-[var(--primary-500)]/50 transition-all group">
             <div className="flex items-start justify-between mb-3">
-                <p className="text-sm font-bold text-white leading-tight pr-2 group-hover:text-primary-400 transition-colors">{deal.title}</p>
-                <button className="text-slate-500 hover:text-white transition-colors"><MoreVertical size={14} /></button>
+                <p className="text-sm font-bold text-[var(--text-primary)] leading-tight pr-2 group-hover:text-[var(--primary-500)] transition-colors">{deal.title}</p>
+                <button className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"><MoreVertical size={14} /></button>
             </div>
 
-            <div className="flex items-center gap-2 mb-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <div className="flex items-center gap-2 mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                 <span className="truncate max-w-[120px]">{deal.company?.name || 'N/A'}</span>
                 <span>•</span>
-                <span className="flex items-center gap-1 text-primary-400">
+                <span className="flex items-center gap-1 text-[var(--primary-500)]">
                     <Star size={10} className="fill-current" /> {deal.probability}%
                 </span>
             </div>
@@ -34,7 +34,7 @@ function DealCard({ deal }) {
                     {formatCurrency(deal.value)}
                 </span>
                 <div className="flex -space-x-2">
-                    <div className="w-7 h-7 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white">
+                    <div className="w-7 h-7 rounded-full bg-[var(--surface-overlay)] border-2 border-[var(--surface)] flex items-center justify-center text-[10px] font-bold text-[var(--text-primary)]">
                         {deal.createdBy?.name?.[0] || 'U'}
                     </div>
                 </div>
@@ -77,22 +77,22 @@ export default function PipelinePage() {
         <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white tracking-tight">Sales Pipeline</h1>
+                    <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Sales Pipeline</h1>
                     <div className="flex items-center gap-3 mt-1 text-sm font-medium">
-                        <span className="text-slate-400 flex items-center gap-1">
-                            Total: <span className="text-white font-bold">{formatCurrency(totalValue)}</span>
+                        <span className="text-[var(--text-muted)] flex items-center gap-1">
+                            Total: <span className="text-[var(--text-primary)] font-bold">{formatCurrency(totalValue)}</span>
                         </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                        <span className="text-slate-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--border)]"></span>
+                        <span className="text-[var(--text-muted)] flex items-center gap-1">
                             Won: <span className="text-emerald-500 font-bold">{formatCurrency(wonValue)}</span>
                         </span>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium text-sm transition-all border border-slate-700">
+                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-overlay)] hover:bg-[var(--surface-overlay)]/80 text-[var(--text-primary)] rounded-xl font-medium text-sm transition-all border border-[var(--border)]">
                         <Clock size={16} /> History
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-primary-500/20">
+                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
                         <Plus size={16} /> New Deal
                     </button>
                 </div>
@@ -108,28 +108,28 @@ export default function PipelinePage() {
                             <div className={cn('flex-1 rounded-2xl p-4 border flex flex-col transition-all duration-300', stage.color)}>
                                 <div className="flex items-center justify-between mb-5">
                                     <div>
-                                        <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                                        <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-2">
                                             {stage.label}
-                                            <span className="px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400 text-[10px]">{deals.length}</span>
+                                            <span className="px-1.5 py-0.5 rounded-md bg-[var(--surface-overlay)] text-[var(--text-muted)] text-[10px]">{deals.length}</span>
                                         </h3>
-                                        <p className="text-xs font-bold text-slate-500 mt-1">{formatCurrency(stageValue)}</p>
+                                        <p className="text-xs font-bold text-[var(--text-muted)] mt-1">{formatCurrency(stageValue)}</p>
                                     </div>
-                                    <button className="w-8 h-8 rounded-xl bg-slate-900/50 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:border-primary-500/50 transition-all group/add">
+                                    <button className="w-8 h-8 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--primary-500)]/50 transition-all group/add">
                                         <Plus size={16} className="group-hover/add:rotate-90 transition-transform" />
                                     </button>
                                 </div>
 
                                 <div className="space-y-4 flex-1 overflow-y-auto pr-1 scrollbar-none">
                                     {loading ? (
-                                        [1, 2].map(i => <div key={i} className="h-32 bg-slate-900/50 rounded-xl animate-pulse"></div>)
+                                        [1, 2].map(i => <div key={i} className="h-32 bg-[var(--surface-overlay)] rounded-xl animate-pulse"></div>)
                                     ) : deals.length > 0 ? (
                                         deals.map(deal => <DealCard key={deal._id} deal={deal} />)
                                     ) : (
-                                        <div className="h-32 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-800/50 rounded-xl group/drop">
-                                            <div className="w-10 h-10 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-700 group-hover/drop:text-slate-500 transition-colors">
+                                        <div className="h-32 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[var(--border)] rounded-xl group/drop">
+                                            <div className="w-10 h-10 rounded-full bg-[var(--surface-overlay)] flex items-center justify-center text-[var(--text-muted)] group-hover/drop:text-[var(--text-secondary)] transition-colors">
                                                 <DollarSign size={20} />
                                             </div>
-                                            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest group-hover/drop:text-slate-500 transition-colors">No active deals</p>
+                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest group-hover/drop:text-[var(--text-secondary)] transition-colors">No active deals</p>
                                         </div>
                                     )}
                                 </div>

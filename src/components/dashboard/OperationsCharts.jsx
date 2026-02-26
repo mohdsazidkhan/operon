@@ -1,9 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useThemeStore } from '@/store/useThemeStore';
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export function StockSaturationChart() {
+    const { isDark } = useThemeStore();
     const stockChart = {
         options: {
             chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
@@ -16,13 +18,14 @@ export function StockSaturationChart() {
             },
             xaxis: {
                 categories: ['Cloud Srv', 'Neural Link', 'Bio Sensor', 'Nano Kit', 'Proxy Node'],
-                labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } },
+                labels: { style: { colors: 'var(--text-muted)', fontSize: '10px', fontWeight: 600 } },
                 axisBorder: { show: false }
             },
-            yaxis: { labels: { style: { colors: '#64748b', fontWeight: 600 } } },
-            grid: { borderColor: '#1e293b', strokeDashArray: 4 },
+            yaxis: { labels: { style: { colors: 'var(--text-muted)', fontWeight: 600 } } },
+            grid: { borderColor: 'var(--border)', strokeDashArray: 4 },
             legend: { show: false },
-            theme: { mode: 'dark' }
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: [{ name: 'Stock Depth', data: [85, 64, 12, 53, 8] }],
     };
@@ -30,13 +33,14 @@ export function StockSaturationChart() {
 }
 
 export function DeliveryMatrixChart() {
+    const { isDark } = useThemeStore();
     const orderStatusChart = {
         options: {
             chart: { type: 'donut', background: 'transparent' },
             labels: ['Fulfilled', 'Processing', 'Hold', 'Rejected'],
             colors: ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e'],
             stroke: { show: false },
-            legend: { position: 'bottom', labels: { colors: '#94a3b8' }, markers: { radius: 12 } },
+            legend: { position: 'bottom', labels: { colors: 'var(--text-secondary)' }, markers: { radius: 12 } },
             plotOptions: {
                 pie: {
                     donut: {
@@ -44,15 +48,16 @@ export function DeliveryMatrixChart() {
                         labels: {
                             show: true,
                             total: {
-                                show: true, label: 'Fulfillment', color: '#94a3b8', fontSize: '11px',
+                                show: true, label: 'Fulfillment', color: 'var(--text-muted)', fontSize: '11px',
                                 formatter: () => '94.2%'
                             },
-                            value: { color: '#fff', fontSize: '18px', fontWeight: 800 }
+                            value: { color: 'var(--text-primary)', fontSize: '18px', fontWeight: 800 }
                         }
                     }
                 }
             },
-            theme: { mode: 'dark' }
+            theme: { mode: isDark ? 'dark' : 'light' },
+            tooltip: { theme: isDark ? 'dark' : 'light' }
         },
         series: [1240, 310, 45, 12],
     };

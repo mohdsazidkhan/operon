@@ -46,10 +46,10 @@ export default function AttendancePage() {
             {/* Header */}
             <div className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Presence Monitoring</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Presence Monitoring</h1>
                     <div className="flex items-center gap-3 mt-2">
-                        <Calendar size={14} className="text-primary-500" />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{formatDate(new Date(), { weekday: 'long' })}</span>
+                        <Calendar size={14} className="text-[var(--primary-500)]" />
+                        <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{formatDate(new Date(), { weekday: 'long' })}</span>
                     </div>
                 </div>
             </div>
@@ -57,12 +57,12 @@ export default function AttendancePage() {
             {/* Real-time Tally */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((s, i) => (
-                    <div key={i} className="bg-slate-900/50 backdrop-blur-sm rounded-[2rem] p-6 border border-slate-800 shadow-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+                    <div key={i} className="bg-[var(--card-bg)] backdrop-blur-sm rounded-[2rem] p-6 border border-[var(--card-border)] shadow-2xl relative overflow-hidden group hover:border-[var(--primary-500)]/30 transition-all">
                         <div className="flex items-center justify-between mb-3 relative z-10">
-                            <div className={cn('p-3 rounded-2xl bg-slate-950 border border-slate-800 transition-colors', s.color)}>
+                            <div className={cn('p-3 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] transition-colors', s.color)}>
                                 <s.icon size={20} />
                             </div>
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{s.label}</span>
+                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{s.label}</span>
                         </div>
                         <p className={cn('text-4xl font-black tracking-tighter relative z-10', s.color)}>{s.count}</p>
                         <div className="absolute -right-4 -bottom-4 opacity-5 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
@@ -73,22 +73,22 @@ export default function AttendancePage() {
             </div>
 
             {/* Attendance Ledger */}
-            <div className="bg-slate-900/50 backdrop-blur-3xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden">
-                <div className="p-6 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] shadow-2xl overflow-hidden">
+                <div className="p-6 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-4">
                     <div className="relative flex-1 max-w-sm">
-                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                         <input
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="SEARCH BY NAME OR DEPT..."
-                            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all placeholder:text-slate-800"
+                            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/20 transition-all placeholder:text-[var(--text-muted)]"
                         />
                     </div>
                     <div className="flex gap-3">
-                        <button className="px-5 py-3 rounded-2xl bg-slate-800 text-slate-400 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest border border-slate-700">
+                        <button className="px-5 py-3 rounded-2xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all font-black text-[10px] uppercase tracking-widest border border-[var(--border)]">
                             Export logs
                         </button>
-                        <button className="px-5 py-3 rounded-2xl bg-primary-500 text-white shadow-xl shadow-primary-500/20 font-black text-[10px] uppercase tracking-widest transition-all">
+                        <button className="px-5 py-3 rounded-2xl bg-[var(--primary-500)] text-white shadow-xl shadow-[var(--primary-500)]/20 font-black text-[10px] uppercase tracking-widest transition-all">
                             Force check-out all
                         </button>
                     </div>
@@ -96,7 +96,7 @@ export default function AttendancePage() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] bg-slate-950/40">
+                        <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] bg-[var(--surface-overlay)]/40">
                             <tr>
                                 <th className="py-6 px-8">Staff Identity</th>
                                 <th className="py-6 px-8">Check-in time</th>
@@ -105,7 +105,7 @@ export default function AttendancePage() {
                                 <th className="py-6 px-8">Tracking status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/50">
+                        <tbody className="divide-y divide-[var(--border)]">
                             {loading ? (
                                 <tr><td colSpan="5" className="py-12 text-center text-slate-700 font-black tracking-widest uppercase text-xs animate-pulse">Establishing secure link to time-clock...</td></tr>
                             ) : attendance.length === 0 ? (
@@ -113,10 +113,10 @@ export default function AttendancePage() {
                             ) : attendance.map(a => {
                                 const Icon = statusIcon[a.status] || CheckCircle;
                                 return (
-                                    <tr key={a._id} className="hover:bg-white/[0.02] transition-colors group">
+                                    <tr key={a._id} className="hover:bg-[var(--primary-500)]/[0.02] transition-colors group">
                                         <td className="py-5 px-8">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-slate-800 group-hover:ring-primary-500/30 transition-all">
+                                                <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-[var(--border)] group-hover:ring-[var(--primary-500)]/30 transition-all">
                                                     <img
                                                         src={a.employee?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(a.employee?.name || '')}&background=8b5cf6&color=fff`}
                                                         alt=""
@@ -124,24 +124,24 @@ export default function AttendancePage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-black text-white group-hover:text-primary-400 transition-colors uppercase tracking-tight">{a.employee?.name}</p>
-                                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{a.employee?.department}</p>
+                                                    <p className="text-xs font-black text-[var(--text-primary)] group-hover:text-[var(--primary-500)] transition-colors uppercase tracking-tight">{a.employee?.name}</p>
+                                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{a.employee?.department}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="py-5 px-8">
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
-                                                <Clock size={12} className="text-slate-700" />
+                                            <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                                                <Clock size={12} className="text-[var(--text-muted)]" />
                                                 {a.checkIn || '—'}
                                             </div>
                                         </td>
                                         <td className="py-5 px-8">
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                                                <ArrowRight size={12} className="text-slate-800" />
+                                            <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-muted)]">
+                                                <ArrowRight size={12} className="text-[var(--border)]" />
                                                 {a.checkOut || 'Active'}
                                             </div>
                                         </td>
-                                        <td className="py-5 px-8 text-sm font-black text-white">
+                                        <td className="py-5 px-8 text-sm font-black text-[var(--text-primary)]">
                                             {a.hours > 0 ? `${a.hours}h` : '—'}
                                         </td>
                                         <td className="py-5 px-8">

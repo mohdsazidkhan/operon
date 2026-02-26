@@ -28,8 +28,8 @@ export default async function HRDashboard() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Workforce Intelligence</h1>
-                    <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Workforce Intelligence</h1>
+                    <p className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
                         <TrendingUp size={14} className="text-emerald-500" />
                         Human Capital Distribution • Performance Metrics
                     </p>
@@ -39,32 +39,32 @@ export default async function HRDashboard() {
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {kpis.map((k, i) => (
-                    <div key={i} className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] p-7 border border-slate-800 shadow-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+                    <div key={i} className="bg-[var(--card-bg)] backdrop-blur-xl rounded-[2.5rem] p-7 border border-[var(--card-border)] shadow-2xl relative overflow-hidden group hover:border-[var(--primary-500)]/30 transition-all">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-white/10 transition-all duration-700"></div>
                         <div className="flex items-center justify-between mb-4 relative z-10">
-                            <div className={cn('p-3 rounded-2xl bg-slate-950 border border-slate-800 transition-colors', k.color)}>
+                            <div className={cn('p-3 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border)] transition-colors', k.color)}>
                                 <k.icon size={20} />
                             </div>
                         </div>
-                        <p className="text-3xl font-black text-white tracking-tighter relative z-10">{k.value}</p>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1 relative z-10">{k.title}</p>
+                        <p className="text-3xl font-black text-[var(--text-primary)] tracking-tighter relative z-10">{k.value}</p>
+                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-1 relative z-10">{k.title}</p>
                     </div>
                 ))}
             </div>
 
             {/* Main Distribution row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-8 shadow-2xl group relative overflow-hidden">
-                    <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-                        <PieChart size={16} className="text-primary-400" /> Sector Allocation
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl group relative overflow-hidden">
+                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                        <PieChart size={16} className="text-[var(--primary-400)]" /> Sector Allocation
                     </h3>
                     <div className="h-[280px]">
                         <SectorAllocationChart total={total} />
                     </div>
                 </div>
 
-                <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-8 shadow-2xl group relative overflow-hidden">
-                    <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl group relative overflow-hidden">
+                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
                         <BarChart3 size={16} className="text-emerald-400" /> Weekly Presence Delta
                     </h3>
                     <div className="h-[280px]">
@@ -74,14 +74,14 @@ export default async function HRDashboard() {
             </div>
 
             {/* Talent Roster Preview */}
-            <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 shadow-2xl overflow-hidden mb-12">
-                <div className="p-8 border-b border-slate-800 flex items-center justify-between">
-                    <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Personnel Snapshot</h3>
-                    <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 hover:text-white transition-colors">Complete Directory</button>
+            <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl overflow-hidden mb-12">
+                <div className="p-8 border-b border-[var(--border)] flex items-center justify-between">
+                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Personnel Snapshot</h3>
+                    <button className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary-500)] hover:text-[#fff] hover:bg-[var(--primary-500)] transition-colors px-2 py-1 rounded-lg">Complete Directory</button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] bg-slate-950/40">
+                        <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] bg-[var(--surface-overlay)]/40">
                             <tr>
                                 <th className="py-6 px-8">Identity</th>
                                 <th className="py-6 px-8">Sector</th>
@@ -92,17 +92,17 @@ export default async function HRDashboard() {
                         </thead>
                         <tbody className="divide-y divide-slate-800/50">
                             {serializedEmployees.slice(0, 5).map((emp, i) => (
-                                <tr key={emp._id} className="hover:bg-white/[0.02] transition-colors group">
+                                <tr key={emp._id} className="hover:bg-[var(--surface-overlay)]/30 transition-colors group">
                                     <td className="py-5 px-8">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-400 font-black text-xs border border-primary-500/20">
+                                            <div className="w-10 h-10 rounded-2xl bg-[var(--primary-500)]/10 flex items-center justify-center text-[var(--primary-400)] font-black text-xs border border-[var(--primary-500)]/20">
                                                 {emp.name[0]}
                                             </div>
-                                            <span className="text-xs font-black text-white group-hover:text-primary-400 transition-colors uppercase tracking-tight">{emp.name}</span>
+                                            <span className="text-xs font-black text-[var(--text-primary)] group-hover:text-[var(--primary-500)] transition-colors uppercase tracking-tight">{emp.name}</span>
                                         </div>
                                     </td>
-                                    <td className="py-5 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest">{emp.department}</td>
-                                    <td className="py-5 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">{emp.designation}</td>
+                                    <td className="py-5 px-8 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{emp.department}</td>
+                                    <td className="py-5 px-8 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{emp.designation}</td>
                                     <td className="py-5 px-8">
                                         <div className={cn(
                                             'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border',
@@ -112,7 +112,7 @@ export default async function HRDashboard() {
                                             {emp.isActive ? 'ACTIVE' : 'ON LEAVE'}
                                         </div>
                                     </td>
-                                    <td className="py-5 px-8 text-xs font-black text-slate-600 font-mono tracking-tighter">{new Date(emp.joiningDate).getFullYear()}</td>
+                                    <td className="py-5 px-8 text-xs font-black text-[var(--text-muted)] font-mono tracking-tighter">{new Date(emp.joiningDate).getFullYear()}</td>
                                 </tr>
                             ))}
                         </tbody>

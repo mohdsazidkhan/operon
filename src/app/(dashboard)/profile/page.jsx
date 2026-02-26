@@ -8,12 +8,12 @@ export default function ProfilePage() {
     const [mounted, setMounted] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [profile, setProfile] = useState({
-        name: 'Sazid Ahmed',
+        name: 'MOHD SAZID KHAN',
         position: 'System Architect & Founder',
         bio: 'Designing high-velocity neural architectures and decentralized operational frameworks for the next generation of SASS ecosystems.',
         email: 'sazid.operon@neural.io',
-        location: 'Dhaka, Sector 9',
-        joined: 'Jan 2024',
+        location: 'New Delhi, India',
+        joined: `${new Date().toLocaleString('en-US', { month: 'short' })} ${new Date().getFullYear()}`,
         dept: 'Core Engineering',
         rank: 'Elite-S'
     });
@@ -29,9 +29,9 @@ export default function ProfilePage() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Entity Profile Management</h1>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
-                        <User size={12} className="text-primary-500" />
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Entity Profile Management</h1>
+                    <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+                        <User size={12} className="text-[var(--primary-500)]" />
                         Identity Verification Status: Level 5
                     </p>
                 </div>
@@ -40,7 +40,7 @@ export default function ProfilePage() {
                         onClick={() => setIsEditing(!isEditing)}
                         className={cn(
                             'h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-3',
-                            isEditing ? 'bg-slate-900 border border-slate-800 text-slate-500 hover:text-white' : 'bg-primary-500 text-white shadow-2xl shadow-primary-500/20 hover:scale-105'
+                            isEditing ? 'bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]' : 'bg-[var(--primary-500)] text-white shadow-2xl shadow-[var(--primary-500)]/20 hover:scale-105'
                         )}
                     >
                         {isEditing ? <><X size={16} /> Discard Delta</> : <><Edit3 size={16} /> Modify Identity</>}
@@ -56,25 +56,25 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Col - Identity Card */}
                 <div className="lg:col-span-1 space-y-8">
-                    <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-10 shadow-2xl relative overflow-hidden group text-center">
-                        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-500/20 to-transparent"></div>
+                    <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-10 shadow-2xl relative overflow-hidden group text-center">
+                        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[var(--primary-500)]/20 to-transparent"></div>
                         <div className="relative z-10">
                             <div className="relative inline-block mb-8">
-                                <div className="w-40 h-40 rounded-[2.5rem] bg-slate-900 p-1 border border-primary-500/30 overflow-hidden shadow-2xl">
-                                    <div className="w-full h-full rounded-[2.2rem] bg-slate-950 flex items-center justify-center overflow-hidden">
+                                <div className="w-40 h-40 rounded-[2.5rem] bg-[var(--surface-overlay)] p-1 border border-[var(--primary-500)]/30 overflow-hidden shadow-2xl">
+                                    <div className="w-full h-full rounded-[2.2rem] bg-[var(--surface-raised)] flex items-center justify-center overflow-hidden">
                                         <img src="https://i.pravatar.cc/300?u=sazid" alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                     </div>
                                 </div>
-                                <button className="absolute bottom-2 right-2 p-3 rounded-2xl bg-primary-500 text-white shadow-xl shadow-primary-500/20 hover:scale-110 active:scale-95 transition-all">
+                                <button className="absolute bottom-2 right-2 p-3 rounded-2xl bg-[var(--primary-500)] text-white shadow-xl shadow-[var(--primary-500)]/20 hover:scale-110 active:scale-95 transition-all">
                                     <Camera size={18} />
                                 </button>
                             </div>
-                            <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-1">{profile.name}</h2>
-                            <p className="text-[10px] font-bold text-primary-400 uppercase tracking-[0.4em] mb-6">{profile.position}</p>
+                            <h2 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-1">{profile.name}</h2>
+                            <p className="text-[10px] font-bold text-[var(--primary-400)] uppercase tracking-[0.4em] mb-6">{profile.position}</p>
 
-                            <div className="flex justify-center gap-3 pt-6 border-t border-slate-800">
+                            <div className="flex justify-center gap-3 pt-6 border-t border-[var(--border)]">
                                 {[Twitter, Github, Linkedin, Globe].map((Icon, idx) => (
-                                    <button key={idx} className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-slate-700 hover:text-white hover:border-slate-700 transition-all">
+                                    <button key={idx} className="p-3.5 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--primary-500)]/30 transition-all">
                                         <Icon size={18} />
                                     </button>
                                 ))}
@@ -82,21 +82,21 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-8 shadow-2xl">
-                        <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] mb-8">Tactical Stats</h3>
+                    <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl">
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8">Tactical Stats</h3>
                         <div className="space-y-6">
                             {[
                                 { label: 'Neural Sector', val: 'Engineering', icon: Briefcase, color: 'text-indigo-400' },
-                                { label: 'Operational Hub', val: 'Dhaka Sync Point', icon: MapPin, color: 'text-rose-400' },
-                                { label: 'Commission Date', val: 'Cycle 01-2024', icon: Calendar, color: 'text-emerald-400' },
+                                { label: 'Operational Hub', val: 'New Delhi Sync Point', icon: MapPin, color: 'text-rose-400' },
+                                { label: 'Commission Date', val: `Cycle ${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}-${new Date().getFullYear()}`, icon: Calendar, color: 'text-emerald-400' },
                             ].map((stat, i) => (
-                                <div key={i} className="flex items-center gap-4 p-5 rounded-2xl bg-slate-950 border border-slate-800 group hover:bg-white/[0.02] transition-all">
-                                    <div className={cn('p-3 rounded-xl bg-slate-900 shrink-0 group-hover:scale-110 transition-transform', stat.color)}>
+                                <div key={i} className="flex items-center gap-4 p-5 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] group hover:bg-[var(--surface-raised)] transition-all">
+                                    <div className={cn('p-3 rounded-xl bg-[var(--surface-raised)] shrink-0 group-hover:scale-110 transition-transform', stat.color)}>
                                         <stat.icon size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.label}</p>
-                                        <p className="text-xs font-black text-white uppercase tracking-tight mt-0.5">{stat.val}</p>
+                                        <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{stat.label}</p>
+                                        <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight mt-0.5">{stat.val}</p>
                                     </div>
                                 </div>
                             ))}
@@ -107,28 +107,28 @@ export default function ProfilePage() {
                 {/* Right Col - Data Forms/Settings */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Identity Bio */}
-                    <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-10 shadow-2xl">
-                        <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                            <Shield size={18} className="text-primary-400" /> Identity Narrative
+                    <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-10 shadow-2xl">
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+                            <Shield size={18} className="text-[var(--primary-400)]" /> Identity Narrative
                         </h3>
-                        <div className="p-8 rounded-[2rem] bg-slate-950 border border-slate-800 relative group">
+                        <div className="p-8 rounded-[2rem] bg-[var(--surface-overlay)] border border-[var(--border)] relative group">
                             {isEditing ? (
                                 <textarea
                                     defaultValue={profile.bio}
-                                    className="w-full bg-transparent text-sm font-black text-slate-400 uppercase tracking-tight leading-relaxed focus:outline-none min-h-[120px]"
+                                    className="w-full bg-transparent text-sm font-black text-[var(--text-secondary)] uppercase tracking-tight leading-relaxed focus:outline-none min-h-[120px]"
                                 />
                             ) : (
-                                <p className="text-sm font-black text-slate-400 uppercase tracking-tight leading-relaxed">
+                                <p className="text-sm font-black text-[var(--text-secondary)] uppercase tracking-tight leading-relaxed">
                                     {profile.bio}
                                 </p>
                             )}
-                            <div className="absolute top-4 right-4 text-[8px] font-black text-slate-800 uppercase tracking-widest group-hover:text-primary-500 transition-colors">DECRYPTED</div>
+                            <div className="absolute top-4 right-4 text-[8px] font-black text-[var(--text-muted)] uppercase tracking-widest group-hover:text-[var(--primary-500)] transition-colors">DECRYPTED</div>
                         </div>
                     </div>
 
                     {/* Configuration Grid */}
-                    <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-800 p-10 shadow-2xl">
-                        <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] mb-10 flex items-center gap-3">
+                    <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-10 shadow-2xl">
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-10 flex items-center gap-3">
                             <Settings size={18} className="text-emerald-400" /> System Protocols
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -139,15 +139,15 @@ export default function ProfilePage() {
                                 { label: 'System Rank', val: profile.rank, icon: Shield },
                             ].map((field, i) => (
                                 <div key={i} className="space-y-3">
-                                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] ml-2">{field.label}</label>
+                                    <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] ml-2">{field.label}</label>
                                     <div className="relative group">
-                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-primary-500 transition-colors">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-hover:text-[var(--primary-500)] transition-colors">
                                             <field.icon size={16} />
                                         </div>
                                         <input
                                             disabled={!isEditing}
                                             defaultValue={field.val}
-                                            className="w-full pl-14 pr-4 py-5 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-black uppercase tracking-widest text-white focus:outline-none focus:border-primary-500/50 transition-all disabled:opacity-50"
+                                            className="w-full pl-14 pr-4 py-5 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] text-xs font-black uppercase tracking-widest text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary-500)]/50 transition-all disabled:opacity-50"
                                         />
                                     </div>
                                 </div>
@@ -158,7 +158,7 @@ export default function ProfilePage() {
                     {/* Security Section */}
                     <div className="bg-rose-500/5 backdrop-blur-3xl rounded-[3rem] border border-rose-500/20 p-10 shadow-2xl">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3 text-rose-400">
+                            <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-3 text-rose-400">
                                 <Key size={18} /> High-Security Overrides
                             </h3>
                             <button className="px-5 py-2.5 rounded-xl bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/20 hover:scale-105 transition-all">Cycle Keys</button>
@@ -166,16 +166,16 @@ export default function ProfilePage() {
                         <div className="space-y-4">
                             {[
                                 { title: 'Neural Authorization (2FA)', status: 'Active', desc: 'Quantum authentication active across all vectors.' },
-                                { title: 'Session Integrity', status: 'Verifying', desc: 'Localized at Dhaka Sync Point Sector 9.' }
+                                { title: 'Session Integrity', status: 'Verifying', desc: 'Localized at New Delhi Sync Point.' }
                             ].map((s, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-6 rounded-[2rem] bg-slate-950 border border-slate-800 hover:border-rose-500/30 transition-all group">
+                                <div key={idx} className="flex items-center justify-between p-6 rounded-[2rem] bg-[var(--surface-overlay)] border border-[var(--border)] hover:border-rose-500/30 transition-all group">
                                     <div>
-                                        <p className="text-[11px] font-black text-white uppercase tracking-tight">{s.title}</p>
-                                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1 italic">{s.desc}</p>
+                                        <p className="text-[11px] font-black text-[var(--text-primary)] uppercase tracking-tight">{s.title}</p>
+                                        <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1 italic">{s.desc}</p>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="text-[9px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-lg uppercase tracking-widest">{s.status}</span>
-                                        <ChevronRight size={16} className="text-slate-800 group-hover:text-white transition-colors" />
+                                        <ChevronRight size={16} className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors" />
                                     </div>
                                 </div>
                             ))}
