@@ -4,32 +4,58 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Receipt, PieChart, TrendingDown, Clock, CheckCircle2, MoreVertical, AlertCircle } from 'lucide-react';
 import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 import { useThemeStore } from '@/store/useThemeStore';
+
+const EMPTY_EXPENSE = { title: '', amount: '', category: 'Office', date: new Date().toISOString().split('T')[0], description: '' };
 
 export default function ExpensesPage() {
     const { isDark } = useThemeStore();
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_EXPENSE);
 
-    useEffect(() => {
-        const fetchExpenses = async () => {
-            try {
-                const res = await fetch(`/api/expenses?search=${search}`);
-                const data = await res.json();
-                if (data.success) {
-                    setExpenses(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch expenses:', err);
-            } finally {
-                setLoading(false);
+    const fetchExpenses = async () => {
+        try {
+            const res = await fetch(`/api/expenses?search=${search}`);
+            const data = await res.json();
+            if (data.success) setExpenses(data.data);
+        } catch (err) {
+            console.error('Failed to fetch expenses:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchExpenses(); }, [search]);
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/expenses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...form, amount: +form.amount })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Expense added!');
+                setShowAdd(false);
+                setForm(EMPTY_EXPENSE);
+                fetchExpenses();
+            } else {
+                toast.error(data.message || 'Failed to add expense');
             }
-        };
-        fetchExpenses();
-    }, [search]);
+        } catch { toast.error('Failed to add expense'); }
+        finally { setSaving(false); }
+    };
 
     const total = expenses.reduce((s, e) => s + (e.amount || 0), 0);
     const approved = expenses.filter(e => e.status === 'approved').reduce((s, e) => s + (e.amount || 0), 0);
@@ -73,6 +99,34 @@ export default function ExpensesPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Add Expense Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add Expense" size="md">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <FormField label="Title" required>
+                        <input required className={inputCls} placeholder="e.g. AWS Cloud Services" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
+                    </FormField>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Amount ($)" required>
+                            <input required type="number" min="0" className={inputCls} placeholder="0" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Date">
+                            <input type="date" className={inputCls} value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} />
+                        </FormField>
+                    </div>
+                    <FormField label="Category">
+                        <select className={inputCls} value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
+                            {['Office', 'Travel', 'Meals', 'Software', 'Infrastructure', 'Marketing', 'Other'].map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    </FormField>
+                    <FormField label="Description">
+                        <textarea rows={3} className={inputCls + " resize-none"} placeholder="Additional details..." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                    </FormField>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Add Expense" />
+                </form>
+            </Modal>
+
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -81,11 +135,12 @@ export default function ExpensesPage() {
                         Expense Report • {expenses.length} Expenses Recorded
                     </p>
                 </div>
-                <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[var(--primary-500)]/30">
-                        <Plus size={16} /> Add Expense
-                    </button>
-                </div>
+                <button
+                    onClick={() => setShowAdd(true)}
+                    className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[var(--primary-500)]/30"
+                >
+                    <Plus size={16} /> Add Expense
+                </button>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -160,8 +215,8 @@ export default function ExpensesPage() {
                                             <td className="py-4 px-6 text-[10px] font-bold text-[var(--text-muted)]">{formatDate(e.date)}</td>
                                             <td className="py-4 px-6">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full bg-[var(--surface-overlay)] flex items-center justify-center text-[8px] font-black text-[var(--text-muted)] border border-[var(--border)] uppercase">{e.submittedBy?.name?.[0] || 'S'}</div>
-                                                    <span className="text-[10px] font-bold text-[var(--text-muted)]">{e.submittedBy?.name || 'System'}</span>
+                                                    <div className="w-6 h-6 rounded-full bg-[var(--surface-overlay)] flex items-center justify-center text-[8px] font-black text-[var(--text-muted)] border border-[var(--border)] uppercase">{e.createdBy?.name?.[0] || 'S'}</div>
+                                                    <span className="text-[10px] font-bold text-[var(--text-muted)]">{e.createdBy?.name || 'System'}</span>
                                                 </div>
                                             </td>
                                             <td className="py-4 px-6">

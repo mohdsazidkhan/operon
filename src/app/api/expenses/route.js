@@ -21,7 +21,7 @@ export async function GET(req) {
 
         const total = await Expense.countDocuments(query);
         const expenses = await Expense.find(query)
-            .populate('submittedBy', 'name avatar')
+            .populate('createdBy', 'name avatar')
             .populate('approvedBy', 'name')
             .sort({ date: -1 })
             .skip((page - 1) * limit)
@@ -43,7 +43,7 @@ export async function POST(req) {
         const expense = await Expense.create({
             ...body,
             organization: user.organization,
-            submittedBy: user._id
+            createdBy: user._id
         });
 
         return NextResponse.json({ success: true, data: expense }, { status: 201 });

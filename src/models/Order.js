@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
     orderNumber: { type: String, unique: true },
+    type: { type: String, enum: ['purchase', 'sale'], default: 'sale' },
     customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Contact' },
     company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
     items: [{

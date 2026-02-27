@@ -3,31 +3,102 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Send, Eye, Download, Printer, Filter, MoreHorizontal } from 'lucide-react';
 import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const STATUS_OPTIONS = ['all', 'paid', 'sent', 'draft', 'overdue'];
 
+const EMPTY_INVOICE = {
+    customer: '',
+    company: '',
+    items: [{ description: '', quantity: 1, price: 0, total: 0 }],
+    tax: 10,
+    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    notes: ''
+};
+
 export default function InvoicesPage() {
     const [invoices, setInvoices] = useState([]);
+    const [customers, setCustomers] = useState([]);
+    const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_INVOICE);
+
+    const fetchInvoices = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/invoices?status=${filter === 'all' ? '' : filter}&search=${search}`);
+            const data = await res.json();
+            if (data.success) {
+                setInvoices(data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch invoices:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchDropdowns = async () => {
+        try {
+            const [cRes, coRes] = await Promise.all([
+                fetch('/api/contacts'),
+                fetch('/api/companies')
+            ]);
+            const [cData, coData] = await Promise.all([cRes.json(), coRes.json()]);
+            if (cData.success) setCustomers(cData.data);
+            if (coData.success) setCompanies(coData.data);
+        } catch (err) {
+            console.error('Failed to fetch dropdown data:', err);
+        }
+    };
 
     useEffect(() => {
-        const fetchInvoices = async () => {
-            try {
-                const res = await fetch(`/api/invoices?status=${filter === 'all' ? '' : filter}&search=${search}`);
-                const data = await res.json();
-                if (data.success) {
-                    setInvoices(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch invoices:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchInvoices();
+        fetchDropdowns();
     }, [filter, search]);
+
+    const handleAddItem = () => {
+        setForm(p => ({
+            ...p,
+            items: [...p.items, { description: '', quantity: 1, price: 0, total: 0 }]
+        }));
+    };
+
+    const handleUpdateItem = (index, field, value) => {
+        const newItems = [...form.items];
+        newItems[index][field] = value;
+        if (field === 'quantity' || field === 'price') {
+            newItems[index].total = newItems[index].quantity * newItems[index].price;
+        }
+        setForm(p => ({ ...p, items: newItems }));
+    };
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/invoices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Invoice created!');
+                setShowAdd(false);
+                setForm(EMPTY_INVOICE);
+                fetchInvoices();
+            } else {
+                toast.error(data.message || 'Failed to create invoice');
+            }
+        } catch { toast.error('Failed to create invoice'); }
+        finally { setSaving(false); }
+    };
 
     const totalPaid = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total || 0), 0);
     const totalPending = invoices.filter(i => i.status !== 'paid').reduce((s, i) => s + (i.total || 0), 0);
@@ -35,6 +106,62 @@ export default function InvoicesPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Add Invoice Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Create New Invoice" size="xl">
+                <form onSubmit={handleAdd} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField label="Assign to Customer">
+                            <select className={inputCls} value={form.customer} onChange={e => setForm(p => ({ ...p, customer: e.target.value }))}>
+                                <option value="">Select Customer</option>
+                                {customers.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                            </select>
+                        </FormField>
+                        <FormField label="Assign to Company">
+                            <select className={inputCls} value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))}>
+                                <option value="">Select Company</option>
+                                {companies.map(co => <option key={co._id} value={co._id}>{co.name}</option>)}
+                            </select>
+                        </FormField>
+                    </div>
+
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest">Items</h3>
+                            <button type="button" onClick={handleAddItem} className="text-xs font-bold text-[var(--primary-500)] hover:text-[var(--primary-600)]">+ Add Item</button>
+                        </div>
+                        <div className="space-y-2">
+                            {form.items.map((item, i) => (
+                                <div key={i} className="grid grid-cols-12 gap-2 bg-[var(--surface-overlay)]/30 p-2 rounded-xl border border-[var(--border)]/50">
+                                    <div className="col-span-6">
+                                        <input required className={inputCls} placeholder="Description" value={item.description} onChange={e => handleUpdateItem(i, 'description', e.target.value)} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <input required type="number" min="1" className={inputCls} placeholder="Qty" value={item.quantity} onChange={e => handleUpdateItem(i, 'quantity', +e.target.value)} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <input required type="number" min="0" className={inputCls} placeholder="Price" value={item.price} onChange={e => handleUpdateItem(i, 'price', +e.target.value)} />
+                                    </div>
+                                    <div className="col-span-2 flex items-center justify-end px-2 text-xs font-bold text-[var(--text-primary)]">
+                                        {formatCurrency(item.total)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Tax Rate (%)">
+                            <input type="number" className={inputCls} value={form.tax} onChange={e => setForm(p => ({ ...p, tax: +e.target.value }))} />
+                        </FormField>
+                        <FormField label="Due Date" required>
+                            <input required type="date" className={inputCls} value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
+                        </FormField>
+                    </div>
+
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Generate Invoice" />
+                </form>
+            </Modal>
+
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -45,7 +172,7 @@ export default function InvoicesPage() {
                     <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-overlay)] hover:bg-[var(--surface-overlay)] text-[var(--text-primary)] rounded-xl font-medium text-sm transition-all border border-[var(--border)]">
                         <Printer size={16} /> Print Reports
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20 font-bold uppercase tracking-wider">
+                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20 font-bold uppercase tracking-wider">
                         <Plus size={16} /> Create Invoice
                     </button>
                 </div>
@@ -129,10 +256,10 @@ export default function InvoicesPage() {
                                     <td className="py-4 px-6">
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 rounded-lg bg-[var(--primary-500)]/10 flex items-center justify-center text-[var(--primary-500)] font-bold text-sm">
-                                                {inv.clientName?.[0] || 'C'}
+                                                {(inv.customer?.name || inv.company?.name || 'C')[0]}
                                             </div>
                                             <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-500)] transition-colors uppercase tracking-tight">
-                                                {inv.clientName}
+                                                {inv.customer?.name || inv.company?.name || 'N/A'}
                                             </span>
                                         </div>
                                     </td>

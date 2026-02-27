@@ -26,8 +26,8 @@ export async function PATCH(req) {
 
         await dbConnect();
         await Notification.updateMany(
-            { user: user._id, organization: user.organization, read: false },
-            { read: true, readAt: new Date() }
+            { user: user._id, organization: user.organization, isRead: false },
+            { isRead: true }
         );
 
         return NextResponse.json({ success: true, message: 'All notifications marked as read' });

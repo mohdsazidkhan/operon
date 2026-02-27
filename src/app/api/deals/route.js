@@ -10,7 +10,7 @@ export async function GET(req) {
 
         const { searchParams } = new URL(req.url);
         const stage = searchParams.get('stage');
-        const assignedTo = searchParams.get('assignedTo');
+        const owner = searchParams.get('owner');
         const search = searchParams.get('search');
         const page = parseInt(searchParams.get('page')) || 1;
         const limit = parseInt(searchParams.get('limit')) || 20;
@@ -18,7 +18,7 @@ export async function GET(req) {
         await dbConnect();
         const query = { organization: user.organization };
         if (stage) query.stage = stage;
-        if (assignedTo) query.assignedTo = assignedTo;
+        if (owner) query.owner = owner;
         if (search) {
             query.$or = [
                 { title: new RegExp(search, 'i') },
@@ -27,7 +27,7 @@ export async function GET(req) {
 
         const total = await Deal.countDocuments(query);
         const deals = await Deal.find(query)
-            .populate('assignedTo', 'name avatar')
+            .populate('owner', 'name avatar')
             .populate('lead', 'name email company')
             .populate('company', 'name')
             .sort({ updatedAt: -1 })
@@ -50,8 +50,7 @@ export async function POST(req) {
         const deal = await Deal.create({
             ...body,
             organization: user.organization,
-            owner: user._id, // Existing controller used assignedTo, adapting to use owner or assignedTo based on body
-            assignedTo: body.assignedTo || user._id,
+            owner: body.owner || user._id,
         });
 
         return NextResponse.json({ success: true, data: deal }, { status: 201 });

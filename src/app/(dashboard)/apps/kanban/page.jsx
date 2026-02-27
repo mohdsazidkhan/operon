@@ -4,19 +4,20 @@ import { Plus, MoreHorizontal, UserCircle2, Calendar, Tag, AlertCircle, GripVert
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const STATUS_MAP = {
-    'Backlog': 'todo',
-    'In Motion': 'in_progress',
-    'Validation': 'review',
-    'Serialized': 'done'
+    'To Do': 'todo',
+    'In Progress': 'in_progress',
+    'In Review': 'review',
+    'Done': 'done'
 };
 
 const REV_STATUS_MAP = {
-    'todo': 'Backlog',
-    'in_progress': 'In Motion',
-    'review': 'Validation',
-    'done': 'Serialized'
+    'todo': 'To Do',
+    'in_progress': 'In Progress',
+    'review': 'In Review',
+    'done': 'Done'
 };
 
 const priorityStyles = {
@@ -26,15 +27,21 @@ const priorityStyles = {
     low: 'text-[var(--text-muted)] bg-[var(--text-muted)]/10 border-[var(--text-muted)]/20'
 };
 
+const EMPTY_TASK = { title: '', priority: 'medium', module: 'general', dueDate: '', description: '' };
+
 export default function KanbanPage() {
     const [boards, setBoards] = useState({
-        'Backlog': [],
-        'In Motion': [],
-        'Validation': [],
-        'Serialized': []
+        'To Do': [],
+        'In Progress': [],
+        'In Review': [],
+        'Done': []
     });
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [activeCol, setActiveCol] = useState('To Do');
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_TASK);
 
     const fetchTasks = async () => {
         try {
@@ -42,19 +49,19 @@ export default function KanbanPage() {
             const data = await res.json();
             if (data.success) {
                 const grouped = {
-                    'Backlog': [],
-                    'In Motion': [],
-                    'Validation': [],
-                    'Serialized': []
+                    'To Do': [],
+                    'In Progress': [],
+                    'In Review': [],
+                    'Done': []
                 };
                 data.data.forEach(task => {
-                    const col = REV_STATUS_MAP[task.status] || 'Backlog';
+                    const col = REV_STATUS_MAP[task.status] || 'To Do';
                     grouped[col].push(task);
                 });
                 setBoards(grouped);
             }
         } catch (err) {
-            toast.error('Neural link failure: Could not retrieve task stream');
+            toast.error('Could not load tasks. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -64,40 +71,73 @@ export default function KanbanPage() {
         fetchTasks();
     }, [search]);
 
-    const handleCreateTask = async (col) => {
-        const title = prompt('SEQUENCE NEW DATA PACKET (Task Title):');
-        if (!title) return;
-
+    const handleCreateTask = async (e) => {
+        e.preventDefault();
+        setSaving(true);
         try {
             const res = await fetch('/api/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title,
-                    status: STATUS_MAP[col],
-                    priority: 'medium',
-                    module: 'general'
+                    ...form,
+                    status: STATUS_MAP[activeCol],
+                    dueDate: form.dueDate ? new Date(form.dueDate) : undefined
                 })
             });
             const data = await res.json();
             if (data.success) {
-                toast.success('Sequence initialized successfully');
+                toast.success('Task created!');
+                setShowAdd(false);
+                setForm(EMPTY_TASK);
                 fetchTasks();
+            } else {
+                toast.error(data.message || 'Failed to create task');
             }
-        } catch (err) {
-            toast.error('Failed to sequence new item');
-        }
+        } catch { toast.error('Failed to create task'); }
+        finally { setSaving(false); }
     };
+
+    const openAdd = (col) => { setActiveCol(col); setShowAdd(true); };
 
     return (
         <div className="h-[calc(100vh-140px)] flex flex-col animate-in fade-in duration-700">
+            {/* Add Task Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title={`Add Task to "${activeCol}"`} size="md">
+                <form onSubmit={handleCreateTask} className="space-y-4">
+                    <FormField label="Task Title" required>
+                        <input required className={inputCls} placeholder="e.g. Fix login page bug" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
+                    </FormField>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Priority">
+                            <select className={inputCls} value={form.priority} onChange={e => setForm(p => ({ ...p, priority: e.target.value }))}>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </FormField>
+                        <FormField label="Due Date">
+                            <input type="date" className={inputCls} value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
+                        </FormField>
+                    </div>
+                    <FormField label="Module / Area">
+                        <input className={inputCls} placeholder="e.g. Frontend, Backend, HR" value={form.module} onChange={e => setForm(p => ({ ...p, module: e.target.value }))} />
+                    </FormField>
+                    <FormField label="Description">
+                        <textarea rows={2} className={inputCls + " resize-none"} placeholder="Task details..." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                    </FormField>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Add Task" />
+                </form>
+            </Modal>
+
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2 mb-8">
+
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Neural Kanban Board</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Task Board</h1>
                     <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-1 flex items-center gap-2">
                         <GripVertical size={12} className="text-[var(--primary-500)]" />
-                        High-Velocity Task Orchestration • Real-time Synchronization
+                        Organize and track your team's tasks
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -106,7 +146,7 @@ export default function KanbanPage() {
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="QUERY TASK HASH..."
+                            placeholder="Search tasks..."
                             className="w-full pl-12 pr-4 py-4 rounded-[1.5rem] bg-[var(--surface-overlay)] border border-[var(--border)] text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/20 transition-all placeholder:text-[var(--text-muted)]"
                         />
                     </div>
@@ -131,7 +171,7 @@ export default function KanbanPage() {
 
                             <div className="flex-1 overflow-y-auto space-y-6 relative z-10 scrollbar-hide">
                                 {loading && tasks.length === 0 ? (
-                                    <div className="py-12 text-center text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] animate-pulse">Decrypting Segment...</div>
+                                    <div className="py-12 text-center text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] animate-pulse">Loading tasks...</div>
                                 ) : tasks.map(task => (
                                     <div
                                         key={task._id}
@@ -162,10 +202,10 @@ export default function KanbanPage() {
                                     </div>
                                 ))}
                                 <button
-                                    onClick={() => handleCreateTask(col)}
+                                    onClick={() => openAdd(col)}
                                     className="w-full py-6 rounded-[2rem] border-2 border-dashed border-[var(--border)]/50 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] hover:border-[var(--primary-500)]/50 hover:text-[var(--primary-500)] transition-all flex items-center justify-center gap-3 group/add"
                                 >
-                                    <Plus size={16} className="group-hover/add:scale-110 transition-transform" /> Sequence Item
+                                    <Plus size={16} className="group-hover/add:scale-110 transition-transform" /> Add Task
                                 </button>
                             </div>
                         </div>

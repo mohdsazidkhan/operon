@@ -19,7 +19,8 @@ export async function GET(req) {
 
         const total = await Invoice.countDocuments(query);
         const invoices = await Invoice.find(query)
-            .populate('client', 'name email address')
+            .populate('customer', 'name email')
+            .populate('company', 'name')
             .populate('createdBy', 'name')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)

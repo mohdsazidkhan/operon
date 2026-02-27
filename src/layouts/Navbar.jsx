@@ -7,6 +7,7 @@ import { Menu, Sun, Moon, Bell, Search, ChevronDown, LogOut, User, Settings, X }
 import { useThemeStore } from '@/store/useThemeStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 // Note: formatRelativeTime and demoData need to be migrated/imported correctly
 // For now, using placeholders or simple implementations
 
@@ -32,6 +33,8 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
     const { isDark, toggleDark, isRTL, toggleRTL } = useThemeStore();
     const { user, logout } = useAuthStore();
     const router = useRouter();
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [showProfile, setShowProfile] = useState(false);
     const [showNotifs, setShowNotifs] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
@@ -39,7 +42,34 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
     const profileRef = useRef(null);
     const notifsRef = useRef(null);
 
-    const unreadCount = demoNotifications.filter(n => !n.read).length;
+    const fetchNotifications = async () => {
+        try {
+            const res = await fetch('/api/notifications');
+            const data = await res.json();
+            if (data.success) {
+                setNotifications(data.data.slice(0, 5));
+                setUnreadCount(data.data.filter(n => !n.isRead).length);
+            }
+        } catch (err) { console.error('Failed to fetch notifications:', err); }
+    };
+
+    const handleMarkAllRead = async () => {
+        try {
+            const res = await fetch('/api/notifications', { method: 'PATCH' });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('All marked as read');
+                fetchNotifications();
+            }
+        } catch (err) { toast.error('Failed to update notifications'); }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+        // Poll every 30s for demo
+        const interval = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         const handler = (e) => {
@@ -110,22 +140,30 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                             <div className="absolute end-0 mt-2 w-80 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">
                                 <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                                     <span className="font-semibold text-[var(--text-primary)]">Notifications</span>
-                                    <span className="text-xs text-[var(--primary-500)] font-medium cursor-pointer">Mark all read</span>
+                                    <button onClick={handleMarkAllRead} className="text-xs text-[var(--primary-500)] font-medium cursor-pointer hover:underline">Mark all read</button>
                                 </div>
                                 <div className="divide-y divide-[var(--border)] max-h-72 overflow-y-auto">
-                                    {demoNotifications.map(n => (
-                                        <div key={n._id} className={cn('px-4 py-3 hover:bg-[var(--surface-overlay)] cursor-pointer', !n.read && 'bg-[var(--primary-500)]/10')}>
-                                            <div className="flex items-start gap-3">
-                                                <span className={cn('mt-0.5 text-sm', notifTypeColor[n.type] || 'text-slate-500')}>●</span>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{n.title}</p>
-                                                    <p className="text-xs text-[var(--muted)] mt-0.5 line-clamp-2">{n.message}</p>
-                                                    <p className="text-xs text-[var(--muted)] mt-1">{formatRelativeTime(n.createdAt)}</p>
+                                    {notifications.length === 0 ? (
+                                        <div className="px-4 py-8 text-center text-xs text-[var(--muted)] underline-offset-4 italic">Sequential integrity verified. No pending alerts.</div>
+                                    ) : (
+                                        notifications.map(n => (
+                                            <div key={n._id} className={cn('px-4 py-3 hover:bg-[var(--surface-overlay)] cursor-pointer transition-colors', !n.isRead && 'bg-[var(--primary-500)]/5 dark:bg-[var(--primary-500)]/10')}>
+                                                <div className="flex items-start gap-3">
+                                                    <div className={cn('w-2 h-2 rounded-full mt-1.5 shrink-0',
+                                                        n.type === 'success' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                                                            n.type === 'error' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' :
+                                                                n.type === 'warning' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' :
+                                                                    'bg-[var(--primary-500)] shadow-[0_0_8px_rgba(124,58,237,0.5)]'
+                                                    )} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-black text-[var(--text-primary)] truncate uppercase tracking-tight italic">{n.title}</p>
+                                                        <p className="text-[10px] font-bold text-[var(--text-muted)] mt-0.5 line-clamp-2 leading-relaxed">{n.message}</p>
+                                                        <p className="text-[9px] font-black text-[var(--text-muted)] mt-1 opacity-50 uppercase tracking-widest">{formatRelativeTime(n.createdAt)}</p>
+                                                    </div>
                                                 </div>
-                                                {!n.read && <div className="w-2 h-2 bg-[var(--primary-500)] rounded-full mt-1.5 flex-shrink-0" />}
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))
+                                    )}
                                 </div>
                                 <div className="px-4 py-2 border-t border-[var(--border)]">
                                     <Link href="/apps/notifications" onClick={() => setShowNotifs(false)} className="text-xs text-[var(--primary-500)] hover:text-[var(--primary-600)] font-medium">View all notifications →</Link>

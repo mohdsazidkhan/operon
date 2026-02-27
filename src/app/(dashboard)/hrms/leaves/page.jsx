@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, Clock, Calendar, AlertCircle, Filter, Search, MoreVertical, Check, X } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, Clock, Calendar, AlertCircle, Filter, Search, MoreVertical, Check, X, ArrowRight } from 'lucide-react';
 import { formatDate, getStatusColor, cn } from '@/lib/utils';
 
 export default function LeavesPage() {

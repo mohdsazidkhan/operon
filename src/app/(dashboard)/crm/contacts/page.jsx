@@ -3,31 +3,116 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Mail, Phone, Building2, Eye, MoreHorizontal, Users } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
+
+const EMPTY_CONTACT = { name: '', email: '', phone: '', position: '', company: '', city: '', country: '' };
 
 export default function ContactsPage() {
     const [contacts, setContacts] = useState([]);
+    const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_CONTACT);
+
+    const fetchContacts = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/contacts?search=${search}`);
+            const data = await res.json();
+            if (data.success) {
+                setContacts(data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch contacts:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCompanies = async () => {
+        try {
+            const res = await fetch('/api/companies');
+            const data = await res.json();
+            if (data.success) setCompanies(data.data);
+        } catch (err) {
+            console.error('Failed to fetch companies:', err);
+        }
+    };
 
     useEffect(() => {
-        const fetchContacts = async () => {
-            try {
-                const res = await fetch(`/api/contacts?search=${search}`);
-                const data = await res.json();
-                if (data.success) {
-                    setContacts(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch contacts:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchContacts();
+        fetchCompanies();
     }, [search]);
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            // Prepare body, handling nested address if needed by schema (Contact schema has address: {city, country})
+            const body = {
+                ...form,
+                address: { city: form.city, country: form.country }
+            };
+            const res = await fetch('/api/contacts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Contact created!');
+                setShowAdd(false);
+                setForm(EMPTY_CONTACT);
+                fetchContacts();
+            } else {
+                toast.error(data.message || 'Failed to create contact');
+            }
+        } catch { toast.error('Failed to create contact'); }
+        finally { setSaving(false); }
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Add Contact Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Contact" size="lg">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField label="Full Name" required>
+                            <input required className={inputCls} placeholder="e.g. Jane Doe" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Position / Title">
+                            <input className={inputCls} placeholder="e.g. Software Architect" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Email" required>
+                            <input required type="email" className={inputCls} placeholder="e.g. jane@example.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Phone">
+                            <input className={inputCls} placeholder="e.g. +1 (555) 000-0000" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Company">
+                            <select className={inputCls} value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))}>
+                                <option value="">Select Company</option>
+                                {companies.map(co => (
+                                    <option key={co._id} value={co._id}>{co.name}</option>
+                                ))}
+                            </select>
+                        </FormField>
+                        <div className="grid grid-cols-2 gap-2">
+                            <FormField label="City">
+                                <input className={inputCls} placeholder="e.g. New York" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} />
+                            </FormField>
+                            <FormField label="Country">
+                                <input className={inputCls} placeholder="e.g. USA" value={form.country} onChange={e => setForm(p => ({ ...p, country: e.target.value }))} />
+                            </FormField>
+                        </div>
+                    </div>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Create Contact" />
+                </form>
+            </Modal>
+
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)]">Contacts</h1>
@@ -43,7 +128,7 @@ export default function ContactsPage() {
                             className="pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/40 focus:border-[var(--primary-500)] transition-all w-64"
                         />
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
+                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
                         <Plus size={16} /> New Contact
                     </button>
                 </div>

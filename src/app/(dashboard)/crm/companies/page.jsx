@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Globe, Building2, Edit, Trash2, Search, ExternalLink } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const industryColors = {
     Technology: 'bg-blue-500 shadow-blue-500/20',
@@ -12,30 +14,102 @@ const industryColors = {
     'E-Commerce': 'bg-rose-500 shadow-rose-500/20'
 };
 
+const EMPTY_COMPANY = { name: '', industry: 'Technology', size: '11-50', website: '', email: '', phone: '', revenue: 0, description: '' };
+
 export default function CompaniesPage() {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_COMPANY);
+
+    const fetchCompanies = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/companies?search=${search}`);
+            const data = await res.json();
+            if (data.success) {
+                setCompanies(data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch companies:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchCompanies = async () => {
-            try {
-                const res = await fetch(`/api/companies?search=${search}`);
-                const data = await res.json();
-                if (data.success) {
-                    setCompanies(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch companies:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchCompanies();
     }, [search]);
 
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Company created!');
+                setShowAdd(false);
+                setForm(EMPTY_COMPANY);
+                fetchCompanies();
+            } else {
+                toast.error(data.message || 'Failed to create company');
+            }
+        } catch { toast.error('Failed to create company'); }
+        finally { setSaving(false); }
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Add Company Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Company" size="lg">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField label="Company Name" required>
+                            <input required className={inputCls} placeholder="e.g. Acme Corp" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Industry">
+                            <select className={inputCls} value={form.industry} onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}>
+                                {['Technology', 'Healthcare', 'Finance', 'Retail', 'E-Commerce', 'Manufacturing', 'Services', 'Other'].map(i => (
+                                    <option key={i} value={i}>{i}</option>
+                                ))}
+                            </select>
+                        </FormField>
+                        <FormField label="Website">
+                            <input className={inputCls} placeholder="e.g. acme.com" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Size">
+                            <select className={inputCls} value={form.size} onChange={e => setForm(p => ({ ...p, size: e.target.value }))}>
+                                {['1-10', '11-50', '51-200', '201-500', '500+'].map(s => (
+                                    <option key={s} value={s}>{s} employees</option>
+                                ))}
+                            </select>
+                        </FormField>
+                        <FormField label="Contact Email">
+                            <input type="email" className={inputCls} placeholder="e.g. hello@acme.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Phone">
+                            <input className={inputCls} placeholder="e.g. +1 (555) 000-0000" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Annual Revenue ($)">
+                            <input type="number" min="0" className={inputCls} placeholder="0" value={form.revenue} onChange={e => setForm(p => ({ ...p, revenue: +e.target.value }))} />
+                        </FormField>
+                        <div className="sm:col-span-2">
+                            <FormField label="Description">
+                                <textarea rows={3} className={inputCls + " resize-none"} placeholder="Company background..." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                            </FormField>
+                        </div>
+                    </div>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Create Company" />
+                </form>
+            </Modal>
+
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)]">Companies</h1>
@@ -51,7 +125,7 @@ export default function CompaniesPage() {
                             className="pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/40 focus:border-[var(--primary-500)] transition-all w-64"
                         />
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
+                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
                         <Plus size={16} /> New Company
                     </button>
                 </div>

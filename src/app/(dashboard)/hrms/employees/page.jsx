@@ -1,37 +1,115 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-import { Plus, Search, Eye, Edit, Trash2, Building2, UserPlus, Users, Calendar } from 'lucide-react';
+import { Plus, Search, UserPlus, Users, Calendar, Briefcase, Mail, Phone } from 'lucide-react';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
+
+const EMPTY_EMP = {
+    name: '', email: '', phone: '', department: '', position: '',
+    salary: '', employmentType: 'full_time', status: 'active',
+    hireDate: new Date().toISOString().split('T')[0], skills: ''
+};
 
 export default function EmployeesPage() {
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [dept, setDept] = useState('all');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_EMP);
 
-    useEffect(() => {
-        const fetchEmployees = async () => {
-            try {
-                const res = await fetch(`/api/employees?search=${search}&department=${dept === 'all' ? '' : dept}`);
-                const data = await res.json();
-                if (data.success) {
-                    setEmployees(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch employees:', err);
-            } finally {
-                setLoading(false);
+    const fetchEmployees = async () => {
+        try {
+            const res = await fetch(`/api/employees?search=${search}&department=${dept === 'all' ? '' : dept}`);
+            const data = await res.json();
+            if (data.success) setEmployees(data.data);
+        } catch (err) {
+            console.error('Failed to fetch employees:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchEmployees(); }, [search, dept]);
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const payload = {
+                ...form,
+                salary: Number(form.salary),
+                skills: form.skills.split(',').map(s => s.trim()).filter(Boolean),
+                hireDate: new Date(form.hireDate),
+            };
+            const res = await fetch('/api/employees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Employee added!');
+                setShowAdd(false);
+                setForm(EMPTY_EMP);
+                fetchEmployees();
+            } else {
+                toast.error(data.message || 'Failed to add employee');
             }
-        };
-        fetchEmployees();
-    }, [search, dept]);
+        } catch { toast.error('Failed to add employee'); }
+        finally { setSaving(false); }
+    };
 
-    const departments = ['all', ...new Set(employees.map(e => e.department))];
+    const DEPTS = ['all', ...new Set(employees.map(e => e.department).filter(Boolean))];
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+            {/* Add Employee Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Employee" size="lg">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField label="Full Name" required>
+                            <input required className={inputCls} placeholder="e.g. John Smith" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Email" required>
+                            <input required type="email" className={inputCls} placeholder="john@company.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Phone">
+                            <input className={inputCls} placeholder="+91 98765 43210" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Department" required>
+                            <input required className={inputCls} placeholder="e.g. Engineering" value={form.department} onChange={e => setForm(p => ({ ...p, department: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Position" required>
+                            <input required className={inputCls} placeholder="e.g. Frontend Developer" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Monthly Salary ($)" required>
+                            <input required type="number" min="0" className={inputCls} placeholder="60000" value={form.salary} onChange={e => setForm(p => ({ ...p, salary: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Employment Type">
+                            <select className={inputCls} value={form.employmentType} onChange={e => setForm(p => ({ ...p, employmentType: e.target.value }))}>
+                                <option value="full_time">Full Time</option>
+                                <option value="part_time">Part Time</option>
+                                <option value="contract">Contract</option>
+                                <option value="intern">Intern</option>
+                            </select>
+                        </FormField>
+                        <FormField label="Hire Date">
+                            <input type="date" className={inputCls} value={form.hireDate} onChange={e => setForm(p => ({ ...p, hireDate: e.target.value }))} />
+                        </FormField>
+                        <div className="sm:col-span-2">
+                            <FormField label="Skills (comma separated)">
+                                <input className={inputCls} placeholder="React, Node.js, MongoDB" value={form.skills} onChange={e => setForm(p => ({ ...p, skills: e.target.value }))} />
+                            </FormField>
+                        </div>
+                    </div>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Add Employee" />
+                </form>
+            </Modal>
+
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -40,110 +118,89 @@ export default function EmployeesPage() {
                         Total Staff • {employees.length} Employees
                     </p>
                 </div>
-                <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[var(--primary-500)]/30">
-                        <UserPlus size={16} /> Add Employee
-                    </button>
-                </div>
+                <button
+                    onClick={() => setShowAdd(true)}
+                    className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[var(--primary-500)]/30"
+                >
+                    <UserPlus size={16} /> Add Employee
+                </button>
             </div>
 
-            {/* Filter Hub */}
+            {/* Dept Filter */}
             <div className="flex flex-wrap items-center gap-4 bg-[var(--surface-overlay)] p-4 rounded-3xl border border-[var(--border)] backdrop-blur-sm">
                 <div className="flex bg-[var(--surface-overlay)]/50 p-1 rounded-2xl border border-[var(--border)] overflow-x-auto scrollbar-none">
-                    {departments.map(d => (
+                    {DEPTS.map(d => (
                         <button
                             key={d}
                             onClick={() => setDept(d)}
                             className={cn(
-                                'px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap',
-                                dept === d
-                                    ? 'bg-[var(--primary-500)] text-white shadow-lg shadow-[var(--primary-500)]/20'
-                                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                                'px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap',
+                                dept === d ? 'bg-[var(--primary-500)] text-white shadow' : 'text-[var(--text-muted)] hover:bg-[var(--surface-overlay)] hover:text-[var(--text-primary)]'
                             )}
                         >
-                            {d}
+                            {d === 'all' ? 'All Depts' : d}
                         </button>
                     ))}
                 </div>
-                <div className="relative flex-1 min-w-[300px]">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                <div className="relative flex-1 min-w-[200px]">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        placeholder="SEARCH VIA NAME OR EMPLOYEE ID..."
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--surface-overlay)]/50 border border-[var(--border)] text-[var(--text-primary)] text-[10px] font-black uppercase tracking-[0.2em] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/20 focus:border-[var(--primary-500)]/40 transition-all placeholder:text-[var(--text-muted)]"
+                        placeholder="Search employees..."
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/30 focus:border-[var(--primary-500)] transition-all"
                     />
                 </div>
             </div>
 
             {/* Employee Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {loading ? (
-                    Array(8).fill(0).map((_, i) => (
-                        <div key={i} className="h-64 bg-[var(--surface-overlay)]/50 animate-pulse rounded-3xl border border-[var(--border)]"></div>
-                    ))
-                ) : employees.length === 0 ? (
-                    <div className="col-span-full py-20 text-center bg-[var(--surface-overlay)]/50 rounded-3xl border border-[var(--border)] border-dashed">
-                        <Users size={48} className="mx-auto text-[var(--text-muted)] mb-4 opacity-50" />
-                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest italic">No employees found</h3>
-                    </div>
-                ) : employees.map(emp => (
-                    <div key={emp._id} className="bg-[var(--card-bg)] backdrop-blur-xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl hover:shadow-[var(--primary-500)]/5 hover:border-[var(--primary-500)]/30 transition-all group relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary-500)]/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-[var(--primary-500)]/10 transition-all duration-700"></div>
-
-                        <div className="flex items-start justify-between mb-8 relative z-10">
-                            <div className="relative">
-                                <div className="w-16 h-16 rounded-3xl overflow-hidden ring-4 ring-[var(--surface-raised)] shadow-2xl group-hover:scale-110 transition-transform duration-500">
-                                    <img
-                                        src={emp.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=8b5cf6&color=fff`}
-                                        alt={emp.name}
-                                        className="w-full h-full object-cover"
-                                    />
+            {loading ? (
+                <div className="py-20 text-center text-[var(--text-muted)]">Loading employees...</div>
+            ) : employees.length === 0 ? (
+                <div className="py-20 text-center text-[var(--text-muted)]">No employees found</div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {employees.map(emp => (
+                        <div key={emp._id} className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-5 shadow-lg hover:shadow-xl hover:border-[var(--primary-500)]/30 transition-all group">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-12 h-12 rounded-2xl bg-[var(--primary-500)]/10 flex items-center justify-center text-[var(--primary-500)] font-bold text-xl flex-shrink-0">
+                                    {emp.name?.[0] || 'E'}
                                 </div>
-                                <div className={cn(
-                                    'absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-[var(--surface)] shadow-xl',
-                                    emp.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'
-                                )} />
-                            </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                                <button className="p-2 rounded-xl hover:bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"><Edit size={16} /></button>
-                                <button className="p-2 rounded-xl hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all"><Trash2 size={16} /></button>
-                            </div>
-                        </div>
-
-                        <div className="relative z-10 space-y-4">
-                            <div>
-                                <h3 className="text-lg font-black text-[var(--text-primary)] tracking-tight group-hover:text-[var(--primary-500)] transition-colors uppercase leading-tight">{emp.name}</h3>
-                                <p className="text-[10px] font-black text-[var(--primary-500)] uppercase tracking-[0.2em] mt-1">{emp.position}</p>
-                            </div>
-
-                            <div className="py-4 space-y-2 text-[10px] border-y border-[var(--border)]">
-                                <div className="flex justify-between items-center">
-                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Department</span>
-                                    <span className="font-black text-[var(--text-primary)] uppercase tracking-tight bg-[var(--surface-overlay)] px-2 py-0.5 rounded-lg">{emp.department}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Salary</span>
-                                    <span className="font-black text-emerald-500 tracking-tight">{formatCurrency(emp.salary)}<span className="text-[8px] text-[var(--text-muted)] ml-1">/MON</span></span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Employee ID</span>
-                                    <span className="font-mono font-bold text-[var(--text-muted)]">{emp.employeeId}</span>
+                                <div className="min-w-0">
+                                    <p className="font-bold text-[var(--text-primary)] truncate text-sm">{emp.name}</p>
+                                    <p className="text-xs text-[var(--text-muted)] truncate">{emp.position}</p>
                                 </div>
                             </div>
-
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.1em] text-[var(--text-muted)]">
-                                <span className="flex items-center gap-1.5 min-w-0">
-                                    <Calendar size={12} className="text-[var(--text-muted)] opacity-50" /> Joined {formatDate(emp.hireDate)}
+                            <div className="space-y-2 text-xs">
+                                <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                                    <Briefcase size={12} className="shrink-0" /><span className="truncate">{emp.department}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                                    <Mail size={12} className="shrink-0" /><span className="truncate">{emp.email}</span>
+                                </div>
+                                {emp.phone && (
+                                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                                        <Phone size={12} className="shrink-0" /><span>{emp.phone}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                                    <Calendar size={12} className="shrink-0" />
+                                    <span>Joined {emp.hireDate ? formatDate(emp.hireDate) : '—'}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border)]">
+                                <span className={cn(
+                                    'text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider',
+                                    emp.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                                )}>{emp.status}</span>
+                                <span className="text-sm font-bold text-[var(--text-primary)]">
+                                    {emp.salary ? formatCurrency(emp.salary) : '—'}
                                 </span>
-                                <button className="flex items-center gap-1 text-[var(--primary-500)] hover:text-[var(--primary-600)] transition-colors shrink-0">
-                                    Profile <Eye size={12} />
-                                </button>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

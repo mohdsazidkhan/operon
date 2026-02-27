@@ -21,7 +21,7 @@ export async function GET(req) {
 
         const total = await Order.countDocuments(query);
         const orders = await Order.find(query)
-            .populate('vendor', 'name')
+            .populate('company', 'name')
             .populate('customer', 'name')
             .populate('createdBy', 'name avatar')
             .sort({ createdAt: -1 })

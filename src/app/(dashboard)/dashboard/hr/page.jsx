@@ -112,7 +112,9 @@ export default async function HRDashboard() {
                                             {emp.isActive ? 'ACTIVE' : 'ON LEAVE'}
                                         </div>
                                     </td>
-                                    <td className="py-5 px-8 text-xs font-black text-[var(--text-muted)] font-mono tracking-tighter">{new Date(emp.joiningDate).getFullYear()}</td>
+                                    <td className="py-5 px-8 text-xs font-black text-[var(--text-muted)] font-mono tracking-tighter">
+                                        {emp.joiningDate ? new Date(emp.joiningDate).getFullYear() : 'N/A'}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

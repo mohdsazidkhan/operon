@@ -10,6 +10,7 @@ const expenseSchema = new mongoose.Schema({
     reference: String,
     merchant: String,
     employee: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     attachments: [{ name: String, url: String }],
     notes: String,
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },

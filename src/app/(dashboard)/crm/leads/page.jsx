@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 import { useThemeStore } from '@/store/useThemeStore';
@@ -23,29 +25,53 @@ const getStatusColor = (status) => {
     }
 };
 
+const EMPTY_LEAD = { name: '', email: '', phone: '', company: '', position: '', source: 'website', status: 'new', score: 50, value: 0, industry: '' };
+
 export default function LeadsPage() {
     const { isDark } = useThemeStore();
     const [leads, setLeads] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_LEAD);
 
-    useEffect(() => {
-        const fetchLeads = async () => {
-            try {
-                const res = await fetch(`/api/leads?status=${filter === 'all' ? '' : filter}&search=${search}`);
-                const data = await res.json();
-                if (data.success) {
-                    setLeads(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch leads:', err);
-            } finally {
-                setLoading(false);
+    const fetchLeads = async () => {
+        try {
+            const res = await fetch(`/api/leads?status=${filter === 'all' ? '' : filter}&search=${search}`);
+            const data = await res.json();
+            if (data.success) setLeads(data.data);
+        } catch (err) {
+            console.error('Failed to fetch leads:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchLeads(); }, [filter, search]);
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/leads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Lead added!');
+                setShowAdd(false);
+                setForm(EMPTY_LEAD);
+                fetchLeads();
+            } else {
+                toast.error(data.message || 'Failed to add lead');
             }
-        };
-        fetchLeads();
-    }, [filter, search]);
+        } catch { toast.error('Failed to add lead'); }
+        finally { setSaving(false); }
+    };
 
     const statusCounts = STATUS_OPTIONS.slice(1).reduce((acc, s) => {
         acc[s] = leads.filter(l => l.status === s).length;
@@ -71,13 +97,60 @@ export default function LeadsPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Add Lead Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Lead" size="lg">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField label="Full Name" required>
+                            <input required className={inputCls} placeholder="e.g. John Smith" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Email">
+                            <input type="email" className={inputCls} placeholder="john@company.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Phone">
+                            <input className={inputCls} placeholder="+1 555 000 0000" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Company">
+                            <input className={inputCls} placeholder="Company name" value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Position">
+                            <input className={inputCls} placeholder="e.g. CTO" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Industry">
+                            <input className={inputCls} placeholder="e.g. Technology" value={form.industry} onChange={e => setForm(p => ({ ...p, industry: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Source">
+                            <select className={inputCls} value={form.source} onChange={e => setForm(p => ({ ...p, source: e.target.value }))}>
+                                {['website', 'referral', 'linkedin', 'email', 'cold_call', 'event', 'other'].map(s => (
+                                    <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ')}</option>
+                                ))}
+                            </select>
+                        </FormField>
+                        <FormField label="Status">
+                            <select className={inputCls} value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))}>
+                                {['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'].map(s => (
+                                    <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                                ))}
+                            </select>
+                        </FormField>
+                        <FormField label="Estimated Value ($)">
+                            <input type="number" min="0" className={inputCls} placeholder="0" value={form.value} onChange={e => setForm(p => ({ ...p, value: +e.target.value }))} />
+                        </FormField>
+                        <FormField label="Score (0–100)">
+                            <input type="number" min="0" max="100" className={inputCls} placeholder="50" value={form.score} onChange={e => setForm(p => ({ ...p, score: +e.target.value }))} />
+                        </FormField>
+                    </div>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Add Lead" />
+                </form>
+            </Modal>
+
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)]">Leads</h1>
                     <p className="text-[var(--text-muted)] text-sm mt-0.5">{leads.length} total leads</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
+                <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
                     <Plus size={16} /> Add Lead
                 </button>
             </div>
@@ -160,16 +233,13 @@ export default function LeadsPage() {
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-2.5">
                                                 <div className="w-20 h-1.5 bg-[var(--surface-overlay)] rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-[var(--primary-500)] rounded-full shadow-[0_0_8px_rgba(139,92,246,0.5)]"
-                                                        style={{ width: `${lead.score}%` }}
-                                                    />
+                                                    <div className="h-full bg-[var(--primary-500)] rounded-full" style={{ width: `${lead.score}%` }} />
                                                 </div>
                                                 <span className="text-xs font-medium text-[var(--text-muted)]">{lead.score}%</span>
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-right">
-                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                                                 <button className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"><Eye size={16} /></button>
                                                 <button className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] transition-all"><Edit size={16} /></button>
                                                 <button className="p-2 rounded-lg hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all"><Trash2 size={16} /></button>
@@ -205,16 +275,13 @@ export default function LeadsPage() {
                     </div>
 
                     <div className="bg-gradient-to-br from-[var(--primary-500)]/20 to-purple-500/20 backdrop-blur-md rounded-2xl p-6 border border-[var(--primary-500)]/20 shadow-lg relative overflow-hidden group">
-                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-[var(--primary-500)]/10 rounded-full blur-2xl group-hover:bg-[var(--primary-500)]/20 transition-all duration-500"></div>
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-[var(--primary-500)]/10 rounded-full blur-2xl"></div>
                         <h4 className="font-bold text-[var(--text-primary)] mb-2 relative z-10 flex items-center gap-2">
                             <Plus size={18} className="text-[var(--primary-500)]" /> Smart Insights
                         </h4>
                         <p className="text-xs text-[var(--text-secondary)] relative z-10 leading-relaxed">
                             Based on your lead pipeline, you have {statusCounts.negotiation || 0} deals in negotiation. Focus on these to hit your monthly target.
                         </p>
-                        <button className="mt-4 text-xs font-bold text-[var(--primary-500)] hover:text-[var(--primary-600)] relative z-10 flex items-center gap-1 transition-colors">
-                            View Suggestions <Plus size={12} />
-                        </button>
                     </div>
                 </div>
             </div>

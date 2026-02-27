@@ -1,13 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, Search, Plus, Filter, MoreVertical, Edit3, Trash2, ArrowUpDown, ChevronDown, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
+
+const EMPTY_PRODUCT = { name: '', sku: '', description: '', category: '', price: '', cost: '', stock: '', unit: 'piece', status: 'active' };
 
 export default function ProductsLedger({ initialProducts }) {
-    const [products] = useState(initialProducts);
+    const [products, setProducts] = useState(initialProducts);
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('ALL');
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState(EMPTY_PRODUCT);
+
+    const fetchProducts = async () => {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success) setProducts(data.data);
+    };
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...form, price: +form.price, cost: +form.cost, stock: +form.stock })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Product added!');
+                setShowAdd(false);
+                setForm(EMPTY_PRODUCT);
+                fetchProducts();
+            } else {
+                toast.error(data.message || 'Failed to add product');
+            }
+        } catch { toast.error('Failed to add product'); }
+        finally { setSaving(false); }
+    };
 
     const categories = ['ALL', ...new Set(products.map(p => p.category?.toUpperCase() || 'UNCATEGORIZED'))];
 
@@ -23,6 +58,49 @@ export default function ProductsLedger({ initialProducts }) {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+            {/* Add Product Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Product" size="lg">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField label="Product Name" required>
+                            <input required className={inputCls} placeholder="e.g. Operon ERP Suite" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                        </FormField>
+                        <FormField label="SKU" required>
+                            <input required className={inputCls} placeholder="e.g. OPS-ERP-002" value={form.sku} onChange={e => setForm(p => ({ ...p, sku: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Category">
+                            <input className={inputCls} placeholder="e.g. Software" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Unit">
+                            <select className={inputCls} value={form.unit} onChange={e => setForm(p => ({ ...p, unit: e.target.value }))}>
+                                {['piece', 'license', 'month', 'year', 'kg', 'box'].map(u => <option key={u} value={u}>{u}</option>)}
+                            </select>
+                        </FormField>
+                        <FormField label="Selling Price ($)" required>
+                            <input required type="number" min="0" className={inputCls} placeholder="0" value={form.price} onChange={e => setForm(p => ({ ...p, price: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Cost Price ($)">
+                            <input type="number" min="0" className={inputCls} placeholder="0" value={form.cost} onChange={e => setForm(p => ({ ...p, cost: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Stock Quantity">
+                            <input type="number" min="0" className={inputCls} placeholder="0" value={form.stock} onChange={e => setForm(p => ({ ...p, stock: e.target.value }))} />
+                        </FormField>
+                        <FormField label="Status">
+                            <select className={inputCls} value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))}>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </FormField>
+                        <div className="sm:col-span-2">
+                            <FormField label="Description">
+                                <textarea rows={2} className={inputCls + " resize-none"} placeholder="Short description..." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                            </FormField>
+                        </div>
+                    </div>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Add Product" />
+                </form>
+            </Modal>
+
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
@@ -72,9 +150,9 @@ export default function ProductsLedger({ initialProducts }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="h-14 w-14 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"><Filter size={20} /></button>
-                    <button className="h-14 px-8 rounded-2xl bg-[var(--text-primary)] text-[var(--surface)] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all flex items-center gap-3">
-                        <Plus size={18} /> Initialize SKU
+                    <button className="h-14 w-14 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center justify-center"><Filter size={20} /></button>
+                    <button onClick={() => setShowAdd(true)} className="h-14 px-8 rounded-2xl bg-[var(--primary-500)] text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[var(--primary-500)]/20 hover:scale-105 transition-all flex items-center gap-3">
+                        <Plus size={18} /> Add Product
                     </button>
                 </div>
             </div>
@@ -106,7 +184,7 @@ export default function ProductsLedger({ initialProducts }) {
                             {filteredProducts.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="p-20 text-center">
-                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.5em]">No Data Vectors Found</p>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.5em]">No products found</p>
                                     </td>
                                 </tr>
                             ) : filteredProducts.map(p => (
@@ -150,9 +228,9 @@ export default function ProductsLedger({ initialProducts }) {
                                     </td>
                                     <td className="p-8">
                                         <div className="flex items-center gap-3">
-                                            <div className={cn('w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]', p.isActive ? 'text-emerald-500 bg-emerald-500' : 'text-[var(--border)] bg-[var(--border)]')}></div>
-                                            <span className={cn('text-[10px] font-black uppercase tracking-widest', p.isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]')}>
-                                                {p.isActive ? 'NOMINAL' : 'DEACTIVATED'}
+                                            <div className={cn('w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]', p.status === 'active' ? 'text-emerald-500 bg-emerald-500' : 'text-[var(--border)] bg-[var(--border)]')}></div>
+                                            <span className={cn('text-[10px] font-black uppercase tracking-widest', p.status === 'active' ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]')}>
+                                                {p.status === 'active' ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
                                     </td>

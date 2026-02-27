@@ -10,8 +10,8 @@ export async function GET(req, { params }) {
 
         const { id } = params;
         await dbConnect();
-        const order = await Order.findById(id)
-            .populate('vendor', 'name email phone address')
+        const order = await Order.findOne({ _id: id, organization: user.organization })
+            .populate('company', 'name email phone address')
             .populate('customer', 'name email phone address')
             .populate('items.product', 'name sku price')
             .populate('createdBy', 'name avatar');

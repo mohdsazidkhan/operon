@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, DollarSign, MoreVertical, Star, Clock, AlertCircle } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const STAGES = [
     { key: 'prospecting', label: 'Prospecting', color: 'border-[var(--border)] bg-[var(--surface-overlay)]/40' },
@@ -34,8 +36,12 @@ function DealCard({ deal }) {
                     {formatCurrency(deal.value)}
                 </span>
                 <div className="flex -space-x-2">
-                    <div className="w-7 h-7 rounded-full bg-[var(--surface-overlay)] border-2 border-[var(--surface)] flex items-center justify-center text-[10px] font-bold text-[var(--text-primary)]">
-                        {deal.createdBy?.name?.[0] || 'U'}
+                    <div className="w-7 h-7 rounded-full bg-[var(--surface-overlay)] border-2 border-[var(--surface)] flex items-center justify-center text-[10px] font-bold text-[var(--text-primary)] overflow-hidden">
+                        {deal.owner?.avatar ? (
+                            <img src={deal.owner.avatar} alt={deal.owner.name} className="w-full h-full object-cover" />
+                        ) : (
+                            deal.owner?.name?.[0] || 'U'
+                        )}
                     </div>
                 </div>
             </div>
@@ -49,32 +55,120 @@ function DealCard({ deal }) {
     );
 }
 
+const EMPTY_DEAL = { title: '', value: 0, stage: 'prospecting', probability: 50, expectedCloseDate: '' };
+
 export default function PipelinePage() {
     const [pipeline, setPipeline] = useState({});
+    const [leads, setLeads] = useState([]);
+    const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showAdd, setShowAdd] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState({ ...EMPTY_DEAL, company: '', lead: '' });
+
+    const fetchPipeline = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/deals/pipeline');
+            const data = await res.json();
+            if (data.success) {
+                setPipeline(data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch pipeline:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchData = async () => {
+        try {
+            const [lRes, cRes] = await Promise.all([
+                fetch('/api/leads'),
+                fetch('/api/companies')
+            ]);
+            const [lData, cData] = await Promise.all([lRes.json(), cRes.json()]);
+            if (lData.success) setLeads(lData.data);
+            if (cData.success) setCompanies(cData.data);
+        } catch (err) {
+            console.error('Failed to fetch data:', err);
+        }
+    };
 
     useEffect(() => {
-        const fetchPipeline = async () => {
-            try {
-                const res = await fetch('/api/deals/pipeline');
-                const data = await res.json();
-                if (data.success) {
-                    setPipeline(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch pipeline:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchPipeline();
+        fetchData();
     }, []);
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch('/api/deals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Deal created!');
+                setShowAdd(false);
+                setForm(EMPTY_DEAL);
+                fetchPipeline();
+            } else {
+                toast.error(data.message || 'Failed to create deal');
+            }
+        } catch { toast.error('Failed to create deal'); }
+        finally { setSaving(false); }
+    };
 
     const totalValue = Object.values(pipeline).flat().reduce((s, d) => s + (d.value || 0), 0);
     const wonValue = (pipeline.closed_won || []).reduce((s, d) => s + (d.value || 0), 0);
 
     return (
         <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500">
+            {/* Add Deal Modal */}
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Create New Deal" size="md">
+                <form onSubmit={handleAdd} className="space-y-4">
+                    <FormField label="Deal Title" required>
+                        <input required className={inputCls} placeholder="e.g. Enterprise License Expansion" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
+                    </FormField>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Company">
+                            <select className={inputCls} value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))}>
+                                <option value="">Select Company</option>
+                                {companies.map(co => <option key={co._id} value={co._id}>{co.name}</option>)}
+                            </select>
+                        </FormField>
+                        <FormField label="Lead / Opportunity">
+                            <select className={inputCls} value={form.lead} onChange={e => setForm(p => ({ ...p, lead: e.target.value }))}>
+                                <option value="">Select Lead</option>
+                                {leads.map(l => <option key={l._id} value={l._id}>{l.name} ({l.company})</option>)}
+                            </select>
+                        </FormField>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Value ($)" required>
+                            <input required type="number" min="0" className={inputCls} placeholder="0" value={form.value} onChange={e => setForm(p => ({ ...p, value: +e.target.value }))} />
+                        </FormField>
+                        <FormField label="Probability (%)">
+                            <input type="number" min="0" max="100" className={inputCls} placeholder="50" value={form.probability} onChange={e => setForm(p => ({ ...p, probability: +e.target.value }))} />
+                        </FormField>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Stage">
+                            <select className={inputCls} value={form.stage} onChange={e => setForm(p => ({ ...p, stage: e.target.value }))}>
+                                {STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                            </select>
+                        </FormField>
+                        <FormField label="Expected Close">
+                            <input type="date" className={inputCls} value={form.expectedCloseDate} onChange={e => setForm(p => ({ ...p, expectedCloseDate: e.target.value }))} />
+                        </FormField>
+                    </div>
+                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Create Deal" />
+                </form>
+            </Modal>
+
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Sales Pipeline</h1>
@@ -92,7 +186,7 @@ export default function PipelinePage() {
                     <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-overlay)] hover:bg-[var(--surface-overlay)]/80 text-[var(--text-primary)] rounded-xl font-medium text-sm transition-all border border-[var(--border)]">
                         <Clock size={16} /> History
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
+                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
                         <Plus size={16} /> New Deal
                     </button>
                 </div>
@@ -114,7 +208,10 @@ export default function PipelinePage() {
                                         </h3>
                                         <p className="text-xs font-bold text-[var(--text-muted)] mt-1">{formatCurrency(stageValue)}</p>
                                     </div>
-                                    <button className="w-8 h-8 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--primary-500)]/50 transition-all group/add">
+                                    <button
+                                        onClick={() => { setForm(p => ({ ...p, stage: stage.key })); setShowAdd(true); }}
+                                        className="w-8 h-8 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--primary-500)]/50 transition-all group/add"
+                                    >
                                         <Plus size={16} className="group-hover/add:rotate-90 transition-transform" />
                                     </button>
                                 </div>

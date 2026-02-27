@@ -10,7 +10,7 @@ export async function GET(req) {
 
         await dbConnect();
         const deals = await Deal.find({ organization: user.organization })
-            .populate('assignedTo', 'name avatar')
+            .populate('owner', 'name avatar')
             .populate('company', 'name')
             .sort({ updatedAt: -1 });
 
