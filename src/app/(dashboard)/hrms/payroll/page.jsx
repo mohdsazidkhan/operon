@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, Printer, Search, MoreHorizontal, UserCircle, Briefcase, CreditCard } from 'lucide-react';
+import { Plus, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, Printer, Search, MoreHorizontal, UserCircle, Briefcase, CreditCard, Landmark, TrendingUp, Users, CheckCircle, Download } from 'lucide-react';
 import { formatCurrency, formatDate, cn, getStatusColor } from '@/lib/utils';
 
 export default function PayrollPage() {
@@ -27,6 +27,11 @@ export default function PayrollPage() {
         };
         fetchPayroll();
     }, [search]);
+
+    const payrolls = payrollRecords;
+    const currentPeriod = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    const totalDisbursed = summary.totalNetPay || 0;
+    const avgNet = summary.averageSalary || 0;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-12">

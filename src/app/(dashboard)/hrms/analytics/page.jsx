@@ -1,4 +1,4 @@
-import { Users, DollarSign, GraduationCap, Users2, ShieldCheck, Download } from 'lucide-react';
+import { Users, DollarSign, GraduationCap, Users2, ShieldCheck, Download, TrendingUp, Clock, Target } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import { getEmployees } from '@/lib/data-access';
 import { SalaryVelocityChart, DepartmentalExpenditureChart } from '@/components/hrms/HRAnalyticsCharts';
