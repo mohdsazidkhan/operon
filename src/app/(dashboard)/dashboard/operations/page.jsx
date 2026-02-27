@@ -12,10 +12,10 @@ export default async function OperationsDashboard() {
     const lowStockCount = lowStockItems.length;
 
     const kpis = [
-        { title: 'Asset Base', value: stats.products, icon: Box, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-        { title: 'Lifecycle Count', value: stats.orders, icon: ShoppingCart, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-        { title: 'Asset Valuation', value: formatCurrency(stats.revenue * 0.8), icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-        { title: 'Critical Thresholds', value: lowStockItems.length, icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-500/10' },
+        { title: 'Total Products', value: stats.products, icon: Box, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+        { title: 'Total Orders', value: stats.orders, icon: ShoppingCart, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+        { title: 'Total Sales', value: formatCurrency(stats.revenue * 0.8), icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+        { title: 'Low Stock Items', value: lowStockItems.length, icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-500/10' },
     ];
 
     return (
@@ -23,10 +23,10 @@ export default async function OperationsDashboard() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Operations Logistics</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Operations Overview</h1>
                     <p className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
                         <TrendingUp size={14} className="text-emerald-500" />
-                        Supply Chain Velocity • Inventory Telemetry
+                        Delivery Speed • Inventory Monitoring
                     </p>
                 </div>
             </div>
@@ -51,7 +51,7 @@ export default async function OperationsDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl group relative overflow-hidden">
                     <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-                        <BarChart3 size={16} className="text-[var(--primary-400)]" /> Stock Saturation
+                        <BarChart3 size={16} className="text-[var(--primary-400)]" /> Inventory Levels
                     </h3>
                     <div className="h-[280px]">
                         <StockSaturationChart />
@@ -60,7 +60,7 @@ export default async function OperationsDashboard() {
 
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl group relative overflow-hidden">
                     <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-                        <PieChart size={16} className="text-emerald-400" /> Delivery Matrix
+                        <PieChart size={16} className="text-emerald-400" /> Delivery Status
                     </h3>
                     <div className="h-[280px]">
                         <DeliveryMatrixChart />
@@ -76,7 +76,7 @@ export default async function OperationsDashboard() {
                         <div className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center text-white shadow-xl shadow-rose-500/20">
                             <AlertTriangle size={20} />
                         </div>
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Critical Depletion Warning</h3>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Low Stock Alert</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {lowStockItems.map((p, i) => (
@@ -98,14 +98,14 @@ export default async function OperationsDashboard() {
             {/* Operational Velocity Feed */}
             <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8 mb-12">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Lifecycle Pulse</h3>
+                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Order Status</h3>
                     <Activity size={16} className="text-[var(--text-muted)] opacity-50" />
                 </div>
                 <div className="space-y-4">
                     {[
-                        { title: 'Batch #A92 Fulfilling', status: 'In Transit', progress: 85, color: 'bg-emerald-500' },
-                        { title: 'Global Inbound Logistics', status: 'Processing', progress: 45, color: 'bg-[var(--primary-500)]' },
-                        { title: 'Warehouse Sector B Re-stock', status: 'Pending', progress: 12, color: 'bg-amber-500' },
+                        { title: 'Order #A92 Shipping', status: 'In Transit', progress: 85, color: 'bg-emerald-500' },
+                        { title: 'Incoming Shipments', status: 'Processing', progress: 45, color: 'bg-[var(--primary-500)]' },
+                        { title: 'Warehouse Restock', status: 'Pending', progress: 12, color: 'bg-amber-500' },
                     ].map((v, i) => (
                         <div key={i} className="space-y-2 p-5 rounded-[2rem] bg-[var(--surface-overlay)]/40 border border-[var(--border)] group hover:border-[var(--primary-500)]/30 transition-all">
                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">

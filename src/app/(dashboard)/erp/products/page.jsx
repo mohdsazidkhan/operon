@@ -11,10 +11,10 @@ export default async function ProductsPage() {
             {/* Context Header */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Product Catalog Architecture</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Product List</h1>
                     <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
                         <BarChart3 size={12} className="text-[var(--primary-500)]" />
-                        Asset Inventory Ledger • Valuation Tracking Active
+                        Inventory Tracking • Stock Monitoring
                     </p>
                 </div>
             </div>

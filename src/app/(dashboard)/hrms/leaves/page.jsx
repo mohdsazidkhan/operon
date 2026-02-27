@@ -48,9 +48,9 @@ export default function LeavesPage() {
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Time-Off Protocol</h1>
-                    <p className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-[0.3em] mt-2">
-                        Resource Availability Ledger • {leaves.length} Applications Detected
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tight uppercase">Leave Applications</h1>
+                    <p className="text-[var(--text-muted)] text-sm font-bold tracking-widest mt-1">
+                        Leave Management • {leaves.length} Applications
                     </p>
                 </div>
                 <button className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl shadow-[var(--primary-500)]/20">
@@ -94,7 +94,7 @@ export default function LeavesPage() {
                 ) : leaves.length === 0 ? (
                     <div className="py-20 text-center bg-[var(--surface-overlay)]/40 rounded-[2.5rem] border border-[var(--border)] border-dashed">
                         <Calendar size={48} className="mx-auto text-[var(--text-muted)] mb-4 opacity-50" />
-                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest italic">Zero application delta</h3>
+                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest italic">No leave requests</h3>
                     </div>
                 ) : leaves.map(leave => (
                     <div key={leave._id} className="bg-[var(--card-bg)] backdrop-blur-xl rounded-[2.5rem] border border-[var(--card-border)] p-6 shadow-2xl hover:border-[var(--primary-500)]/30 transition-all group relative overflow-hidden flex flex-wrap items-center gap-8">
@@ -126,12 +126,12 @@ export default function LeavesPage() {
 
                         <div className="flex items-center gap-6 px-4">
                             <div className="text-center">
-                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Initiation</p>
+                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Start Date</p>
                                 <p className="text-[11px] font-bold text-[var(--text-muted)]">{formatDate(leave.startDate)}</p>
                             </div>
                             <ArrowRight size={14} className="text-[var(--border)]" />
                             <div className="text-center">
-                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Termination</p>
+                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1.5">End Date</p>
                                 <p className="text-[11px] font-bold text-[var(--text-muted)]">{formatDate(leave.endDate)}</p>
                             </div>
                         </div>

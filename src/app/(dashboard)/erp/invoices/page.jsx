@@ -39,7 +39,7 @@ export default function InvoicesPage() {
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Invoices</h1>
-                    <p className="text-[var(--text-muted)] text-sm mt-0.5">{invoices.length} billing records found</p>
+                    <p className="text-[var(--text-muted)] text-sm mt-0.5">{invoices.length} invoices found</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-overlay)] hover:bg-[var(--surface-overlay)] text-[var(--text-primary)] rounded-xl font-medium text-sm transition-all border border-[var(--border)]">
@@ -56,7 +56,7 @@ export default function InvoicesPage() {
                 {[
                     { label: 'Total Paid', value: totalPaid, color: 'text-emerald-500', border: 'border-emerald-500/20', bg: 'bg-emerald-500/5' },
                     { label: 'Outstanding', value: totalPending, color: 'text-amber-500', border: 'border-amber-500/20', bg: 'bg-amber-500/5' },
-                    { label: 'Total Volume', value: totalInvoiced, color: 'text-[var(--primary-500)]', border: 'border-[var(--primary-500)]/20', bg: 'bg-[var(--primary-500)]/5' },
+                    { label: 'Total Amount', value: totalInvoiced, color: 'text-[var(--primary-500)]', border: 'border-[var(--primary-500)]/20', bg: 'bg-[var(--primary-500)]/5' },
                 ].map((stat, i) => (
                     <div key={i} className={cn('rounded-3xl p-6 border backdrop-blur-sm shadow-xl relative overflow-hidden group', stat.border, stat.bg)}>
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-white/10 transition-all duration-500"></div>
@@ -96,7 +96,7 @@ export default function InvoicesPage() {
                         <input
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Find invoice or client..."
+                            placeholder="Search invoices..."
                             className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)] transition-all font-medium placeholder:text-[var(--text-muted)]"
                         />
                     </div>
@@ -106,8 +106,8 @@ export default function InvoicesPage() {
                     <table className="w-full text-left">
                         <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] bg-[var(--surface-overlay)]/30">
                             <tr>
-                                <th className="py-5 px-6">Billed To</th>
-                                <th className="py-5 px-6">Reference ID</th>
+                                <th className="py-5 px-6">Client Name</th>
+                                <th className="py-5 px-6">Invoice Number</th>
                                 <th className="py-5 px-6 text-right">Total Amount</th>
                                 <th className="py-5 px-6">Status</th>
                                 <th className="py-5 px-6">Issue Date</th>
@@ -123,7 +123,7 @@ export default function InvoicesPage() {
                                     </tr>
                                 ))
                             ) : invoices.length === 0 ? (
-                                <tr><td colSpan="7" className="py-16 text-center text-[var(--text-muted)] font-bold uppercase tracking-widest text-xs">No billing records identified</td></tr>
+                                <tr><td colSpan="7" className="py-16 text-center text-[var(--text-muted)] font-bold uppercase tracking-widest text-xs">No invoices found</td></tr>
                             ) : invoices.map(inv => (
                                 <tr key={inv._id} className="hover:bg-[var(--surface-overlay)]/50 transition-colors group">
                                     <td className="py-4 px-6">

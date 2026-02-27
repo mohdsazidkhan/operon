@@ -34,11 +34,16 @@ export default function AttendancePage() {
         fetchAttendance();
     }, [search]);
 
+    const present = attendance.filter(a => a.status === 'present').length;
+    const absent = attendance.filter(a => a.status === 'absent').length;
+    const late = attendance.filter(a => a.status === 'late').length;
+    const onLeave = attendance.filter(a => a.status === 'on_leave').length;
+
     const stats = [
-        { label: 'Verified present', count: attendance.filter(a => a.status === 'present').length, color: 'text-emerald-500', icon: UserCheck },
-        { label: 'Unaccounted absence', count: attendance.filter(a => a.status === 'absent').length, color: 'text-rose-500', icon: XCircle },
-        { label: 'Delayed arrival', count: attendance.filter(a => a.status === 'late').length, color: 'text-amber-500', icon: AlertCircle },
-        { label: 'Authorized leave', count: attendance.filter(a => a.status === 'on_leave').length, color: 'text-blue-500', icon: Clock },
+        { label: 'Present', count: present, color: 'text-emerald-500', icon: CheckCircle2 },
+        { label: 'Absent', count: absent, color: 'text-rose-500', icon: XCircle },
+        { label: 'Late', count: late, color: 'text-amber-500', icon: Clock },
+        { label: 'On Leave', count: onLeave, color: 'text-blue-500', icon: Calendar },
     ];
 
     return (
@@ -46,11 +51,14 @@ export default function AttendancePage() {
             {/* Header */}
             <div className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Presence Monitoring</h1>
-                    <div className="flex items-center gap-3 mt-2">
-                        <Calendar size={14} className="text-[var(--primary-500)]" />
-                        <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{formatDate(new Date(), { weekday: 'long' })}</span>
-                    </div>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tight uppercase">Attendance Tracking</h1>
+                    <p className="text-[var(--text-muted)] text-sm font-bold tracking-widest mt-1">
+                        Presence Monitoring • Real-time Summary
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 mt-2">
+                    <Calendar size={14} className="text-[var(--primary-500)]" />
+                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{formatDate(new Date(), { weekday: 'long' })}</span>
                 </div>
             </div>
 
@@ -88,28 +96,29 @@ export default function AttendancePage() {
                         <button className="px-5 py-3 rounded-2xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all font-black text-[10px] uppercase tracking-widest border border-[var(--border)]">
                             Export logs
                         </button>
-                        <button className="px-5 py-3 rounded-2xl bg-[var(--primary-500)] text-white shadow-xl shadow-[var(--primary-500)]/20 font-black text-[10px] uppercase tracking-widest transition-all">
-                            Force check-out all
+                        <button className="flex items-center gap-2 px-4 py-2 border border-rose-500/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all">
+                            <Activity size={14} /> Clock-out all
                         </button>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] bg-[var(--surface-overlay)]/40">
+                        <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] bg-[var(--surface-overlay)]/30">
                             <tr>
-                                <th className="py-6 px-8">Staff Identity</th>
-                                <th className="py-6 px-8">Check-in time</th>
-                                <th className="py-6 px-8">Check-out time</th>
-                                <th className="py-6 px-8">Active duration</th>
-                                <th className="py-6 px-8">Tracking status</th>
+                                <th className="py-5 px-6">Name</th>
+                                <th className="py-5 px-6">Check-in time</th>
+                                <th className="py-5 px-6">Status</th>
+                                <th className="py-5 px-6">Shift</th>
+                                <th className="py-5 px-6">Location</th>
+                                <th className="py-5 px-6"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border)]">
                             {loading ? (
-                                <tr><td colSpan="5" className="py-12 text-center text-slate-700 font-black tracking-widest uppercase text-xs animate-pulse">Establishing secure link to time-clock...</td></tr>
+                                <tr><td colSpan="6" className="py-12 text-center text-[var(--text-muted)] font-bold tracking-widest uppercase text-[10px]">Loading attendance...</td></tr>
                             ) : attendance.length === 0 ? (
-                                <tr><td colSpan="5" className="py-20 text-center text-slate-700 font-black tracking-widest uppercase text-xs italic">No telemetry data for this cycle</td></tr>
+                                <tr><td colSpan="6" className="py-16 text-center text-[var(--text-muted)] font-bold tracking-widest uppercase text-[10px]">No data found</td></tr>
                             ) : attendance.map(a => {
                                 const Icon = statusIcon[a.status] || CheckCircle;
                                 return (

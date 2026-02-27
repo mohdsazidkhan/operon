@@ -7,7 +7,7 @@ export default async function SalesDashboard() {
     const stats = await getSalesStats();
 
     const kpis = [
-        { title: 'Total Pipeline Value', value: formatCurrency(stats.pipelineValue), change: 15.3, icon: DollarSign, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+        { title: 'Potential Sales', value: formatCurrency(stats.pipelineValue), change: 15.3, icon: DollarSign, color: 'text-blue-400', bg: 'bg-blue-500/10' },
         { title: 'Won This Month', value: formatCurrency(stats.wonValue), change: 22.1, icon: Award, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
         { title: 'Active Deals', value: stats.activeDeals, change: 5.5, icon: Target, color: 'text-purple-400', bg: 'bg-purple-500/10' },
         { title: 'Avg Deal Size', value: formatCurrency(stats.avgDealSize), change: -2.3, icon: TrendingUp, color: 'text-amber-400', bg: 'bg-amber-500/10' },
@@ -18,10 +18,10 @@ export default async function SalesDashboard() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Sales Intelligence</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Sales Overview</h1>
                     <p className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
                         <TrendingUp size={14} className="text-emerald-500" />
-                        Pipeline Optimization • Real-time Forecasting
+                        Sales Tracking • Real-time Forecasting
                     </p>
                 </div>
                 <div className="flex bg-[var(--surface-overlay)] border border-[var(--border)] p-1.5 rounded-2xl">
@@ -57,9 +57,9 @@ export default async function SalesDashboard() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-2">
-                                <BarChart3 size={16} className="text-[var(--primary-400)]" /> Pipeline Density
+                                <BarChart3 size={16} className="text-[var(--primary-400)]" /> Sales Pipeline
                             </h3>
-                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Valuation distribution across Lifecycle</p>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Value distribution by stage</p>
                         </div>
                     </div>
                     <div className="h-[280px]">
@@ -71,9 +71,9 @@ export default async function SalesDashboard() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-2">
-                                <PieChart size={16} className="text-emerald-400" /> Resolution Matrix
+                                <PieChart size={16} className="text-emerald-400" /> Success Rate
                             </h3>
-                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Efficiency ratio analysis</p>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Win/Loss ratio analysis</p>
                         </div>
                     </div>
                     <div className="h-[280px]">
@@ -86,7 +86,7 @@ export default async function SalesDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
                 <div className="lg:col-span-2 bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Revenue Trajectory</h3>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Sales Growth</h3>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[var(--primary-500)]"></div><span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest">Actual</span></div>
                             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div><span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest">Goal</span></div>
@@ -98,7 +98,7 @@ export default async function SalesDashboard() {
                 </div>
 
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] p-8 shadow-2xl">
-                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8">Elite Performers</h3>
+                    <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] mb-8">Top Performers</h3>
                     <div className="space-y-5">
                         {[
                             { name: 'Sarah Johnson', deals: 5, revenue: 155000, initial: 'SJ', color: 'bg-indigo-500/20 text-indigo-400' },
@@ -116,7 +116,7 @@ export default async function SalesDashboard() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight truncate group-hover:text-[var(--primary-500)] transition-colors">{p.name}</p>
-                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-1">{p.deals} High-Value Cycles</p>
+                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-1">{p.deals} Closed Deals</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-black text-[var(--text-primary)] tracking-tighter">{formatCurrency(p.revenue)}</p>

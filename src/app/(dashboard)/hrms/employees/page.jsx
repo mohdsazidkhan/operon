@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Search, Eye, Edit, Trash2, Medal, Building2, Mail, Phone, Calendar } from 'lucide-react';
-import { formatCurrency, formatDate, cn, getStatusColor } from '@/lib/utils';
+import { Plus, Search, Eye, Edit, Trash2, Building2, UserPlus, Users, Calendar } from 'lucide-react';
+import { formatCurrency, formatDate, cn } from '@/lib/utils';
 
 export default function EmployeesPage() {
     const [employees, setEmployees] = useState([]);
@@ -30,18 +29,18 @@ export default function EmployeesPage() {
     const departments = ['all', ...new Set(employees.map(e => e.department))];
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500 pb-12">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight uppercase">Staff Directory</h1>
                     <p className="text-[var(--text-muted)] text-sm font-bold tracking-widest mt-1">
-                        Workspace Force • {employees.length} Personnel Registered
+                        Total Staff • {employees.length} Employees
                     </p>
                 </div>
                 <div className="flex gap-3">
                     <button className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[var(--primary-500)]/30">
-                        <Plus size={16} /> Onboard Personnel
+                        <UserPlus size={16} /> Add Employee
                     </button>
                 </div>
             </div>
@@ -83,8 +82,8 @@ export default function EmployeesPage() {
                     ))
                 ) : employees.length === 0 ? (
                     <div className="col-span-full py-20 text-center bg-[var(--surface-overlay)]/50 rounded-3xl border border-[var(--border)] border-dashed">
-                        <Building2 size={48} className="mx-auto text-[var(--text-muted)] mb-4" />
-                        <h3 className="text-sm font-black text-[var(--text-muted)] uppercase tracking-widest">Personnel Archive Empty</h3>
+                        <Users size={48} className="mx-auto text-[var(--text-muted)] mb-4 opacity-50" />
+                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest italic">No employees found</h3>
                     </div>
                 ) : employees.map(emp => (
                     <div key={emp._id} className="bg-[var(--card-bg)] backdrop-blur-xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl hover:shadow-[var(--primary-500)]/5 hover:border-[var(--primary-500)]/30 transition-all group relative overflow-hidden">
@@ -122,11 +121,11 @@ export default function EmployeesPage() {
                                     <span className="font-black text-[var(--text-primary)] uppercase tracking-tight bg-[var(--surface-overlay)] px-2 py-0.5 rounded-lg">{emp.department}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Compensation</span>
+                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Salary</span>
                                     <span className="font-black text-emerald-500 tracking-tight">{formatCurrency(emp.salary)}<span className="text-[8px] text-[var(--text-muted)] ml-1">/MON</span></span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Staff Code</span>
+                                    <span className="font-black text-[var(--text-muted)] uppercase tracking-widest">Employee ID</span>
                                     <span className="font-mono font-bold text-[var(--text-muted)]">{emp.employeeId}</span>
                                 </div>
                             </div>

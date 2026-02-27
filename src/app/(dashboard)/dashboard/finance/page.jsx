@@ -5,10 +5,10 @@ import { PLVarianceChart, CashPropagationChart, OverheadSegregationChart } from 
 export default async function FinanceDashboard() {
     // In a real scenario, we'd fetch specific finance data here
     const kpis = [
-        { title: 'Gross Liquid Assets', value: 248350, change: '+12.4%', up: true, icon: Landmark, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-        { title: 'Operational Burn', value: 52480, change: '+3.1%', up: false, icon: CreditCard, color: 'text-rose-400', bg: 'bg-rose-500/10' },
-        { title: 'Neural Margin', value: 195870, change: '+18.2%', up: true, icon: TrendingUp, color: 'text-[var(--primary-400)]', bg: 'bg-[var(--primary-500)]/10' },
-        { title: 'Capital Delta', value: 81283, change: '-5.3%', up: true, icon: Wallet, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+        { title: 'Total Cash', value: 248350, change: '+12.4%', up: true, icon: Landmark, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+        { title: 'Spending', value: 52480, change: '+3.1%', up: false, icon: CreditCard, color: 'text-rose-400', bg: 'bg-rose-500/10' },
+        { title: 'Profit Margin', value: 195870, change: '+18.2%', up: true, icon: TrendingUp, color: 'text-[var(--primary-400)]', bg: 'bg-[var(--primary-500)]/10' },
+        { title: 'Cash Balance', value: 81283, change: '-5.3%', up: true, icon: Wallet, color: 'text-amber-400', bg: 'bg-amber-500/10' },
     ];
 
     function FinanceTrendingUp({ size, className }) { return <Activity size={size} className={className} />; }
@@ -18,15 +18,15 @@ export default async function FinanceDashboard() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Fiscal Matrix</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Financial Overview</h1>
                     <p className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
                         <Activity size={14} className="text-emerald-500" />
-                        Capital Flow Infrastructure • Audited Real-time Ledger
+                        Cash Flow Tracking • Real-time Records
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="flex items-center gap-2 px-6 py-3 bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all">
-                        Ledger Verification
+                        Verify Records
                     </button>
                 </div>
             </div>
@@ -57,9 +57,9 @@ export default async function FinanceDashboard() {
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-2">
-                            <BarChart3 size={16} className="text-[var(--primary-400)]" /> P&L Variance
+                            <BarChart3 size={16} className="text-[var(--primary-400)]" /> Profit & Loss
                         </h3>
-                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Revenue Performance vs Operating Overheads</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Revenue vs Spending</p>
                     </div>
                 </div>
                 <div className="h-[320px]">
@@ -73,9 +73,9 @@ export default async function FinanceDashboard() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-2">
-                                <Activity size={16} className="text-[var(--primary-400)]" /> Cash Propagation
+                                <Activity size={16} className="text-[var(--primary-400)]" /> Cash Growth
                             </h3>
-                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">H1 {new Date().getFullYear()} Liquidity Assessment</p>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">H1 {new Date().getFullYear()} Cash Assessment</p>
                         </div>
                     </div>
                     <div className="h-[220px]">
@@ -87,9 +87,9 @@ export default async function FinanceDashboard() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-2">
-                                <PieChart size={16} className="text-rose-400" /> Overhead Segregation
+                                <PieChart size={16} className="text-rose-400" /> Expense Breakdown
                             </h3>
-                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Expenditure classification breakdown</p>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Expenditure by category</p>
                         </div>
                     </div>
                     <div className="h-[220px]">

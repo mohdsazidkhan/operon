@@ -33,18 +33,17 @@ export default function PayrollPage() {
             {/* Header */}
             <div className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Compensation Engine</h1>
-                    <div className="flex items-center gap-3 mt-2">
-                        <CreditCard size={14} className="text-[var(--primary-500)]" />
-                        <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Fiscal Period: {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
-                    </div>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tight uppercase">Payroll Management</h1>
+                    <p className="text-[var(--text-muted)] text-sm font-bold tracking-widest mt-1">
+                        Current Period: {currentPeriod}
+                    </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-5 py-3 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all border border-[var(--border)]">
-                        <Printer size={16} /> Ledger Export
+                <div className="flex gap-3">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--primary-500)] rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all">
+                        <Download size={14} /> Download Report
                     </button>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[var(--primary-500)]/20">
-                        <Plus size={16} /> Execute Payroll Run
+                    <button className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[var(--primary-500)]/30">
+                        <CreditCard size={16} /> Process Payroll
                     </button>
                 </div>
             </div>
@@ -52,9 +51,9 @@ export default function PayrollPage() {
             {/* Financial Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Total Disbursed', value: summary.totalNetPay, color: 'text-[var(--primary-500)]', icon: Wallet, bg: 'from-[var(--primary-500)]/10 to-transparent' },
-                    { label: 'Unit Benchmark', value: summary.averageSalary, color: 'text-emerald-500', icon: ArrowUpRight, bg: 'from-emerald-500/10 to-transparent' },
-                    { label: 'Recipient Count', value: summary.totalEmployees, color: 'text-indigo-500', icon: UserCircle, bg: 'from-indigo-500/10 to-transparent', suffix: 'Personnel' },
+                    { label: 'Total Paid', value: totalDisbursed, color: 'text-emerald-500', icon: Landmark, bg: 'from-emerald-500/10 to-transparent' },
+                    { label: 'Average Salary', value: avgNet, color: 'text-[var(--primary-500)]', icon: TrendingUp, bg: 'from-[var(--primary-500)]/10 to-transparent' },
+                    { label: 'Total Employees', value: payrolls.length, color: 'text-indigo-500', icon: Users, bg: 'from-indigo-500/10 to-transparent' },
                 ].map((stat, i) => (
                     <div key={i} className={cn('bg-[var(--card-bg)] backdrop-blur-sm rounded-[2rem] p-8 border border-[var(--card-border)] shadow-2xl relative overflow-hidden group bg-gradient-to-br', stat.bg)}>
                         <div className="flex items-center justify-between mb-4 relative z-10">
@@ -88,23 +87,23 @@ export default function PayrollPage() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] bg-[var(--surface-overlay)]/40">
+                        <thead className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] bg-[var(--surface-overlay)]/30">
                             <tr>
-                                <th className="py-6 px-8">Staff Entity</th>
-                                <th className="py-6 px-8 text-right">Base Allocation</th>
-                                <th className="py-6 px-8 text-right">Incentives</th>
-                                <th className="py-6 px-8 text-right">Adjustments</th>
-                                <th className="py-6 px-8 text-right">Net Liquidation</th>
-                                <th className="py-6 px-8">Status</th>
-                                <th className="py-6 px-8 text-right"></th>
+                                <th className="py-5 px-6">Employee Name</th>
+                                <th className="py-5 px-6">Basic Salary</th>
+                                <th className="py-5 px-6">Allowances</th>
+                                <th className="py-5 px-6">Net Pay</th>
+                                <th className="py-5 px-6">Attendance records</th>
+                                <th className="py-5 px-6">Status</th>
+                                <th className="py-5 px-6"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border)]">
                             {loading ? (
-                                <tr><td colSpan="7" className="py-12 text-center text-slate-700 font-black tracking-widest uppercase text-xs animate-pulse italic">Auditing compensation vectors...</td></tr>
-                            ) : payrollRecords.length === 0 ? (
-                                <tr><td colSpan="7" className="py-20 text-center text-slate-700 font-black tracking-widest uppercase text-xs italic">Zero transaction records in local cache</td></tr>
-                            ) : payrollRecords.map(r => (
+                                <tr><td colSpan="7" className="py-12 text-center text-[var(--text-muted)] font-black tracking-widest uppercase text-xs">Loading payroll...</td></tr>
+                            ) : payrolls.length === 0 ? (
+                                <tr><td colSpan="7" className="py-16 text-center text-[var(--text-muted)] font-black tracking-widest uppercase text-xs">No payroll data found</td></tr>
+                            ) : payrolls.map(r => (
                                 <tr key={r._id} className="hover:bg-[var(--primary-500)]/[0.02] transition-colors group">
                                     <td className="py-5 px-8">
                                         <div className="flex items-center gap-4">

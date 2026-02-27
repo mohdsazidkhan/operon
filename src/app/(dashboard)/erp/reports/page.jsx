@@ -51,7 +51,7 @@ export default function FinanceReportsPage() {
         { label: 'Annual Revenue', val: 392700, trend: '+24%', icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
         { label: 'Annual Expenses', val: 208600, trend: '+12%', icon: TrendingDown, color: 'text-rose-500', bg: 'bg-rose-500/10' },
         { label: 'Net Profit', val: 184100, trend: '+38%', icon: TrendingUp, color: 'text-primary-500', bg: 'bg-primary-500/10' },
-        { label: 'Growth Vector', val: '46.9%', trend: 'NOMINAL', icon: Activity, color: 'text-amber-500', bg: 'bg-amber-500/10', raw: true },
+        { label: 'Growth Rate', val: '46.9%', trend: 'NORMAL', icon: Activity, color: 'text-amber-500', bg: 'bg-amber-500/10', raw: true },
     ];
 
     return (
@@ -59,10 +59,10 @@ export default function FinanceReportsPage() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Institutional Fiscal Intelligence</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Financial Reports</h1>
                     <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
                         <PieChart size={12} className="text-[var(--primary-500)]" />
-                        Quarterly P&L Vectoring • Fiscal Audit Active
+                        Quarterly Profit & Loss • Financial Monitoring
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -73,7 +73,7 @@ export default function FinanceReportsPage() {
                 </div>
             </div>
 
-            {/* Tactical Stats */}
+            {/* Key Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((s, i) => (
                     <div key={i} className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl group relative overflow-hidden">
@@ -96,8 +96,8 @@ export default function FinanceReportsPage() {
 
                 <div className="flex items-center justify-between mb-10 relative z-10">
                     <div>
-                        <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Quarterly Revenue vs Expenditure Core</h3>
-                        <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mt-1">Cross-sectional Fiscal Stream Visualization</p>
+                        <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Quarterly Revenue vs Spending</h3>
+                        <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mt-1">Quarterly Financial Breakdown</p>
                     </div>
                 </div>
 
@@ -109,11 +109,11 @@ export default function FinanceReportsPage() {
             {/* Bottom Insights */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pb-12">
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl">
-                    <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-6 border-b border-[var(--border)] pb-4">Key Performance Vectors</h4>
+                    <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-6 border-b border-[var(--border)] pb-4">Performance Metrics</h4>
                     <div className="space-y-6">
                         {[
-                            { name: 'Operating Margin Flow', val: '46.9%', status: 'optimal' },
-                            { name: 'Burn Rate Alpha', val: '$15.4k/mo', status: 'stable' },
+                            { name: 'Profit Margin', val: '46.9%', status: 'optimal' },
+                            { name: 'Monthly Spending', val: '$15.4k/mo', status: 'stable' },
                             { name: 'Customer LTV:CAC', val: '4.8x', status: 'high' }
                         ].map((item, i) => (
                             <div key={i} className="flex items-center justify-between">
@@ -127,10 +127,10 @@ export default function FinanceReportsPage() {
                     </div>
                 </div>
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl flex flex-col items-center justify-center text-center">
-                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.5em] mb-4">Institutional Audit Integrity</p>
+                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.5em] mb-4">Data Integrity</p>
                     <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest leading-relaxed max-w-sm">
-                        Fiscal data vectors are cryptographically signed and immutable. <br />
-                        <span className="text-[var(--primary-500)]">Verified by OPERON-CORE-FINANCE</span>
+                        Financial data is verified and secure. <br />
+                        <span className="text-[var(--primary-500)]">Verified by OPERON-CORE</span>
                     </p>
                 </div>
             </div>

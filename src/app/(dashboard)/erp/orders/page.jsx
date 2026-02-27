@@ -12,10 +12,10 @@ export default async function OrdersPage() {
     const fulfillmentRate = serializedOrders.length > 0 ? ((deliveredCount / serializedOrders.length) * 100).toFixed(1) : '0';
 
     const logisticsStats = [
-        { label: 'Active Streams', value: serializedOrders.filter(o => o.status !== 'delivered').length, icon: Truck, color: 'text-indigo-400' },
-        { label: 'Fulfilled Cycle', value: `${fulfillmentRate}%`, icon: CheckCircle2, color: 'text-emerald-400' },
-        { label: 'Avg Velocity', value: '1.2d', icon: Clock, color: 'text-amber-400' },
-        { label: 'Net Flow', value: formatCurrency(totalFlow), icon: ArrowUpRight, color: 'text-primary-400' },
+        { label: 'Pending Orders', value: serializedOrders.filter(o => o.status !== 'delivered').length, icon: Truck, color: 'text-indigo-400' },
+        { label: 'Completed Orders', value: `${fulfillmentRate}%`, icon: CheckCircle2, color: 'text-emerald-400' },
+        { label: 'Delivery Time', value: '1.2d', icon: Clock, color: 'text-amber-400' },
+        { label: 'Total Sales', value: formatCurrency(totalFlow), icon: ArrowUpRight, color: 'text-primary-400' },
     ];
 
     return (
@@ -23,10 +23,10 @@ export default async function OrdersPage() {
             {/* Context Header */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Lifecycle Transaction Ledger</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Order List</h1>
                     <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
                         <BarChart3 size={12} className="text-[var(--primary-500)]" />
-                        Real-time Order Vectoring • Logistics Stream Active
+                        Tracking Orders • Logistics Tracking
                     </p>
                 </div>
             </div>
