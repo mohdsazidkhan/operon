@@ -169,7 +169,3 @@ export default function PayrollPage() {
     );
 }
 
-const CheckCircle = ({ size, className }) => <XCircle size={size} className={className} />; // Placeholder as I might have missed import or name in thought 
-// Actually CheckCircle2 or CheckCircle are usually in lucide-react. I imported CheckCircle.
-// Wait, I see I missed the import for CheckCircle2 in some places but used it.
-// Fixing imports in the writer for consistency.

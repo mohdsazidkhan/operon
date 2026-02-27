@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, CheckCircle, XCircle, AlertCircle, Calendar, ArrowRight, UserCheck, Search, Filter } from 'lucide-react';
+import { Clock, CheckCircle, CheckCircle2, XCircle, AlertCircle, Calendar, ArrowRight, UserCheck, Search, Filter } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 
 const statusIcon = { present: CheckCircle, absent: XCircle, late: AlertCircle, on_leave: Clock };
