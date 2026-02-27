@@ -34,11 +34,11 @@ export default function InventoryPage() {
             {/* Main Header */}
             <div className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Inventory Intelligence</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Inventory Management</h1>
                     <div className="flex items-center gap-4 mt-2">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
-                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Global Status: Optimal</span>
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Stock Status: Good</span>
                         </div>
                         <p className="text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-[0.2em]">Active SKUs: {products.length}</p>
                     </div>
@@ -46,7 +46,7 @@ export default function InventoryPage() {
 
                 <div className="flex items-center gap-4">
                     <div className="text-right">
-                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Portfolio Valuation</p>
+                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Value</p>
                         <p className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{formatCurrency(totalValue)}</p>
                     </div>
                     <div className="w-px h-10 bg-[var(--border)]"></div>
@@ -63,12 +63,12 @@ export default function InventoryPage() {
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        placeholder="IDENTIFY ASSET VIA SKU OR NAME..."
+                        placeholder="Search by name or code..."
                         className="w-full pl-12 pr-4 py-4 rounded-3xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] text-xs font-black uppercase tracking-[0.2em] focus:outline-none focus:ring-4 focus:ring-[var(--primary-500)]/10 focus:border-[var(--primary-500)]/40 transition-all placeholder:text-[var(--text-muted)]"
                     />
                 </div>
                 <button className="px-6 py-4 rounded-3xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-3 font-black text-[10px] uppercase tracking-widest">
-                    <Filter size={16} /> Advanced Parameters
+                    <Filter size={16} /> More Filters
                 </button>
             </div>
 
@@ -80,11 +80,11 @@ export default function InventoryPage() {
                             <AlertTriangle size={24} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Supply Chain Warning</h4>
-                            <p className="text-xs text-rose-500 font-bold mt-0.5">{lowStockCount} critical assets are below minimum threshold levels.</p>
+                            <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Low Stock Alert</h4>
+                            <p className="text-xs text-rose-500 font-bold mt-0.5">{lowStockCount} items are below minimum levels.</p>
                         </div>
                     </div>
-                    <button className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 group-hover:underline">Procure Now</button>
+                    <button className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 group-hover:underline">Order Now</button>
                 </div>
             )}
 
@@ -97,7 +97,7 @@ export default function InventoryPage() {
                 ) : products.length === 0 ? (
                     <div className="col-span-full py-32 text-center bg-[var(--surface-overlay)] rounded-[2.5rem] border border-[var(--border)] border-dashed">
                         <Package size={64} className="mx-auto text-[var(--border-strong)] mb-6" />
-                        <h3 className="text-xl font-black text-[var(--text-muted)] uppercase tracking-[0.5em]">Zero Inventory Depth</h3>
+                        <h3 className="text-xl font-black text-[var(--text-muted)] uppercase tracking-[0.5em]">No items found</h3>
                     </div>
                 ) : products.map(p => (
                     <div
@@ -133,13 +133,13 @@ export default function InventoryPage() {
                         <div className="mt-auto space-y-5 relative z-10">
                             <div className="flex items-end justify-between">
                                 <div>
-                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Inventory Level</p>
+                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">In Stock</p>
                                     <p className={cn('text-2xl font-black tracking-tighter', p.stock < 10 ? 'text-rose-500' : 'text-emerald-500')}>
                                         {p.stock} <span className="text-xs">UNITS</span>
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">MSRP</p>
+                                    <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Price</p>
                                     <p className="text-lg font-black text-[var(--text-primary)] tracking-tighter">{formatCurrency(p.price)}</p>
                                 </div>
                             </div>
@@ -158,7 +158,7 @@ export default function InventoryPage() {
                         {/* Hover Overlay */}
                         <div className="absolute inset-x-0 bottom-0 p-8 translate-y-full group-hover:translate-y-0 bg-[var(--surface-overlay)] transition-transform duration-500 flex items-center justify-between border-t border-[var(--border)]">
                             <button className="text-[10px] font-black uppercase tracking-widest text-[var(--primary-500)] hover:text-[var(--primary-600)] transition-colors">Update Stock</button>
-                            <button className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Audit logs</button>
+                            <button className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">History</button>
                         </div>
                     </div>
                 ))}

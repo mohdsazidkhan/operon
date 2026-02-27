@@ -74,11 +74,11 @@ export default function RegisterPage() {
                         transition={{ delay: 0.3, duration: 0.8 }}
                     >
                         <h1 className="text-6xl font-black text-white leading-tight tracking-tighter uppercase italic">
-                            Join the <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-primary-200 to-white/50">Elite.</span>
+                            Join <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-primary-200 to-white/50">Us.</span>
                         </h1>
                         <p className="text-white/60 text-xl font-medium mt-4 max-w-md">
-                            Begin your journey with the singular platform designed for hyper-growth and architectural elegance.
+                            Start using the simple platform for your business.
                         </p>
                     </motion.div>
 
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                     animate={{ opacity: 0.5 }}
                     className="relative z-10 text-white text-xs font-bold uppercase tracking-[0.4em]"
                 >
-                    © {new Date().getFullYear()} OPERON Protocol // JOIN_REQ_V1
+                    © {new Date().getFullYear()} Operon System // V1.0.0
                 </motion.p>
             </div>
 
@@ -115,18 +115,18 @@ export default function RegisterPage() {
                 >
                     <div className="text-center lg:text-left">
                         <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[var(--text-primary)]">
-                            Request <br />
-                            <span className="text-primary-500">Access Identity</span>
+                            Create <br />
+                            <span className="text-primary-500">Account</span>
                         </h2>
                         <p className="text-[var(--text-muted)] mt-2 text-xs font-bold uppercase tracking-widest flex items-center gap-2 justify-center lg:justify-start">
                             <Sparkles size={14} className="text-primary-500" />
-                            Provisioning Protocol 01
+                            Registration
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Full Legal Alias</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Full Name</label>
                             <input
                                 {...register('name', { required: 'Name required' })}
                                 placeholder="JOHN DOE"
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Secure Relay Address</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Email Address</label>
                             <input
                                 {...register('email', { required: 'Email required' })}
                                 type="email" placeholder="YOU@COMPANY.IO"
@@ -142,7 +142,7 @@ export default function RegisterPage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Cryptographic Key</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Password</label>
                             <div className="relative group">
                                 <input
                                     {...register('password', { required: 'Password required' })}
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                             >
                                 {isSubmitting ? "Provisioning..." : (
                                     <>
-                                        Execute Provisioning
+                                        Sign Up
                                         <UserPlus size={18} className="transition-transform group-hover:translate-y-[-2px]" />
                                     </>
                                 )}
@@ -170,7 +170,7 @@ export default function RegisterPage() {
 
                     <div className="pt-6 border-t border-[var(--border)] text-center">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                            Existing Identity? <Link href="/login" className="text-primary-500 hover:text-primary-600 transition-colors">Resume Protocol</Link>
+                            Already have an account? <Link href="/login" className="text-primary-500 hover:text-primary-600 transition-colors">Login</Link>
                         </p>
                     </div>
                 </motion.div>

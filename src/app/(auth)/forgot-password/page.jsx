@@ -18,9 +18,9 @@ export default function ForgotPasswordPage() {
         try {
             await new Promise(r => setTimeout(r, 1500));
             setSent(true);
-            toast.success('Reset protocol initialized. Check your secure link.');
+            toast.success('Reset link sent. Check your email.');
         } catch (err) {
-            toast.error('Initialization failed. Check network integrity.');
+            toast.error('Failed to send email. Check your connection.');
         }
     };
 
@@ -69,11 +69,11 @@ export default function ForgotPasswordPage() {
                         transition={{ delay: 0.3, duration: 0.8 }}
                     >
                         <h1 className="text-6xl font-black text-white leading-tight tracking-tighter uppercase italic">
-                            Security <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-primary-200 to-white/50">Restoration.</span>
+                            Password <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-primary-200 to-white/50">Reset.</span>
                         </h1>
                         <p className="text-white/60 text-xl font-medium mt-4 max-w-md">
-                            The decentralized recovery protocol ensuring your identity remains under your absolute control.
+                            The simple way to recover your account and keep it safe.
                         </p>
                     </motion.div>
 
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
                     animate={{ opacity: 0.5 }}
                     className="relative z-10 text-white text-xs font-black uppercase tracking-[0.4em]"
                 >
-                    © {new Date().getFullYear()} OPERON Protocol // SEC_REC_V2
+                    © {new Date().getFullYear()} Operon System // V1.0.0
                 </motion.p>
             </div>
 
@@ -113,27 +113,27 @@ export default function ForgotPasswordPage() {
                             {sent ? <ShieldCheck size={32} className="animate-pulse" /> : <Mail size={32} />}
                         </div>
                         <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[var(--text-primary)]">
-                            {sent ? 'Sequence' : 'Identity'} <br />
-                            <span className="text-primary-500">{sent ? 'Dispatched' : 'Recovery'}</span>
+                            {sent ? 'Email' : 'Password'} <br />
+                            <span className="text-primary-500">{sent ? 'Sent' : 'Reset'}</span>
                         </h2>
                         <p className="text-[var(--text-muted)] mt-2 text-xs font-bold uppercase tracking-widest flex items-center gap-2 justify-center lg:justify-start">
                             <Sparkles size={14} className="text-primary-500" />
-                            {sent ? 'Check your encrypted relay' : 'Initialize recovery protocol'}
+                            {sent ? 'Check your email' : 'Reset your password'}
                         </p>
                     </div>
 
                     {!sent ? (
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Secure Relay Address</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Email Address</label>
                                 <div className="relative group/input">
                                     <input
                                         {...register('email', {
-                                            required: 'Vector required',
-                                            pattern: { value: /^\S+@\S+$/i, message: 'Invalid vector format' }
+                                            required: 'Email required',
+                                            pattern: { value: /^\S+@\S+$/i, message: 'Invalid email format' }
                                         })}
                                         type="email"
-                                        placeholder="ENTITY@OPERON.IO"
+                                        placeholder="USER@COMPANY.COM"
                                         className={cn(
                                             "w-full px-5 py-4 rounded-2xl border bg-[var(--surface)] text-[var(--text-primary)] font-bold text-sm tracking-wide focus:outline-none focus:ring-4 transition-all placeholder:opacity-30",
                                             errors.email ? "border-rose-500/50 ring-rose-500/10" : "border-[var(--border)] focus:border-primary-500 focus:ring-primary-500/10"
@@ -148,14 +148,14 @@ export default function ForgotPasswordPage() {
                                 disabled={isSubmitting}
                                 className="w-full h-16 rounded-2xl bg-primary-500 hover:bg-primary-600 text-white font-black text-xs uppercase tracking-[0.3em] transition-all shadow-xl shadow-primary-500/20 active:scale-[0.98] hover:scale-[1.02] flex items-center justify-center gap-3 disabled:opacity-50"
                             >
-                                {isSubmitting ? 'Initializing...' : 'Execute Recovery'}
+                                {isSubmitting ? 'Sending...' : 'Reset Password'}
                             </button>
                         </form>
                     ) : (
                         <div className="p-8 rounded-[2.5rem] bg-[var(--surface)] border border-[var(--border)] relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 rounded-full blur-3xl animate-pulse"></div>
                             <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight leading-relaxed">
-                                A validation sequence has been dispatched to your registered relay. Please check your inbox for further instructions.
+                                We have sent a link to your email. Please check your inbox for instructions.
                                 <br /><br />
                                 <span className="text-emerald-500 text-[10px] tracking-widest">INTEGRITY HASH: 0xA72-B91-XFC</span>
                             </p>
@@ -165,7 +165,7 @@ export default function ForgotPasswordPage() {
                     <div className="pt-4 border-t border-[var(--border)] text-center">
                         <Link href="/login" className="inline-flex items-center gap-3 text-[10px] font-black text-[var(--text-muted)] hover:text-primary-500 uppercase tracking-[0.3em] transition-all group">
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                            Return to Access Module
+                            Back to Login
                         </Link>
                     </div>
                 </motion.div>

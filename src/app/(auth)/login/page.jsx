@@ -97,7 +97,7 @@ export default function LoginPage() {
                     animate={{ opacity: 0.5 }}
                     className="relative z-10 text-white text-xs font-bold uppercase tracking-[0.4em]"
                 >
-                    © {new Date().getFullYear()} OPERON Protocol // V4.0.0
+                    © {new Date().getFullYear()} Operon System // V1.0.0
                 </motion.p>
             </div>
 
@@ -119,29 +119,29 @@ export default function LoginPage() {
                 >
                     <div className="text-center lg:text-left">
                         <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[var(--text-primary)]">
-                            Authentication <br />
+                            Login <br />
                             <span className="text-primary-500">Required</span>
                         </h2>
                         <p className="text-[var(--text-muted)] mt-2 text-xs font-bold uppercase tracking-widest flex items-center gap-2 justify-center lg:justify-start">
                             <Sparkles size={14} className="text-primary-500" />
-                            Secure Sequence Initialized
+                            Secure Login
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Access Identity</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Email Address</label>
                             <input
-                                {...register('email', { required: 'Identity required' })}
-                                type="email" placeholder="ADMIN@OPERON.IO"
+                                {...register('email', { required: 'Email required' })}
+                                type="email" placeholder="ADMIN@OPERON.COM"
                                 className="w-full px-5 py-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] font-bold text-sm tracking-wide focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:opacity-30"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between ml-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Encrypted Key</label>
-                                <Link href="/forgot-password" size="sm" className="text-[10px] font-black uppercase tracking-widest text-primary-500 hover:text-primary-600">Recovery Hash?</Link>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Password</label>
+                                <Link href="/forgot-password" size="sm" className="text-[10px] font-black uppercase tracking-widest text-primary-500 hover:text-primary-600">Forgot Password?</Link>
                             </div>
                             <div className="relative group">
                                 <input
@@ -162,7 +162,7 @@ export default function LoginPage() {
                             >
                                 {isSubmitting ? "Processing..." : (
                                     <>
-                                        Authorize Sequence
+                                        Login
                                         <LogIn size={18} className="transition-transform group-hover:translate-x-1" />
                                     </>
                                 )}
@@ -173,7 +173,7 @@ export default function LoginPage() {
                     <div className="space-y-6">
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border)] opacity-50"></div></div>
-                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest"><span className="bg-[var(--surface-raised)] px-4 text-[var(--text-muted)]">Administrative Override</span></div>
+                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest"><span className="bg-[var(--surface-raised)] px-4 text-[var(--text-muted)]">Quick Login</span></div>
                         </div>
 
                         <button onClick={fillDemo} type="button" className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[var(--surface-overlay)] transition-all">
@@ -181,7 +181,7 @@ export default function LoginPage() {
                         </button>
 
                         <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                            No credentials? <Link href="/register" className="text-primary-500 hover:text-primary-600 transition-colors">Request Access Identity</Link>
+                            No account? <Link href="/register" className="text-primary-500 hover:text-primary-600 transition-colors">Create Account</Link>
                         </p>
                     </div>
                 </motion.div>

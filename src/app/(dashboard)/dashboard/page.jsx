@@ -36,11 +36,11 @@ export default async function OverviewDashboard() {
             {/* Header Area */}
             <div className="flex flex-wrap items-end justify-between gap-6 px-2">
                 <div>
-                    <h1 className="text-4xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Neural Command Center</h1>
+                    <h1 className="text-4xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Dashboard Overview</h1>
                     <div className="flex items-center gap-4 mt-2">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--primary-500)]/10 border border-[var(--primary-500)]/20">
                             <Activity size={12} className="text-[var(--primary-500)] animate-pulse" />
-                            <span className="text-[10px] font-black text-[var(--primary-500)] uppercase tracking-widest">System Health: Nominal</span>
+                            <span className="text-[10px] font-black text-[var(--primary-500)] uppercase tracking-widest">System Status: Online</span>
                         </div>
                         <p className="text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-[0.3em]">
                             <Calendar size={12} className="inline mr-2" />
@@ -50,17 +50,17 @@ export default async function OverviewDashboard() {
                 </div>
                 <div className="flex gap-3">
                     <button className="h-14 px-8 rounded-2xl bg-[var(--text-primary)] text-[var(--surface)] font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all">
-                        Execute Report
+                        View Reports
                     </button>
                 </div>
             </div>
 
             {/* KPI Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <KPICard title="Portfolio Valuation" value={formatCurrency(stats.revenue)} change={14.2} icon={DollarSign} iconColor="bg-emerald-500 shadow-emerald-500/30" bgGradient="bg-gradient-to-br from-emerald-500/5 to-transparent" />
-                <KPICard title="Staff Capacity" value={stats.employees} change={8.4} icon={Users} iconColor="bg-indigo-500 shadow-indigo-500/30" bgGradient="bg-gradient-to-br from-indigo-500/5 to-transparent" />
-                <KPICard title="Lead Pipeline" value={stats.leads} change={-2.1} icon={Target} iconColor="bg-[var(--primary-500)] shadow-[var(--primary-500)]/30" bgGradient="bg-gradient-to-br from-[var(--primary-500)]/5 to-transparent" />
-                <KPICard title="Asset Density" value={stats.products} change={5.7} icon={TrendingUp} iconColor="bg-amber-500 shadow-amber-500/30" bgGradient="bg-gradient-to-br from-amber-500/5 to-transparent" />
+                <KPICard title="Total Revenue" value={formatCurrency(stats.revenue)} change={14.2} icon={DollarSign} iconColor="bg-emerald-500 shadow-emerald-500/30" bgGradient="bg-gradient-to-br from-emerald-500/5 to-transparent" />
+                <KPICard title="Total Employees" value={stats.employees} change={8.4} icon={Users} iconColor="bg-indigo-500 shadow-indigo-500/30" bgGradient="bg-gradient-to-br from-indigo-500/5 to-transparent" />
+                <KPICard title="Total Leads" value={stats.leads} change={-2.1} icon={Target} iconColor="bg-[var(--primary-500)] shadow-[var(--primary-500)]/30" bgGradient="bg-gradient-to-br from-[var(--primary-500)]/5 to-transparent" />
+                <KPICard title="Total Products" value={stats.products} change={5.7} icon={TrendingUp} iconColor="bg-amber-500 shadow-amber-500/30" bgGradient="bg-gradient-to-br from-amber-500/5 to-transparent" />
             </div>
 
             {/* Main Data Visuals */}
@@ -70,8 +70,8 @@ export default async function OverviewDashboard() {
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--primary-500)] to-transparent opacity-50"></div>
                     <div className="flex items-center justify-between mb-8 relative z-10">
                         <div>
-                            <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Fiscal Trajectory</h3>
-                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Bi-Annual Revenue Performance Indicator</p>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Revenue Growth</h3>
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Six-Month Revenue Report</p>
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--surface-overlay)] border border-[var(--border)]">
                             <div className="w-2 h-2 rounded-full bg-[var(--primary-500)] shadow-[0_0_8px_var(--glow-primary)]"></div>
@@ -86,8 +86,8 @@ export default async function OverviewDashboard() {
                 {/* Vertical Funnel */}
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8 group">
                     <div className="mb-8">
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Intelligence Funnel</h3>
-                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Conversion Architecture Analysis</p>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Sales Funnel</h3>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">Lead Conversion Status</p>
                     </div>
                     <div className="h-[320px]">
                         <FunnelChart />
@@ -102,17 +102,17 @@ export default async function OverviewDashboard() {
                     <div className="flex items-center justify-between mb-8">
                         <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em] flex items-center gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></div>
-                            Chronological Telemetry
+                            Recent Activity
                         </h3>
                         <Activity size={16} className="text-[var(--text-muted)]" />
                     </div>
                     <div className="space-y-6 relative">
                         <div className="absolute left-3.5 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--primary-500)]/50 via-[var(--border)] to-transparent"></div>
                         {[
-                            { text: 'Global Procurement Protocol Initiated', time: '02:14 PM', val: 'CRIT-1' },
-                            { text: 'Personnel Compensation Delta Normalized', time: '01:45 PM', val: 'NOM-8' },
-                            { text: 'Capital Allocation Batch #924 Verified', time: '11:20 AM', val: 'AUTH-2' },
-                            { text: 'Lead Conversion Threshold Breached', time: '09:05 AM', val: 'PEAK-1' },
+                            { text: 'New Order Started', time: '02:14 PM', val: 'CRIT-1' },
+                            { text: 'Salaries Processed', time: '01:45 PM', val: 'NOM-8' },
+                            { text: 'Payment Confirmed', time: '11:20 AM', val: 'AUTH-2' },
+                            { text: 'New Sales Record', time: '09:05 AM', val: 'PEAK-1' },
                         ].map((a, i) => (
                             <div key={i} className="flex items-start gap-6 pl-8 relative group cursor-pointer">
                                 <div className="absolute left-[11px] w-2.5 h-2.5 rounded-full bg-[var(--surface)] border-2 border-[var(--primary-500)] top-1 shadow-[0_0_10px_var(--glow-primary)] group-hover:scale-125 transition-transform"></div>
@@ -131,7 +131,7 @@ export default async function OverviewDashboard() {
                 {/* Priority Assets */}
                 <div className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[3rem] border border-[var(--card-border)] shadow-2xl p-8">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Priority Acquisitions</h3>
+                        <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.3em]">Top Clients</h3>
                         <button className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary-500)] hover:text-white hover:bg-[var(--primary-500)] transition-colors underline-offset-8 px-2 py-1 rounded-lg">Expand View</button>
                     </div>
                     <div className="grid grid-cols-1 gap-4">

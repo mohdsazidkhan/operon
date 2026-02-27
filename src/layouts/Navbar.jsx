@@ -29,7 +29,7 @@ const demoNotifications = [
 ];
 
 export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
-    const { isDark, toggleDark } = useThemeStore();
+    const { isDark, toggleDark, isRTL, toggleRTL } = useThemeStore();
     const { user, logout } = useAuthStore();
     const router = useRouter();
     const [showProfile, setShowProfile] = useState(false);
@@ -86,6 +86,11 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                     {/* Dark mode */}
                     <button onClick={toggleDark} title="Toggle Dark/Light Mode" className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] transition-colors text-[var(--text-secondary)]">
                         {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
+
+                    {/* RTL/LTR toggle */}
+                    <button onClick={toggleRTL} title={`Switch to ${isRTL ? 'LTR' : 'RTL'}`} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-[var(--surface-overlay)] transition-colors text-[var(--text-secondary)]">
+                        <span className="text-xs font-bold w-7 text-left">{isRTL ? 'RTL' : 'LTR'}</span>
                     </button>
 
                     {/* Customizer */}
