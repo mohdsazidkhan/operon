@@ -83,7 +83,7 @@ export default function Sidebar({ collapsed }) {
             'sidebar flex flex-col h-full transition-all duration-300',
             collapsed ? 'w-16' : 'w-64'
         )}>
-            {/* Logo */}
+            {/* Logo & Close Button */}
             <div className="flex items-center justify-between p-4 border-b border-[var(--sidebar-border)]">
                 {!collapsed && (
                     <Link href="/dashboard" className="flex items-center gap-2">
@@ -104,6 +104,16 @@ export default function Sidebar({ collapsed }) {
                             className="object-contain"
                         />
                     </Link>
+                )}
+
+                {/* Mobile Close Button */}
+                {!collapsed && (
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="lg:hidden p-2 rounded-lg hover:bg-[var(--surface-overlay)] text-[var(--sidebar-text)]"
+                    >
+                        <X size={20} />
+                    </button>
                 )}
             </div>
 

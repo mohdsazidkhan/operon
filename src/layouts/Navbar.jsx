@@ -142,11 +142,11 @@ export default function Navbar({ onToggleSidebar, onOpenCustomizer }) {
                                 alt={user?.name}
                                 className="w-8 h-8 rounded-full object-cover ring-2 ring-[var(--primary-500)]/30"
                             />
-                            <div className="hidden md:block text-left">
+                            <div className="hidden sm:block text-left">
                                 <p className="text-sm font-medium text-[var(--text-primary)] leading-none">{user?.name || 'Admin User'}</p>
                                 <p className="text-xs text-[var(--muted)] capitalize">{user?.role?.replace('_', ' ') || 'Admin'}</p>
                             </div>
-                            <ChevronDown size={14} className="text-[var(--muted)] hidden md:block" />
+                            <ChevronDown size={14} className="text-[var(--muted)] hidden sm:block" />
                         </button>
                         {showProfile && (
                             <div className="absolute end-0 mt-2 w-52 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-soft z-50 animate-fade-in overflow-hidden">

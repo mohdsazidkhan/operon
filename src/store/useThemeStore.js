@@ -7,7 +7,7 @@ export const useThemeStore = create(
             isDark: false,
             colorTheme: 'violet', // violet | blue | rose | orange | green | slate
             sidebarCollapsed: false,
-            sidebarOpen: true, // mobile drawer
+            sidebarOpen: false, // mobile drawer
             logoSize: 30, // height in pixels
             isRTL: false,
 
