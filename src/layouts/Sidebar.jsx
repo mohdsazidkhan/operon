@@ -80,7 +80,7 @@ export default function Sidebar({ collapsed }) {
 
     return (
         <aside className={cn(
-            'sidebar flex flex-col h-full transition-all duration-300',
+            'sidebar flex flex-col h-full transition-all duration-300 bg-[var(--sidebar-bg)]',
             collapsed ? 'w-16' : 'w-64'
         )}>
             {/* Logo & Close Button */}
