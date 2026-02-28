@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import ThemeCustomizer from './ThemeCustomizer';
 import { useThemeStore } from '@/store/useThemeStore';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Settings } from 'lucide-react'; // Assuming cn helper is in lib/utils or similar
+import GlobalSearch from '@/components/ui/GlobalSearch';
 
 function Breadcrumb() {
     const pathname = usePathname();
     const parts = pathname.split('/').filter(Boolean);
-    const labels = { dashboard: 'Dashboard', crm: 'CRM', erp: 'ERP', hrms: 'HRMS', apps: 'Apps', leads: 'Leads', pipeline: 'Pipeline', contacts: 'Contacts', companies: 'Companies', inventory: 'Inventory', products: 'Products', orders: 'Orders', invoices: 'Invoices', expenses: 'Expenses', reports: 'Finance Reports', employees: 'Employees', attendance: 'Attendance', leaves: 'Leave Management', payroll: 'Payroll', analytics: 'HR Analytics', calendar: 'Calendar', kanban: 'Kanban', chat: 'Chat', files: 'Files', email: 'Email', notifications: 'Notifications', sales: 'Sales Analytics', hr: 'HR Overview', finance: 'Finance', operations: 'Operations' };
+    const labels = { dashboard: 'Dashboard', crm: 'CRM', erp: 'ERP', hrms: 'HRMS', apps: 'Apps', leads: 'Leads', deals: 'Deals', pipeline: 'Pipeline', contacts: 'Contacts', companies: 'Companies', inventory: 'Inventory', products: 'Products', orders: 'Orders', invoices: 'Invoices', 'purchase-orders': 'Purchase Orders', vendors: 'Vendors', 'credit-notes': 'Credit Notes', budget: 'Budget', expenses: 'Expenses', reports: 'Finance Reports', employees: 'Employees', departments: 'Departments', recruitment: 'Recruitment', performance: 'Performance', attendance: 'Attendance', leaves: 'Leave Management', payroll: 'Payroll', analytics: 'HR Analytics', calendar: 'Calendar', kanban: 'Kanban', tasks: 'Tasks', chat: 'Chat', files: 'Files', email: 'Email', notifications: 'Notifications', 'audit-logs': 'Audit Log', organization: 'Organization', roles: 'Roles', users: 'Users', settings: 'Settings', sales: 'Sales Analytics', hr: 'HR Overview', finance: 'Finance', operations: 'Operations', projects: 'Projects', announcements: 'Announcements', notes: 'Notes' };
 
     return (
         <nav className="flex items-center gap-1.5 text-sm mb-6" aria-label="Breadcrumb">
@@ -21,7 +21,7 @@ function Breadcrumb() {
                 <span key={i} className="flex items-center gap-1.5">
                     <span className="text-[var(--muted)]">/</span>
                     <span className={i === parts.length - 1 ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--muted)]'}>
-                        {labels[part] || part.charAt(0).toUpperCase() + part.slice(1)}
+                        {labels[part] || (/^[a-f0-9]{24}$/.test(part) ? 'Detail' : part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '))}
                     </span>
                 </span>
             ))}
@@ -32,6 +32,14 @@ function Breadcrumb() {
 export default function DashboardLayout({ children }) {
     const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar, isRTL } = useThemeStore();
     const [customizerOpen, setCustomizerOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    // Global Cmd+K / Ctrl+K shortcut
+    useEffect(() => {
+        const handler = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(prev => !prev); } };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, []);
 
     return (
         <div className="flex h-screen overflow-hidden bg-[var(--surface-raised)]">
@@ -69,6 +77,7 @@ export default function DashboardLayout({ children }) {
                 </main>
             </div>
             <ThemeCustomizer open={customizerOpen} onClose={() => setCustomizerOpen(false)} />
+            <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
         </div>
     );
 }

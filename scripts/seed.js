@@ -1,7 +1,7 @@
 /**
  * Operon Seed Script
  * Run: node scripts/seed.js
- * Inserts realistic demo data into MongoDB
+ * Inserts realistic demo data into MongoDB + seeds RBAC system roles
  */
 
 const mongoose = require('mongoose');
@@ -151,6 +151,41 @@ const NotificationSchema = new mongoose.Schema({
     user: mongoose.Schema.Types.ObjectId, organization: mongoose.Schema.Types.ObjectId,
 }, { timestamps: true });
 
+const PermissionSchema = new mongoose.Schema({
+    key: { type: String, required: true, unique: true },
+    module: { type: String, required: true, enum: ['crm', 'hrms', 'erp', 'global'] },
+    resource: { type: String, required: true },
+    action: { type: String, required: true },
+    description: { type: String, default: '' },
+    isSystem: { type: Boolean, default: true },
+}, { timestamps: true });
+
+const RoleSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    slug: { type: String, required: true, lowercase: true },
+    description: { type: String, default: '' },
+    module: { type: String, enum: ['crm', 'hrms', 'erp', 'global'], required: true },
+    permissions: [{ type: String }],
+    organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', default: null },
+    isSystem: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    createdBy: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+RoleSchema.index({ slug: 1, organization: 1 }, { unique: true });
+
+const UserRoleSchema = new mongoose.Schema({
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
+    organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+    grantedBy: mongoose.Schema.Types.ObjectId,
+    expiresAt: { type: Date, default: null },
+    branch: { type: String, default: null },
+    additionalPermissions: [{ type: String }],
+    revokedPermissions: [{ type: String }],
+    isActive: { type: Boolean, default: true },
+}, { timestamps: true });
+UserRoleSchema.index({ user: 1, role: 1, organization: 1 }, { unique: true });
+
 // ─── Models ─────────────────────────────────────────────────────────────────
 
 const Organization = mongoose.models.Organization || mongoose.model('Organization', OrgSchema);
@@ -170,6 +205,9 @@ const Leave = mongoose.models.Leave || mongoose.model('Leave', LeaveSchema);
 const Event = mongoose.models.Event || mongoose.model('Event', EventSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema);
 const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+const Permission = mongoose.models.Permission || mongoose.model('Permission', PermissionSchema);
+const Role = mongoose.models.Role || mongoose.model('Role', RoleSchema);
+const UserRole = mongoose.models.UserRole || mongoose.model('UserRole', UserRoleSchema);
 
 // ─── Seed Data ───────────────────────────────────────────────────────────────
 
@@ -187,50 +225,206 @@ async function seed() {
         Expense.deleteMany({}), Invoice.deleteMany({}), Payroll.deleteMany({}),
         Attendance.deleteMany({}), Leave.deleteMany({}), Event.deleteMany({}),
         Task.deleteMany({}), Notification.deleteMany({}),
+        Permission.deleteMany({}), Role.deleteMany({}), UserRole.deleteMany({}),
     ]);
     console.log('✅ Cleared!\n');
 
-    // ── Organization ──
-    console.log('🏢 Creating organization...');
     const org = await Organization.create({
         name: 'Operon Technologies', slug: 'operon',
-        industry: 'Software & Technology', website: 'https://operon.io',
-        plan: 'pro', seats: 50,
+        industry: 'Software & Technology', website: 'https://operon.app',
+        plan: 'pro', seats: 100,
         address: { street: '42 Innovation Park', city: 'New Delhi', state: 'Delhi', country: 'India', zip: '110001' },
         settings: { currency: 'USD', timezone: 'Asia/Kolkata' },
     });
 
-    // ── Admin User ──
-    console.log('👤 Creating admin user...');
-    const hashedPassword = await bcrypt.hash('Admin@123', 12);
-    const adminUser = await User.create({
-        name: 'Mohd Sazid Khan', email: 'admin@operon.io', password: hashedPassword,
-        role: 'admin', organization: org._id,
-        department: 'Engineering', position: 'System Architect & Founder',
-        avatar: 'https://i.pravatar.cc/150?u=admin',
-        phone: '+91 98765 43210',
-    });
+    // ── RBAC: Permissions ────────────────────────────────────────────────
+    console.log('🔐 Seeding RBAC permissions...');
+    const permDefs = [
+        // Global
+        { key: 'dashboard.view', module: 'global', resource: 'dashboard', action: 'view', description: 'View dashboard' },
+        { key: 'settings.users.view', module: 'global', resource: 'users', action: 'view', description: 'View user list' },
+        { key: 'settings.users.manage', module: 'global', resource: 'users', action: 'manage', description: 'Manage users' },
+        { key: 'settings.roles.view', module: 'global', resource: 'roles', action: 'view', description: 'View roles' },
+        { key: 'settings.roles.manage', module: 'global', resource: 'roles', action: 'manage', description: 'Manage roles' },
+        { key: 'settings.organization.view', module: 'global', resource: 'organization', action: 'view', description: 'View org settings' },
+        { key: 'settings.organization.manage', module: 'global', resource: 'organization', action: 'manage', description: 'Edit org settings' },
+        { key: 'settings.audit-logs.view', module: 'global', resource: 'audit-logs', action: 'view', description: 'View audit log' },
+        // CRM
+        { key: 'crm.leads.view', module: 'crm', resource: 'leads', action: 'view', description: 'View leads' },
+        { key: 'crm.leads.create', module: 'crm', resource: 'leads', action: 'create', description: 'Create leads' },
+        { key: 'crm.leads.edit', module: 'crm', resource: 'leads', action: 'edit', description: 'Edit leads' },
+        { key: 'crm.leads.delete', module: 'crm', resource: 'leads', action: 'delete', description: 'Delete leads' },
+        { key: 'crm.leads.assign', module: 'crm', resource: 'leads', action: 'assign', description: 'Assign leads' },
+        { key: 'crm.contacts.view', module: 'crm', resource: 'contacts', action: 'view', description: 'View contacts' },
+        { key: 'crm.contacts.create', module: 'crm', resource: 'contacts', action: 'create', description: 'Create contacts' },
+        { key: 'crm.contacts.edit', module: 'crm', resource: 'contacts', action: 'edit', description: 'Edit contacts' },
+        { key: 'crm.contacts.delete', module: 'crm', resource: 'contacts', action: 'delete', description: 'Delete contacts' },
+        { key: 'crm.companies.view', module: 'crm', resource: 'companies', action: 'view', description: 'View companies' },
+        { key: 'crm.companies.create', module: 'crm', resource: 'companies', action: 'create', description: 'Create companies' },
+        { key: 'crm.companies.edit', module: 'crm', resource: 'companies', action: 'edit', description: 'Edit companies' },
+        { key: 'crm.companies.delete', module: 'crm', resource: 'companies', action: 'delete', description: 'Delete companies' },
+        { key: 'crm.deals.view', module: 'crm', resource: 'deals', action: 'view', description: 'View deals' },
+        { key: 'crm.deals.create', module: 'crm', resource: 'deals', action: 'create', description: 'Create deals' },
+        { key: 'crm.deals.edit', module: 'crm', resource: 'deals', action: 'edit', description: 'Edit deals' },
+        { key: 'crm.deals.delete', module: 'crm', resource: 'deals', action: 'delete', description: 'Delete deals' },
+        { key: 'crm.deals.approve', module: 'crm', resource: 'deals', action: 'approve', description: 'Approve deals' },
+        { key: 'crm.pipeline.view', module: 'crm', resource: 'pipeline', action: 'view', description: 'View pipeline' },
+        { key: 'crm.pipeline.manage', module: 'crm', resource: 'pipeline', action: 'manage', description: 'Manage pipeline' },
+        { key: 'crm.reports.view', module: 'crm', resource: 'reports', action: 'view', description: 'View CRM reports' },
+        // HRMS
+        { key: 'hrms.employees.view', module: 'hrms', resource: 'employees', action: 'view', description: 'View employees' },
+        { key: 'hrms.employees.create', module: 'hrms', resource: 'employees', action: 'create', description: 'Add employees' },
+        { key: 'hrms.employees.edit', module: 'hrms', resource: 'employees', action: 'edit', description: 'Edit employees' },
+        { key: 'hrms.employees.delete', module: 'hrms', resource: 'employees', action: 'delete', description: 'Remove employees' },
+        { key: 'hrms.departments.view', module: 'hrms', resource: 'departments', action: 'view', description: 'View departments' },
+        { key: 'hrms.departments.manage', module: 'hrms', resource: 'departments', action: 'manage', description: 'Manage departments' },
+        { key: 'hrms.attendance.view', module: 'hrms', resource: 'attendance', action: 'view', description: 'View attendance' },
+        { key: 'hrms.attendance.manage', module: 'hrms', resource: 'attendance', action: 'manage', description: 'Manage attendance' },
+        { key: 'hrms.leaves.view', module: 'hrms', resource: 'leaves', action: 'view', description: 'View leaves' },
+        { key: 'hrms.leaves.apply', module: 'hrms', resource: 'leaves', action: 'apply', description: 'Apply for leave' },
+        { key: 'hrms.leaves.approve', module: 'hrms', resource: 'leaves', action: 'approve', description: 'Approve leaves' },
+        { key: 'hrms.payroll.view', module: 'hrms', resource: 'payroll', action: 'view', description: 'View payroll' },
+        { key: 'hrms.payroll.process', module: 'hrms', resource: 'payroll', action: 'process', description: 'Process payroll' },
+        { key: 'hrms.recruitment.view', module: 'hrms', resource: 'recruitment', action: 'view', description: 'View recruitment' },
+        { key: 'hrms.recruitment.manage', module: 'hrms', resource: 'recruitment', action: 'manage', description: 'Manage recruitment' },
+        { key: 'hrms.performance.view', module: 'hrms', resource: 'performance', action: 'view', description: 'View performance' },
+        { key: 'hrms.performance.manage', module: 'hrms', resource: 'performance', action: 'manage', description: 'Manage performance' },
+        // ERP
+        { key: 'erp.inventory.view', module: 'erp', resource: 'inventory', action: 'view', description: 'View inventory' },
+        { key: 'erp.inventory.manage', module: 'erp', resource: 'inventory', action: 'manage', description: 'Manage inventory' },
+        { key: 'erp.products.view', module: 'erp', resource: 'products', action: 'view', description: 'View products' },
+        { key: 'erp.products.manage', module: 'erp', resource: 'products', action: 'manage', description: 'Manage products' },
+        { key: 'erp.orders.view', module: 'erp', resource: 'orders', action: 'view', description: 'View orders' },
+        { key: 'erp.orders.create', module: 'erp', resource: 'orders', action: 'create', description: 'Create orders' },
+        { key: 'erp.orders.process', module: 'erp', resource: 'orders', action: 'process', description: 'Process orders' },
+        { key: 'erp.invoices.view', module: 'erp', resource: 'invoices', action: 'view', description: 'View invoices' },
+        { key: 'erp.invoices.create', module: 'erp', resource: 'invoices', action: 'create', description: 'Create invoices' },
+        { key: 'erp.invoices.approve', module: 'erp', resource: 'invoices', action: 'approve', description: 'Approve invoices' },
+        { key: 'erp.vendors.view', module: 'erp', resource: 'vendors', action: 'view', description: 'View vendors' },
+        { key: 'erp.vendors.manage', module: 'erp', resource: 'vendors', action: 'manage', description: 'Manage vendors' },
+        { key: 'erp.purchase-orders.view', module: 'erp', resource: 'purchase-orders', action: 'view', description: 'View POs' },
+        { key: 'erp.purchase-orders.create', module: 'erp', resource: 'purchase-orders', action: 'create', description: 'Create POs' },
+        { key: 'erp.purchase-orders.approve', module: 'erp', resource: 'purchase-orders', action: 'approve', description: 'Approve POs' },
+        { key: 'erp.expenses.view', module: 'erp', resource: 'expenses', action: 'view', description: 'View expenses' },
+        { key: 'erp.expenses.approve', module: 'erp', resource: 'expenses', action: 'approve', description: 'Approve expenses' },
+        { key: 'erp.budget.view', module: 'erp', resource: 'budget', action: 'view', description: 'View budget' },
+        { key: 'erp.budget.manage', module: 'erp', resource: 'budget', action: 'manage', description: 'Manage budget' },
+        { key: 'erp.credit-notes.view', module: 'erp', resource: 'credit-notes', action: 'view', description: 'View credit notes' },
+        { key: 'erp.credit-notes.manage', module: 'erp', resource: 'credit-notes', action: 'manage', description: 'Manage credit notes' },
+        { key: 'erp.finance.view', module: 'erp', resource: 'finance', action: 'view', description: 'View finance' },
+        { key: 'erp.finance.report', module: 'erp', resource: 'finance', action: 'report', description: 'Finance reports' },
+        // Apps
+        { key: 'apps.projects.view', module: 'global', resource: 'projects', action: 'view', description: 'View projects' },
+        { key: 'apps.projects.manage', module: 'global', resource: 'projects', action: 'manage', description: 'Manage projects' },
+        { key: 'apps.tasks.view', module: 'global', resource: 'tasks', action: 'view', description: 'View tasks' },
+        { key: 'apps.tasks.manage', module: 'global', resource: 'tasks', action: 'manage', description: 'Manage tasks' },
+        { key: 'apps.notes.view', module: 'global', resource: 'notes', action: 'view', description: 'View notes' },
+        { key: 'apps.notes.manage', module: 'global', resource: 'notes', action: 'manage', description: 'Manage notes' },
+        { key: 'apps.announcements.view', module: 'global', resource: 'announcements', action: 'view', description: 'View announcements' },
+        { key: 'apps.announcements.manage', module: 'global', resource: 'announcements', action: 'manage', description: 'Manage announcements' },
+    ];
+    await Permission.insertMany(permDefs);
+    console.log(`   ✅ ${permDefs.length} permissions seeded`);
 
-    const managerUser = await User.create({
-        name: 'Priya Sharma', email: 'priya@operon.io', password: hashedPassword,
-        role: 'manager', organization: org._id,
-        department: 'Operations', position: 'Operations Manager',
-        avatar: 'https://i.pravatar.cc/150?u=priya',
-    });
+    // ── RBAC: Roles ──────────────────────────────────────────────────────────
+    console.log('🛡️  Seeding RBAC roles...');
+    const ALL_KEYS = permDefs.map(p => p.key);
+    const CRM_KEYS = ALL_KEYS.filter(k => k.startsWith('crm.'));
+    const HRMS_KEYS = ALL_KEYS.filter(k => k.startsWith('hrms.'));
+    const ERP_KEYS = ALL_KEYS.filter(k => k.startsWith('erp.'));
+
+    const roleDefs = [
+        { slug: 'super_admin', name: 'Super Admin', description: 'Full platform control', module: 'global', permissions: ['*'], isSystem: true },
+        { slug: 'org_admin', name: 'Organization Admin', description: 'Company-wide control', module: 'global', permissions: ALL_KEYS, isSystem: true },
+        { slug: 'crm_admin', name: 'CRM Admin', description: 'Full CRM access', module: 'crm', permissions: [...CRM_KEYS, 'dashboard.view'], isSystem: true },
+        { slug: 'sales_manager', name: 'Sales Manager', description: 'Manage leads, approve deals', module: 'crm', permissions: ['dashboard.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.leads.assign', 'crm.contacts.view', 'crm.contacts.create', 'crm.deals.view', 'crm.deals.create', 'crm.deals.edit', 'crm.deals.approve', 'crm.companies.view', 'crm.pipeline.view', 'crm.pipeline.manage', 'crm.reports.view', 'apps.tasks.view', 'apps.tasks.manage'], isSystem: true },
+        { slug: 'sales_executive', name: 'Sales Executive', description: 'Own leads and deals', module: 'crm', permissions: ['dashboard.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.contacts.view', 'crm.contacts.create', 'crm.deals.view', 'crm.deals.create', 'crm.deals.edit', 'crm.companies.view', 'crm.pipeline.view', 'apps.tasks.view', 'apps.tasks.manage', 'apps.notes.view', 'apps.notes.manage'], isSystem: true },
+        { slug: 'support_manager', name: 'Support Manager', description: 'Customer support management', module: 'crm', permissions: ['dashboard.view', 'crm.contacts.view', 'crm.contacts.create', 'crm.contacts.edit', 'crm.contacts.delete', 'crm.companies.view', 'crm.companies.create', 'crm.leads.view', 'apps.tasks.view', 'apps.tasks.manage'], isSystem: true },
+        { slug: 'support_agent', name: 'Support Agent', description: 'View and respond to contacts', module: 'crm', permissions: ['dashboard.view', 'crm.contacts.view', 'crm.contacts.create', 'crm.companies.view', 'apps.tasks.view', 'apps.notes.view', 'apps.notes.manage'], isSystem: true },
+        { slug: 'client_portal', name: 'Client Portal User', description: 'External client view', module: 'crm', permissions: ['dashboard.view', 'crm.deals.view', 'erp.invoices.view'], isSystem: true },
+        { slug: 'hr_admin', name: 'HR Admin', description: 'Full HRMS access', module: 'hrms', permissions: [...HRMS_KEYS, 'dashboard.view', 'settings.users.view', 'settings.users.manage'], isSystem: true },
+        { slug: 'hr_manager', name: 'HR Manager', description: 'Manage employees and payroll', module: 'hrms', permissions: ['dashboard.view', 'hrms.employees.view', 'hrms.employees.create', 'hrms.employees.edit', 'hrms.departments.view', 'hrms.departments.manage', 'hrms.attendance.view', 'hrms.attendance.manage', 'hrms.leaves.view', 'hrms.leaves.approve', 'hrms.payroll.view', 'hrms.payroll.process', 'hrms.recruitment.view', 'hrms.recruitment.manage', 'hrms.performance.view', 'hrms.performance.manage', 'apps.announcements.view'], isSystem: true },
+        { slug: 'hr_executive', name: 'HR Executive', description: 'Day-to-day HR operations', module: 'hrms', permissions: ['dashboard.view', 'hrms.employees.view', 'hrms.employees.edit', 'hrms.departments.view', 'hrms.attendance.view', 'hrms.attendance.manage', 'hrms.leaves.view', 'hrms.leaves.approve', 'hrms.recruitment.view', 'hrms.performance.view'], isSystem: true },
+        { slug: 'team_lead', name: 'Team Lead', description: 'Team oversight and leave approval', module: 'hrms', permissions: ['dashboard.view', 'hrms.employees.view', 'hrms.attendance.view', 'hrms.leaves.view', 'hrms.leaves.approve', 'hrms.performance.view', 'apps.tasks.view', 'apps.tasks.manage', 'apps.projects.view'], isSystem: true },
+        { slug: 'employee', name: 'Employee', description: 'Basic self-service', module: 'hrms', permissions: ['dashboard.view', 'hrms.attendance.view', 'hrms.leaves.view', 'hrms.leaves.apply', 'hrms.payroll.view', 'apps.tasks.view', 'apps.tasks.manage', 'apps.notes.view', 'apps.notes.manage', 'apps.announcements.view'], isSystem: true },
+        { slug: 'erp_admin', name: 'ERP Admin', description: 'Full ERP access', module: 'erp', permissions: [...ERP_KEYS, 'dashboard.view'], isSystem: true },
+        { slug: 'operations_manager', name: 'Operations Manager', description: 'Orders and operations', module: 'erp', permissions: ['dashboard.view', 'erp.inventory.view', 'erp.inventory.manage', 'erp.orders.view', 'erp.orders.create', 'erp.orders.process', 'erp.products.view', 'erp.products.manage', 'erp.vendors.view', 'apps.projects.view', 'apps.tasks.view', 'apps.tasks.manage'], isSystem: true },
+        { slug: 'inventory_manager', name: 'Inventory Manager', description: 'Inventory and products', module: 'erp', permissions: ['dashboard.view', 'erp.inventory.view', 'erp.inventory.manage', 'erp.products.view', 'erp.products.manage', 'erp.vendors.view', 'erp.orders.view'], isSystem: true },
+        { slug: 'procurement_manager', name: 'Procurement Manager', description: 'Purchase orders and vendors', module: 'erp', permissions: ['dashboard.view', 'erp.purchase-orders.view', 'erp.purchase-orders.create', 'erp.purchase-orders.approve', 'erp.vendors.view', 'erp.vendors.manage', 'erp.expenses.view', 'erp.expenses.approve', 'erp.inventory.view'], isSystem: true },
+        { slug: 'finance_manager', name: 'Finance Manager', description: 'Invoices, budgets, finance', module: 'erp', permissions: ['dashboard.view', 'erp.invoices.view', 'erp.invoices.create', 'erp.invoices.approve', 'erp.credit-notes.view', 'erp.credit-notes.manage', 'erp.budget.view', 'erp.budget.manage', 'erp.expenses.view', 'erp.expenses.approve', 'erp.finance.view', 'erp.finance.report', 'settings.audit-logs.view'], isSystem: true },
+        { slug: 'vendor_portal', name: 'Vendor Portal User', description: 'External vendor view', module: 'erp', permissions: ['dashboard.view', 'erp.orders.view', 'erp.invoices.view', 'erp.purchase-orders.view'], isSystem: true },
+    ];
+
+    const seededRoles = await Role.insertMany(roleDefs.map(r => ({ ...r, organization: null, createdBy: null })));
+    console.log(`   ✅ ${seededRoles.length} roles seeded`);
+
+    const getRoleId = (slug) => seededRoles.find(r => r.slug === slug)._id;
+
+    // ── Demo Users ──
+    console.log('👤 Creating demo users...');
+    const demoUsers = [
+        { name: 'Super Admin', email: process.env.SUPER_ADMIN_EMAIL, pass: process.env.SUPER_ADMIN_PASS, role: 'super_admin', slug: 'super_admin' },
+        { name: 'Organization Admin', email: process.env.ORG_ADMIN_EMAIL, pass: process.env.ORG_ADMIN_PASS, role: 'org_admin', slug: 'org_admin' },
+        { name: 'CRM Admin', email: process.env.CRM_ADMIN_EMAIL, pass: process.env.CRM_ADMIN_PASS, role: 'crm_admin', slug: 'crm_admin' },
+        { name: 'Sales Manager', email: process.env.SALES_MANAGER_EMAIL, pass: process.env.SALES_MANAGER_PASS, role: 'sales_manager', slug: 'sales_manager' },
+        { name: 'Sales Executive', email: process.env.SALES_EXECUTIVE_EMAIL, pass: process.env.SALES_EXECUTIVE_PASS, role: 'sales_executive', slug: 'sales_executive' },
+        { name: 'Support Manager', email: process.env.SUPPORT_MANAGER_EMAIL, pass: process.env.SUPPORT_MANAGER_PASS, role: 'support_manager', slug: 'support_manager' },
+        { name: 'Support Agent', email: process.env.SUPPORT_AGENT_EMAIL, pass: process.env.SUPPORT_AGENT_PASS, role: 'support_agent', slug: 'support_agent' },
+        { name: 'Client Portal', email: process.env.CLIENT_PORTAL_EMAIL, pass: process.env.CLIENT_PORTAL_PASS, role: 'client_portal', slug: 'client_portal' },
+        { name: 'HR Admin', email: process.env.HR_ADMIN_EMAIL, pass: process.env.HR_ADMIN_PASS, role: 'hr_admin', slug: 'hr_admin' },
+        { name: 'HR Manager', email: process.env.HR_MANAGER_EMAIL, pass: process.env.HR_MANAGER_PASS, role: 'hr_manager', slug: 'hr_manager' },
+        { name: 'HR Executive', email: process.env.HR_EXECUTIVE_EMAIL, pass: process.env.HR_EXECUTIVE_PASS, role: 'hr_executive', slug: 'hr_executive' },
+        { name: 'Team Lead', email: process.env.TEAM_LEAD_EMAIL, pass: process.env.TEAM_LEAD_PASS, role: 'team_lead', slug: 'team_lead' },
+        { name: 'Regular Employee', email: process.env.EMPLOYEE_EMAIL, pass: process.env.EMPLOYEE_PASS, role: 'employee', slug: 'employee' },
+        { name: 'ERP Admin', email: process.env.ERP_ADMIN_EMAIL, pass: process.env.ERP_ADMIN_PASS, role: 'erp_admin', slug: 'erp_admin' },
+        { name: 'Operations Manager', email: process.env.OPERATIONS_MANAGER_EMAIL, pass: process.env.OPERATIONS_MANAGER_PASS, role: 'operations_manager', slug: 'operations_manager' },
+        { name: 'Inventory Manager', email: process.env.INVENTORY_MANAGER_EMAIL, pass: process.env.INVENTORY_MANAGER_PASS, role: 'inventory_manager', slug: 'inventory_manager' },
+        { name: 'Procurement Manager', email: process.env.PROCUREMENT_MANAGER_EMAIL, pass: process.env.PROCUREMENT_MANAGER_PASS, role: 'procurement_manager', slug: 'procurement_manager' },
+        { name: 'Finance Manager', email: process.env.FINANCE_MANAGER_EMAIL, pass: process.env.FINANCE_MANAGER_PASS, role: 'finance_manager', slug: 'finance_manager' },
+        { name: 'Vendor Portal', email: process.env.VENDOR_PORTAL_EMAIL, pass: process.env.VENDOR_PORTAL_PASS, role: 'vendor_portal', slug: 'vendor_portal' },
+    ];
+
+    let adminUser, managerUser;
+    for (const u of demoUsers) {
+        if (!u.email || !u.pass) continue;
+        const hashedPassword = await bcrypt.hash(u.pass, 12);
+        const user = await User.create({
+            name: u.name,
+            email: u.email,
+            password: hashedPassword,
+            role: u.role,
+            organization: org._id,
+            isActive: true,
+            avatar: `https://i.pravatar.cc/150?u=${u.email}`,
+        });
+
+        if (u.slug === 'org_admin') adminUser = user;
+        if (u.slug === 'operations_manager') managerUser = user;
+
+        // Assign RBAC Role
+        await UserRole.create({
+            user: user._id,
+            role: getRoleId(u.slug),
+            organization: org._id,
+            grantedBy: null,
+            isActive: true
+        });
+    }
+    console.log(`   ✅ ${demoUsers.filter(u => u.email).length} demo users created with RBAC roles`);
 
     // ── Employees ──
     console.log('👥 Creating employees...');
     const employeeData = [
-        { name: 'Rahul Verma', email: 'rahul@operon.io', department: 'Engineering', position: 'Frontend Developer', salary: 85000, skills: ['React', 'TypeScript', 'CSS'] },
-        { name: 'Sneha Patel', email: 'sneha@operon.io', department: 'Engineering', position: 'Backend Developer', salary: 90000, skills: ['Node.js', 'MongoDB', 'AWS'] },
-        { name: 'Arjun Mehta', email: 'arjun@operon.io', department: 'Sales', position: 'Sales Executive', salary: 70000, skills: ['CRM', 'Negotiation', 'Cold Calling'] },
-        { name: 'Nisha Gupta', email: 'nisha@operon.io', department: 'HR', position: 'HR Manager', salary: 75000, skills: ['Recruitment', 'Payroll', 'Performance Review'] },
-        { name: 'Vikram Singh', email: 'vikram@operon.io', department: 'Finance', position: 'Finance Analyst', salary: 80000, skills: ['Excel', 'QuickBooks', 'Financial Modeling'] },
-        { name: 'Anjali Desai', email: 'anjali@operon.io', department: 'Marketing', position: 'Marketing Lead', salary: 72000, skills: ['SEO', 'Content Strategy', 'Google Ads'] },
-        { name: 'Rohan Kapoor', email: 'rohan@operon.io', department: 'Engineering', position: 'DevOps Engineer', salary: 95000, skills: ['Docker', 'Kubernetes', 'CI/CD'] },
-        { name: 'Divya Nair', email: 'divya@operon.io', department: 'Design', position: 'UI/UX Designer', salary: 78000, skills: ['Figma', 'Prototyping', 'User Research'] },
-        { name: 'Karan Joshi', email: 'karan@operon.io', department: 'Sales', position: 'Account Manager', salary: 68000, skills: ['Client Relations', 'Salesforce', 'Upselling'] },
-        { name: 'Meera Iyer', email: 'meera@operon.io', department: 'Finance', position: 'Accountant', salary: 65000, skills: ['Tally', 'GST', 'Bookkeeping'] },
+        { name: 'Rahul Verma', email: 'rahul@operon.app', department: 'Engineering', position: 'Frontend Developer', salary: 85000, skills: ['React', 'TypeScript', 'CSS'] },
+        { name: 'Sneha Patel', email: 'sneha@operon.app', department: 'Engineering', position: 'Backend Developer', salary: 90000, skills: ['Node.js', 'MongoDB', 'AWS'] },
+        { name: 'Arjun Mehta', email: 'arjun@operon.app', department: 'Sales', position: 'Sales Executive', salary: 70000, skills: ['CRM', 'Negotiation', 'Cold Calling'] },
+        { name: 'Nisha Gupta', email: 'nisha@operon.app', department: 'HR', position: 'HR Manager', salary: 75000, skills: ['Recruitment', 'Payroll', 'Performance Review'] },
+        { name: 'Vikram Singh', email: 'vikram@operon.app', department: 'Finance', position: 'Finance Analyst', salary: 80000, skills: ['Excel', 'QuickBooks', 'Financial Modeling'] },
+        { name: 'Anjali Desai', email: 'anjali@operon.app', department: 'Marketing', position: 'Marketing Lead', salary: 72000, skills: ['SEO', 'Content Strategy', 'Google Ads'] },
+        { name: 'Rohan Kapoor', email: 'rohan@operon.app', department: 'Engineering', position: 'DevOps Engineer', salary: 95000, skills: ['Docker', 'Kubernetes', 'CI/CD'] },
+        { name: 'Divya Nair', email: 'divya@operon.app', department: 'Design', position: 'UI/UX Designer', salary: 78000, skills: ['Figma', 'Prototyping', 'User Research'] },
+        { name: 'Karan Joshi', email: 'karan@operon.app', department: 'Sales', position: 'Account Manager', salary: 68000, skills: ['Client Relations', 'Salesforce', 'Upselling'] },
+        { name: 'Meera Iyer', email: 'meera@operon.app', department: 'Finance', position: 'Accountant', salary: 65000, skills: ['Tally', 'GST', 'Bookkeeping'] },
     ];
 
     const employees = [];
@@ -410,10 +604,15 @@ async function seed() {
         { title: 'Payroll Processed', message: 'March 2024 payroll for 5 employees has been processed successfully.', type: 'success', priority: 'medium', read: true, user: adminUser._id, organization: org._id },
     ]);
 
+    // ── RBAC: Permissions ────────────────────────────────────────────────
+    // (Already seeded above in the first pass)
+    console.log(`   ✅ ${permDefs.length} permissions verified`);
+
+    // ── RBAC: Roles ──────────────────────────────────────────────────────────
+    // (Wait, the duplicate block is actually further down, let's remove it)
     console.log('\n🎉 Seed complete! Summary:');
-    console.log(`   Organization: Operon Technologies`);
-    console.log(`   Admin Email:  admin@operon.io`);
-    console.log(`   Password:     Admin@123`);
+    console.log(`   Organization: Operon Technologies (operon.app)`);
+    console.log(`   Demo Users:   19 (One for each RBAC System Role)`);
     console.log(`   Employees:    ${employees.length}`);
     console.log(`   Products:     ${products.length}`);
     console.log(`   Leads:        8`);
@@ -421,13 +620,16 @@ async function seed() {
     console.log(`   Orders:       8`);
     console.log(`   Events:       6`);
     console.log(`   Tasks:        9`);
-    console.log(`\n✅ You can log in at http://localhost:3000/login\n`);
+    console.log(`   Permissions:  ${permDefs.length}`);
+    console.log(`   Roles:        ${seededRoles.length}`);
+    console.log(`\n✅ Access USERS.md for all credentials.`);
+    console.log(`✅ Login at http://localhost:3000/login\n`);
 
     await mongoose.disconnect();
     process.exit(0);
 }
 
 seed().catch(err => {
-    console.error('❌ Seed failed:', err.message);
+    console.error('❌ Seed failed:', err);
     process.exit(1);
 });

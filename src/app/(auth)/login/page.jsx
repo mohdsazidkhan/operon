@@ -27,7 +27,7 @@ export default function LoginPage() {
     };
 
     const fillDemo = () => {
-        setValue('email', 'admin@operon.io');
+        setValue('email', 'admin@operon.app');
         setValue('password', 'Admin@123');
     };
 
@@ -170,19 +170,51 @@ export default function LoginPage() {
                         </div>
                     </form>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         <div className="relative">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border)] opacity-50"></div></div>
-                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest"><span className="bg-[var(--surface-raised)] px-4 text-[var(--text-muted)]">Quick Login</span></div>
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border)] opacity-30"></div></div>
+                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest"><span className="bg-[var(--surface-raised)] px-4 text-[var(--text-muted)]">Quick Access</span></div>
                         </div>
 
-                        <button onClick={fillDemo} type="button" className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[var(--surface-overlay)] transition-all">
-                            <Zap size={14} className="text-amber-500" /> Use Demo Credentials
-                        </button>
+                        <div className="flex flex-col gap-3">
+                            <select
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (!val) return;
+                                    const [email, pass] = val.split('|');
+                                    setValue('email', email);
+                                    setValue('password', pass);
+                                    toast.success(`${email.split('@')[0]} loaded`);
+                                }}
+                                className="w-full h-14 px-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] text-[11px] font-bold uppercase tracking-wider focus:outline-none focus:border-primary-500 transition-all cursor-pointer"
+                            >
+                                <option value="">Select Demo Role...</option>
+                                <optgroup label="Global Roles">
+                                    <option value="superadmin@operon.app|SuperAdmin@123">Super Admin</option>
+                                    <option value="admin@operon.app|Admin@123">Organization Admin</option>
+                                </optgroup>
+                                <optgroup label="CRM Roles">
+                                    <option value="crmadmin@operon.app|CrmAdmin@123">CRM Admin</option>
+                                    <option value="salesmanager@operon.app|SalesManager@123">Sales Manager</option>
+                                    <option value="supportmanager@operon.app|SupportManager@123">Support Manager</option>
+                                </optgroup>
+                                <optgroup label="HRMS Roles">
+                                    <option value="hradmin@operon.app|HrAdmin@123">HR Admin</option>
+                                    <option value="hrmanager@operon.app|HrManager@123">HR Manager</option>
+                                    <option value="teamlead@operon.app|TeamLead@123">Team Lead</option>
+                                    <option value="employee@operon.app|Employee@123">Regular Employee</option>
+                                </optgroup>
+                                <optgroup label="ERP Roles">
+                                    <option value="erpadmin@operon.app|ErpAdmin@123">ERP Admin</option>
+                                    <option value="opsmanager@operon.app|OpsManager@123">Operations Manager</option>
+                                    <option value="finance@operon.app|Finance@123">Finance Manager</option>
+                                </optgroup>
+                            </select>
 
-                        <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                            No account? <Link href="/register" className="text-primary-500 hover:text-primary-600 transition-colors">Create Account</Link>
-                        </p>
+                            <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] pt-2">
+                                No account? <Link href="/register" className="text-primary-500 hover:text-primary-600 transition-colors">Create Account</Link>
+                            </p>
+                        </div>
                     </div>
                 </motion.div>
             </div>
