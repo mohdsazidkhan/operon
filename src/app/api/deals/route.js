@@ -47,8 +47,11 @@ export async function POST(req) {
 
         const body = await req.json();
         await dbConnect();
+        const requiresApproval = body.value > 50000;
         const deal = await Deal.create({
             ...body,
+            requiresApproval,
+            approvalStatus: requiresApproval ? 'pending' : 'approved',
             organization: user.organization,
             owner: body.owner || user._id,
         });

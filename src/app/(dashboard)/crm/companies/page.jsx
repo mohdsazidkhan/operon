@@ -5,6 +5,8 @@ import { Plus, Globe, Building2, Edit, Trash2, Search, ExternalLink } from 'luci
 import { formatCurrency, cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
+import Can from '@/components/ui/Can';
+import { usePermission } from '@/hooks/usePermission';
 
 const industryColors = {
     Technology: 'bg-blue-500 shadow-blue-500/20',
@@ -21,8 +23,11 @@ export default function CompaniesPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showAdd, setShowAdd] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_COMPANY);
+
+    const canCreate = usePermission('crm.companies.create');
 
     const fetchCompanies = async () => {
         setLoading(true);
@@ -43,33 +48,54 @@ export default function CompaniesPage() {
         fetchCompanies();
     }, [search]);
 
-    const handleAdd = async (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
         try {
-            const res = await fetch('/api/companies', {
-                method: 'POST',
+            const url = editingId ? `/api/companies/${editingId}` : '/api/companies';
+            const method = editingId ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form)
             });
             const data = await res.json();
             if (data.success) {
-                toast.success('Company created!');
+                toast.success(editingId ? 'Company updated!' : 'Company created!');
                 setShowAdd(false);
+                setEditingId(null);
                 setForm(EMPTY_COMPANY);
                 fetchCompanies();
             } else {
-                toast.error(data.message || 'Failed to create company');
+                toast.error(data.message || 'Action failed');
             }
-        } catch { toast.error('Failed to create company'); }
+        } catch { toast.error('Request failed'); }
         finally { setSaving(false); }
+    };
+
+    const handleEdit = (company) => {
+        setForm({ ...company });
+        setEditingId(company._id);
+        setShowAdd(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Delete this company? This will also affect linked deals/leads.')) return;
+        try {
+            const res = await fetch(`/api/companies/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Company deleted');
+                fetchCompanies();
+            } else toast.error(data.message);
+        } catch { toast.error('Delete failed'); }
     };
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Add Company Modal */}
-            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Company" size="lg">
-                <form onSubmit={handleAdd} className="space-y-4">
+            {/* Company Modal */}
+            <Modal isOpen={showAdd} onClose={() => { setShowAdd(false); setEditingId(null); setForm(EMPTY_COMPANY); }} title={editingId ? "Edit Company" : "Add New Company"} size="lg">
+                <form onSubmit={handleFormSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Company Name" required>
                             <input required className={inputCls} placeholder="e.g. Acme Corp" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
@@ -106,7 +132,7 @@ export default function CompaniesPage() {
                             </FormField>
                         </div>
                     </div>
-                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Create Company" />
+                    <FormActions onClose={() => { setShowAdd(false); setEditingId(null); setForm(EMPTY_COMPANY); }} loading={saving} submitLabel={editingId ? "Save Changes" : "Create Company"} />
                 </form>
             </Modal>
 
@@ -122,12 +148,14 @@ export default function CompaniesPage() {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search accounts..."
-                            className="pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/40 focus:border-[var(--primary-500)] transition-all w-64"
+                            className="pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-4 focus:ring-[var(--primary-500)]/10 focus:border-[var(--primary-500)] transition-all w-64 shadow-sm"
                         />
                     </div>
-                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
-                        <Plus size={16} /> New Company
-                    </button>
+                    <Can permission="crm.companies.create">
+                        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-bold text-sm transition-all shadow-xl shadow-[var(--primary-500)]/20 active:scale-95">
+                            <Plus size={18} /> New Company
+                        </button>
+                    </Can>
                 </div>
             </div>
 
@@ -161,9 +189,13 @@ export default function CompaniesPage() {
                                         <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{co.industry}</p>
                                     </div>
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
-                                    <button className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all border border-transparent hover:border-[var(--border)]"><Edit size={16} /></button>
-                                    <button className="p-2 rounded-lg hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all border border-transparent hover:border-rose-500/20"><Trash2 size={16} /></button>
+                                <div className="flex gap-2 sm:opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                                    <Can permission="crm.companies.edit">
+                                        <button onClick={() => handleEdit(co)} className="p-3 rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] transition-all border border-[var(--border)] active:scale-90"><Edit size={16} /></button>
+                                    </Can>
+                                    <Can permission="crm.companies.delete">
+                                        <button onClick={() => handleDelete(co._id)} className="p-3 rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all border border-rose-500/20 active:scale-90"><Trash2 size={16} /></button>
+                                    </Can>
                                 </div>
                             </div>
 

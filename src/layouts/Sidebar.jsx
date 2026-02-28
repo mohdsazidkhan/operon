@@ -10,7 +10,7 @@ import {
     Gift, PieChart, X, Handshake, Truck, UserPlus, Star,
     FolderKanban, StickyNote, Megaphone as MegaphoneIcon, ShieldCheck
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -96,6 +96,11 @@ export default function Sidebar({ collapsed }) {
     const { isDark, logoSize, setSidebarOpen } = useThemeStore();
     const { hasPermission } = useAuthStore();
     const [expandedSections, setExpandedSections] = useState(['DASHBOARDS', 'CRM', 'ERP', 'HRMS', 'APPS']);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const toggleSection = (label) => {
         setExpandedSections(prev =>
@@ -104,7 +109,13 @@ export default function Sidebar({ collapsed }) {
     };
 
     // Filter items by permission — no permission key means always visible
-    const filterItems = (items) => items.filter(item => !item.permission || hasPermission(item.permission));
+    // During hydration (isMounted=false), we only show items that don't require permissions
+    // to match the server output and avoid mismatches.
+    const filterItems = (items) => items.filter(item => {
+        if (!item.permission) return true;
+        if (!isMounted) return false;
+        return hasPermission(item.permission);
+    });
 
 
 

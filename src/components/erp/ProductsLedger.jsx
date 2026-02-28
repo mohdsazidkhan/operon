@@ -8,8 +8,8 @@ import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
 const EMPTY_PRODUCT = { name: '', sku: '', description: '', category: '', price: '', cost: '', stock: '', unit: 'piece', status: 'active' };
 
-export default function ProductsLedger({ initialProducts }) {
-    const [products, setProducts] = useState(initialProducts);
+export default function ProductsLedger({ initialProducts = [] }) {
+    const [products, setProducts] = useState(initialProducts || []);
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('ALL');
     const [showAdd, setShowAdd] = useState(false);

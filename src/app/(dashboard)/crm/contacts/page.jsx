@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Mail, Phone, Building2, Eye, MoreHorizontal, Users } from 'lucide-react';
-import { formatDate, cn } from '@/lib/utils';
+import Can from '@/components/ui/Can';
+import { usePermission } from '@/hooks/usePermission';
+import { Plus, Search, Users, Edit, Trash2, Mail, Phone, Building2, Eye } from 'lucide-react';
+import { cn, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 
@@ -14,6 +16,7 @@ export default function ContactsPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showAdd, setShowAdd] = useState(false);
+    const [editingContact, setEditingContact] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_CONTACT);
 
@@ -22,9 +25,7 @@ export default function ContactsPage() {
         try {
             const res = await fetch(`/api/contacts?search=${search}`);
             const data = await res.json();
-            if (data.success) {
-                setContacts(data.data);
-            }
+            if (data.success) setContacts(data.data);
         } catch (err) {
             console.error('Failed to fetch contacts:', err);
         } finally {
@@ -47,38 +48,53 @@ export default function ContactsPage() {
         fetchCompanies();
     }, [search]);
 
-    const handleAdd = async (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
         try {
-            // Prepare body, handling nested address if needed by schema (Contact schema has address: {city, country})
             const body = {
                 ...form,
                 address: { city: form.city, country: form.country }
             };
-            const res = await fetch('/api/contacts', {
-                method: 'POST',
+            const url = editingContact ? `/api/contacts/${editingContact._id}` : '/api/contacts';
+            const method = editingContact ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             const data = await res.json();
             if (data.success) {
-                toast.success('Contact created!');
+                toast.success(editingContact ? 'Contact updated!' : 'Contact created!');
                 setShowAdd(false);
+                setEditingContact(null);
                 setForm(EMPTY_CONTACT);
                 fetchContacts();
             } else {
-                toast.error(data.message || 'Failed to create contact');
+                toast.error(data.message || 'Action failed');
             }
-        } catch { toast.error('Failed to create contact'); }
+        } catch { toast.error('Request failed'); }
         finally { setSaving(false); }
     };
 
+    const handleDelete = async (id) => {
+        if (!window.confirm('Archive this contact permanently?')) return;
+        try {
+            const res = await fetch(`/api/contacts/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Contact removed');
+                fetchContacts();
+            }
+        } catch { toast.error('Deletion failed'); }
+    };
+
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Add Contact Modal */}
-            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Contact" size="lg">
-                <form onSubmit={handleAdd} className="space-y-4">
+        <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+            {/* Add/Edit Modal */}
+            <Modal isOpen={showAdd} onClose={() => { setShowAdd(false); setEditingContact(null); setForm(EMPTY_CONTACT); }} title={editingContact ? "Update Connection" : "Acquire New Contact"} size="lg">
+                <form onSubmit={handleFormSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Full Name" required>
                             <input required className={inputCls} placeholder="e.g. Jane Doe" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
@@ -92,9 +108,9 @@ export default function ContactsPage() {
                         <FormField label="Phone">
                             <input className={inputCls} placeholder="e.g. +1 (555) 000-0000" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
                         </FormField>
-                        <FormField label="Company">
+                        <FormField label="Link Company">
                             <select className={inputCls} value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))}>
-                                <option value="">Select Company</option>
+                                <option value="">Independent Entity</option>
                                 {companies.map(co => (
                                     <option key={co._id} value={co._id}>{co.name}</option>
                                 ))}
@@ -102,94 +118,111 @@ export default function ContactsPage() {
                         </FormField>
                         <div className="grid grid-cols-2 gap-2">
                             <FormField label="City">
-                                <input className={inputCls} placeholder="e.g. New York" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} />
+                                <input className={inputCls} placeholder="City" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} />
                             </FormField>
                             <FormField label="Country">
-                                <input className={inputCls} placeholder="e.g. USA" value={form.country} onChange={e => setForm(p => ({ ...p, country: e.target.value }))} />
+                                <input className={inputCls} placeholder="Country" value={form.country} onChange={e => setForm(p => ({ ...p, country: e.target.value }))} />
                             </FormField>
                         </div>
                     </div>
-                    <FormActions onClose={() => setShowAdd(false)} loading={saving} submitLabel="Create Contact" />
+                    <FormActions onClose={() => { setShowAdd(false); setEditingContact(null); }} loading={saving} submitLabel={editingContact ? "Sync Changes" : "Create Record"} />
                 </form>
             </Modal>
 
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--text-primary)]">Contacts</h1>
-                    <p className="text-[var(--text-muted)] text-sm mt-0.5">{contacts.length} people in your network</p>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter uppercase italic">Contacts</h1>
+                    <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.4em] mt-1">{contacts.length} VERIFIED CONNECTIONS</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                    <div className="relative group">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary-500)] transition-colors" />
                         <input
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Search contacts..."
-                            className="pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/40 focus:border-[var(--primary-500)] transition-all w-64"
+                            placeholder="QUERY NETWORK..."
+                            className="pl-10 pr-4 py-3 rounded-2xl text-[10px] font-black bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-[var(--primary-500)]/10 transition-all w-64 shadow-inner"
                         />
                     </div>
-                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">
-                        <Plus size={16} /> New Contact
-                    </button>
+                    <Can permission="crm.contacts.create">
+                        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-6 py-3 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:scale-105 active:scale-95">
+                            <Plus size={16} /> Connection
+                        </button>
+                    </Can>
                 </div>
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-48 bg-[var(--surface-overlay)] animate-pulse rounded-2xl border border-[var(--border)]"></div>
+                        <div key={i} className="h-48 bg-[var(--surface-overlay)] animate-pulse rounded-[2.5rem] border border-[var(--border)]"></div>
                     ))}
                 </div>
             ) : contacts.length === 0 ? (
-                <div className="bg-[var(--surface-overlay)] rounded-2xl border border-[var(--border)] p-12 text-center">
-                    <Users size={48} className="mx-auto text-[var(--border-strong)] mb-4" />
-                    <p className="text-[var(--text-muted)]">No contacts found. Start building your CRM.</p>
+                <div className="bg-[var(--surface-overlay)]/50 rounded-[3rem] border-2 border-dashed border-[var(--border)] p-20 text-center">
+                    <Users size={48} className="mx-auto text-[var(--border)] mb-6 opacity-30" />
+                    <h3 className="text-sm font-black text-[var(--text-muted)] uppercase tracking-[0.5em]">No digital footprint found</h3>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {contacts.map(c => (
-                        <div key={c._id} className="bg-[var(--card-bg)] backdrop-blur-sm rounded-2xl border border-[var(--card-border)] p-6 shadow-xl hover:shadow-[var(--primary-500)]/5 hover:border-[var(--primary-500)]/30 transition-all group relative overflow-hidden">
-                            <div className="flex items-start justify-between mb-5 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[var(--primary-500)]/20 group-hover:scale-105 transition-transform duration-500">
+                        <div key={c._id} className="bg-[var(--card-bg)] backdrop-blur-3xl rounded-[2.5rem] border border-[var(--card-border)] p-8 shadow-2xl hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] hover:border-[var(--primary-500)]/40 transition-all duration-500 group relative overflow-hidden flex flex-col">
+                            {/* Accent Glow */}
+                            <div className="absolute -top-12 -right-12 w-32 h-32 bg-[var(--primary-500)] opacity-0 group-hover:opacity-10 blur-[50px] transition-opacity"></div>
+
+                            <div className="flex items-start justify-between mb-8 relative z-10">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-[var(--surface-overlay)] to-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--primary-500)] font-black text-2xl shadow-xl transition-all group-hover:scale-110 group-hover:bg-[var(--primary-500)] group-hover:text-white duration-500">
                                         {c.name?.[0] || 'C'}
                                     </div>
                                     <div>
-                                        <p className="font-bold text-lg text-[var(--text-primary)] group-hover:text-[var(--primary-500)] transition-colors uppercase tracking-tight">{c.name}</p>
-                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-widest">{c.title || 'Professional contact'}</p>
+                                        <p className="font-black text-sm text-[var(--text-primary)] group-hover:text-[var(--primary-500)] transition-colors uppercase tracking-tight leading-none">{c.name}</p>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-2 opacity-60 italic">{c.position || 'Independent'}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
-                                    <button className="p-2 rounded-lg hover:bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"><Edit size={16} /></button>
-                                    <button className="p-2 rounded-lg hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all"><Trash2 size={16} /></button>
+                                    <Can permission="crm.contacts.edit">
+                                        <button onClick={() => {
+                                            setForm({ ...c, city: c.address?.city || '', country: c.address?.country || '', company: c.company?._id || c.company || '' });
+                                            setEditingContact(c);
+                                            setShowAdd(true);
+                                        }} className="p-2.5 rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all">
+                                            <Edit size={16} />
+                                        </button>
+                                    </Can>
+                                    <Can permission="crm.contacts.delete">
+                                        <button onClick={() => handleDelete(c._id)} className="p-2.5 rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/20 transition-all">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </Can>
                                 </div>
                             </div>
 
-                            <div className="space-y-3 relative z-10">
-                                <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group/item">
-                                    <div className="w-8 h-8 rounded-lg bg-[var(--surface-overlay)] flex items-center justify-center group-hover/item:text-[var(--primary-500)] transition-colors">
-                                        <Mail size={14} />
+                            <div className="space-y-4 relative z-10 flex-1">
+                                <div className="flex items-center gap-4 text-[10px] font-black text-[var(--text-muted)] group/item cursor-pointer">
+                                    <div className="w-8 h-8 rounded-xl bg-[var(--surface-overlay)] flex items-center justify-center border border-[var(--border)] group-hover/item:border-[var(--primary-500)]/30 transition-colors">
+                                        <Mail size={12} className="opacity-60" />
                                     </div>
-                                    <span className="truncate">{c.email}</span>
+                                    <span className="truncate tracking-widest">{c.email}</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group/item">
-                                    <div className="w-8 h-8 rounded-lg bg-[var(--surface-overlay)] flex items-center justify-center group-hover/item:text-[var(--primary-500)] transition-colors">
-                                        <Phone size={14} />
+                                <div className="flex items-center gap-4 text-[10px] font-black text-[var(--text-muted)] group/item cursor-pointer">
+                                    <div className="w-8 h-8 rounded-xl bg-[var(--surface-overlay)] flex items-center justify-center border border-[var(--border)] group-hover/item:border-[var(--primary-500)]/30 transition-colors">
+                                        <Phone size={12} className="opacity-60" />
                                     </div>
-                                    <span>{c.phone || 'No phone'}</span>
+                                    <span className="tracking-widest">{c.phone || 'NO-PROTOCOL'}</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group/item">
-                                    <div className="w-8 h-8 rounded-lg bg-[var(--surface-overlay)] flex items-center justify-center group-hover/item:text-[var(--primary-500)] transition-colors">
-                                        <Building2 size={14} />
+                                <div className="flex items-center gap-4 text-[10px] font-black text-[var(--text-muted)] group/item cursor-pointer">
+                                    <div className="w-8 h-8 rounded-xl bg-[var(--surface-overlay)] flex items-center justify-center border border-[var(--border)] group-hover/item:border-[var(--primary-500)]/30 transition-colors">
+                                        <Building2 size={12} className="opacity-60" />
                                     </div>
-                                    <span className="truncate font-medium">{c.company?.name || 'Independent'}</span>
+                                    <span className="truncate tracking-widest">{c.company?.name || 'PRIVATE ENTITY'}</span>
                                 </div>
                             </div>
 
-                            <div className="mt-6 pt-5 border-t border-[var(--border)] flex items-center justify-between text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)] relative z-10">
-                                <span>Created {formatDate(c.createdAt)}</span>
-                                <button className="flex items-center gap-1 text-[var(--primary-500)] hover:text-[var(--primary-600)] transition-colors">
-                                    View full profile <Eye size={10} />
+                            <div className="mt-8 pt-6 border-t border-[var(--border)] border-dashed flex items-center justify-between text-[9px] font-black tracking-widest text-[var(--text-muted)] relative z-10">
+                                <span className="opacity-50">LOGGED: {formatDate(c.createdAt)}</span>
+                                <button className="flex items-center gap-1.5 text-[var(--primary-500)] hover:text-[var(--primary-600)] transition-colors uppercase">
+                                    DEPTH VIEW <Eye size={10} />
                                 </button>
                             </div>
                         </div>

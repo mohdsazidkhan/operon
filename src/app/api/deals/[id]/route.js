@@ -31,6 +31,18 @@ export async function PUT(req, { params }) {
         const { id } = params;
         const body = await req.json();
         await dbConnect();
+
+        if (body.value !== undefined) {
+            body.requiresApproval = body.value > 50000;
+            // If value decreased, maybe auto-approve? No, let's keep it safe.
+            // But if it increases, definitely set back to pending if it was rejected or approved.
+            if (body.requiresApproval) {
+                body.approvalStatus = 'pending';
+            } else {
+                body.approvalStatus = 'approved';
+            }
+        }
+
         const deal = await Deal.findByIdAndUpdate(id, body, { new: true, runValidators: true });
         if (!deal) return NextResponse.json({ success: false, message: 'Deal not found' }, { status: 404 });
 

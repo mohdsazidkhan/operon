@@ -30,6 +30,14 @@ const dealSchema = new mongoose.Schema({
     tags: [String],
     lostReason: { type: String },
     order: { type: Number, default: 0 },
+    approvalStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    approvalDate: { type: Date },
+    requiresApproval: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.models.Deal || mongoose.model('Deal', dealSchema);
