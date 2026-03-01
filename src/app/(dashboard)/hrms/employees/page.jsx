@@ -23,6 +23,11 @@ export default function EmployeesPage() {
     const [editingEmp, setEditingEmp] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_EMP);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const canViewSalary = usePermission('hrms.payroll.view');
 
@@ -143,14 +148,16 @@ export default function EmployeesPage() {
                         Current Strength • {employees.length} Personnel
                     </p>
                 </div>
-                <Can permission="hrms.employees.create">
-                    <button
-                        onClick={() => setShowAdd(true)}
-                        className="flex items-center gap-4 px-8 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95"
-                    >
-                        <UserPlus size={18} /> New Hire
-                    </button>
-                </Can>
+                {isMounted && (
+                    <Can permission="hrms.employees.create">
+                        <button
+                            onClick={() => setShowAdd(true)}
+                            className="flex items-center gap-4 px-8 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95"
+                        >
+                            <UserPlus size={18} /> New Hire
+                        </button>
+                    </Can>
+                )}
             </div>
 
             {/* Dept Filter */}
@@ -212,16 +219,20 @@ export default function EmployeesPage() {
                                     )}></div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Can permission="hrms.employees.edit">
-                                        <button onClick={() => { setForm({ ...emp }); setEditingEmp(emp); setShowAdd(true); }} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-lg active:scale-90" title="Modify Record">
-                                            <Edit size={16} />
-                                        </button>
-                                    </Can>
-                                    <Can permission="hrms.employees.delete">
-                                        <button onClick={() => handleDelete(emp._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-lg active:scale-90" title="Decommission Node">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </Can>
+                                    {isMounted && (
+                                        <>
+                                            <Can permission="hrms.employees.edit">
+                                                <button onClick={() => { setForm({ ...emp }); setEditingEmp(emp); setShowAdd(true); }} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-lg active:scale-90" title="Modify Record">
+                                                    <Edit size={16} />
+                                                </button>
+                                            </Can>
+                                            <Can permission="hrms.employees.delete">
+                                                <button onClick={() => handleDelete(emp._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-lg active:scale-90" title="Decommission Node">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </Can>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -253,11 +264,13 @@ export default function EmployeesPage() {
                                     <div>
                                         <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mb-2 opacity-50 italic">Financial Weight</p>
                                         <div className="flex items-center gap-3">
-                                            <Can permission="hrms.payroll.view">
-                                                <span className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">
-                                                    {emp.salary ? formatCurrency(emp.salary) : '—'}
-                                                </span>
-                                            </Can>
+                                            {isMounted && (
+                                                <Can permission="hrms.payroll.view">
+                                                    <span className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">
+                                                        {emp.salary ? formatCurrency(emp.salary) : '—'}
+                                                    </span>
+                                                </Can>
+                                            )}
                                             {!canViewSalary && (
                                                 <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface-overlay)] rounded-xl border border-[var(--border)] shadow-inner">
                                                     <ShieldCheck size={14} className="text-emerald-500" />

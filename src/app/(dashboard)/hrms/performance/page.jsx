@@ -43,6 +43,11 @@ export default function PerformancePage() {
     const [editRev, setEditRev] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_FORM);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const fetchReviews = async () => {
         setLoading(true);
@@ -169,12 +174,14 @@ export default function PerformancePage() {
                         Operational Evaluation Analytics • {reviews.length} Audits Completed
                     </p>
                 </div>
-                <Can permission="hrms.performance.manage">
-                    <button onClick={() => { setForm(EMPTY_FORM); setEditRev(null); setShowAdd(true); }}
-                        className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95">
-                        <Plus size={18} /> New Performance Review
-                    </button>
-                </Can>
+                {isMounted && (
+                    <Can permission="hrms.performance.manage">
+                        <button onClick={() => { setForm(EMPTY_FORM); setEditRev(null); setShowAdd(true); }}
+                            className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                            <Plus size={18} /> New Performance Review
+                        </button>
+                    </Can>
+                )}
             </div>
 
             {/* Premium Stats Grid */}
@@ -258,11 +265,13 @@ export default function PerformancePage() {
                                         <td className="py-8 px-10 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest opacity-40">{formatDate(rev.createdAt)}</td>
                                         <td className="py-8 px-10">
                                             <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 duration-500">
-                                                <Can permission="hrms.performance.manage">
-                                                    <button onClick={() => { setForm({ employeeId: rev.employee?._id || '', period: rev.period, periodType: rev.periodType, ratings: rev.ratings || EMPTY_FORM.ratings, strengths: rev.strengths || '', improvements: rev.improvements || '', comments: rev.comments || '', status: rev.status }); setEditRev(rev); setShowAdd(true); }}
-                                                        className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90" title="Re-calibrate Vector"><Edit size={16} /></button>
-                                                    <button onClick={() => handleDelete(rev._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
-                                                </Can>
+                                                {isMounted && (
+                                                    <Can permission="hrms.performance.manage">
+                                                        <button onClick={() => { setForm({ employeeId: rev.employee?._id || '', period: rev.period, periodType: rev.periodType, ratings: rev.ratings || EMPTY_FORM.ratings, strengths: rev.strengths || '', improvements: rev.improvements || '', comments: rev.comments || '', status: rev.status }); setEditRev(rev); setShowAdd(true); }}
+                                                            className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90" title="Re-calibrate Vector"><Edit size={16} /></button>
+                                                        <button onClick={() => handleDelete(rev._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                                    </Can>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

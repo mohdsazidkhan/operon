@@ -11,7 +11,6 @@ import {
 import { useAuthStore } from '@/store/useAuthStore';
 import Can from '@/components/ui/Can';
 
-// ── Permission groups for the matrix UI ─────────────────────────────────────
 const PERM_GROUPS = [
     {
         label: 'Dashboard', module: 'global',
@@ -284,7 +283,12 @@ export default function RolesPage() {
     const [expandedGroups, setExpandedGroups] = useState({});
     const [showNewRole, setShowNewRole] = useState(false);
     const [showAssign, setShowAssign] = useState(false);
-    const [newRoleData, setNewRoleData] = useState({ name: '', module: 'global', description: '' });
+    const [form, setForm] = useState({ name: '', description: '', module: 'global', permissions: [] });
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     const [creating, setCreating] = useState(false);
 
     const fetchRoles = useCallback(async () => {
@@ -359,13 +363,13 @@ export default function RolesPage() {
     };
 
     const createRole = async () => {
-        if (!newRoleData.name) return;
+        if (!form.name) return;
         setCreating(true);
         try {
-            const res = await api.post('/rbac/roles', newRoleData);
+            const res = await api.post('/rbac/roles', form);
             setRoles(prev => [...prev, res.data.data]);
             setShowNewRole(false);
-            setNewRoleData({ name: '', module: 'global', description: '' });
+            setForm({ name: '', description: '', module: 'global', permissions: [] });
             setSelectedRole(res.data.data);
             setPermissions(new Set());
         } catch (err) { setError(err.response?.data?.message || 'Create failed'); }
@@ -421,12 +425,14 @@ export default function RolesPage() {
                             Seed System Roles
                         </button>
                     )}
-                    <Can permission="settings.roles.manage">
-                        <button onClick={() => setShowNewRole(true)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-[var(--primary-500)] text-white hover:opacity-90 transition-all shadow-lg shadow-[var(--primary-500)]/20">
-                            <Plus size={16} /> New Role
-                        </button>
-                    </Can>
+                    {isMounted && (
+                        <Can permission="settings.roles.manage">
+                            <button onClick={() => setShowNewRole(true)}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-[var(--primary-500)] text-white hover:opacity-90 transition-all shadow-lg shadow-[var(--primary-500)]/20">
+                                <Plus size={16} /> New Role
+                            </button>
+                        </Can>
+                    )}
                 </div>
             </div>
 
@@ -540,27 +546,29 @@ export default function RolesPage() {
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Can permission="settings.roles.manage">
-                                        <button onClick={() => setShowAssign(true)}
-                                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--surface-overlay)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-all">
-                                            <UserPlus size={13} /> Assign Users
-                                        </button>
-                                        <button onClick={cloneRole}
-                                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--surface-overlay)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-all">
-                                            <Copy size={13} /> Clone
-                                        </button>
-                                        {!selectedRole.isSystem && (
-                                            <button onClick={deleteRole}
-                                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all">
-                                                <Trash2 size={13} />
+                                    {isMounted && (
+                                        <Can permission="settings.roles.manage">
+                                            <button onClick={() => setShowAssign(true)}
+                                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--surface-overlay)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-all">
+                                                <UserPlus size={13} /> Assign Users
                                             </button>
-                                        )}
-                                        <button onClick={savePermissions} disabled={saving || !canEdit}
-                                            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--primary-500)] text-white hover:opacity-90 transition-all shadow-lg shadow-[var(--primary-500)]/20 disabled:opacity-50">
-                                            {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
-                                            Save
-                                        </button>
-                                    </Can>
+                                            <button onClick={cloneRole}
+                                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--surface-overlay)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-all">
+                                                <Copy size={13} /> Clone
+                                            </button>
+                                            {!selectedRole.isSystem && (
+                                                <button onClick={deleteRole}
+                                                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all">
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            )}
+                                            <button onClick={savePermissions} disabled={saving || !canEdit}
+                                                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--primary-500)] text-white hover:opacity-90 transition-all shadow-lg shadow-[var(--primary-500)]/20 disabled:opacity-50">
+                                                {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
+                                                {saving ? 'Saving...' : 'Save Matrix'}
+                                            </button>
+                                        </Can>
+                                    )}
                                 </div>
                             </div>
 

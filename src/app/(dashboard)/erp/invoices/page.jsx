@@ -30,6 +30,11 @@ export default function InvoicesPage() {
     const [editingInvoice, setEditingInvoice] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_INVOICE);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const canManage = usePermission('erp.invoices.create'); // Using create as the management permission
 
@@ -222,11 +227,14 @@ export default function InvoicesPage() {
                     <button className="flex items-center gap-4 px-8 py-4 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all border border-[var(--border)] shadow-xl active:scale-95">
                         <Printer size={18} /> Hard Copy
                     </button>
-                    <Can permission="erp.invoices.create">
-                        <button onClick={() => setShowAdd(true)} className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
-                            <Plus size={18} /> Lodge Invoice
-                        </button>
-                    </Can>
+                    {isMounted && (
+                        <Can permission="erp.invoices.create">
+                            <button onClick={() => { setForm(EMPTY_INVOICE); setEditingInvoice(null); setShowAdd(true); }}
+                                className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                                <Plus size={18} /> New Invoice
+                            </button>
+                        </Can>
+                    )}
                 </div>
             </div>
 
@@ -334,10 +342,12 @@ export default function InvoicesPage() {
                                     <td className="py-6 px-10">
                                         <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 duration-500">
                                             <button onClick={() => handleDownload(inv)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl" title="Expand Node (Download)"><Eye size={18} /></button>
-                                            <Can permission="erp.invoices.create">
-                                                <button onClick={() => { setForm({ ...inv, customer: inv.customer?._id || inv.customer || '', company: inv.company?._id || inv.company || '', dueDate: inv.dueDate ? inv.dueDate.split('T')[0] : '' }); setEditingInvoice(inv); setShowAdd(true); }} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-blue-500 border border-[var(--border)] transition-all shadow-xl" title="Modify Record"><Edit size={18} /></button>
-                                                <button onClick={() => handleDelete(inv._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/20 transition-all shadow-xl" title="Purge Record"><Trash2 size={18} /></button>
-                                            </Can>
+                                            {isMounted && (
+                                                <Can permission="erp.invoices.create">
+                                                    <button onClick={() => { setForm({ ...inv }); setEditingInvoice(inv); setShowAdd(true); }} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90" title="Re-calibrate Vector"><Edit size={16} /></button>
+                                                    <button onClick={() => handleDelete(inv._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                                </Can>
+                                            )}
                                             <button onClick={() => handleSend(inv._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border)] transition-all shadow-xl" title="Broadcast Node (Send)"><Send size={18} /></button>
                                         </div>
                                     </td>

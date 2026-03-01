@@ -33,6 +33,11 @@ export default function DealsPage() {
     const [editDeal, setEditDeal] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_DEAL);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     const [deleteId, setDeleteId] = useState(null);
 
     const canCreate = usePermission('crm.deals.create');
@@ -169,12 +174,14 @@ export default function DealsPage() {
                     <h1 className="text-2xl font-bold text-[var(--text-primary)]">Deals</h1>
                     <p className="text-[var(--text-muted)] text-sm mt-0.5">{deals.length} total deals in pipeline</p>
                 </div>
-                <Can permission="crm.deals.create">
-                    <button onClick={() => { setForm(EMPTY_DEAL); setEditDeal(null); setShowAdd(true); }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20 active:scale-95">
-                        <Plus size={16} /> New Deal
-                    </button>
-                </Can>
+                {isMounted && (
+                    <Can permission="crm.deals.create">
+                        <button onClick={() => { setForm(EMPTY_DEAL); setEditDeal(null); setShowAdd(true); }}
+                            className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                            <Plus size={18} /> New Opportunity
+                        </button>
+                    </Can>
+                )}
             </div>
 
             {/* KPI Cards */}
@@ -325,12 +332,16 @@ export default function DealsPage() {
                                                     <button onClick={() => handleAction(deal._id, 'reject')} className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/20" title="Reject Deal"><X size={16} /></button>
                                                 </Can>
                                             )}
-                                            <Can permission="crm.deals.edit">
-                                                <button onClick={() => openEdit(deal)} className="p-2.5 rounded-xl hover:bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] transition-all"><Edit size={16} /></button>
-                                            </Can>
-                                            <Can permission="crm.deals.delete">
-                                                <button onClick={() => setDeleteId(deal._id)} className="p-2.5 rounded-xl hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all"><Trash2 size={16} /></button>
-                                            </Can>
+                                            {isMounted && (
+                                                <>
+                                                    <Can permission="crm.deals.edit">
+                                                        <button onClick={() => openEdit(deal)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl"><Edit size={16} /></button>
+                                                    </Can>
+                                                    <Can permission="crm.deals.delete">
+                                                        <button onClick={() => handleDelete(deal._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl"><Trash2 size={16} /></button>
+                                                    </Can>
+                                                </>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

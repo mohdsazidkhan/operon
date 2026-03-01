@@ -167,11 +167,23 @@ export default function AttendancePage() {
                             {isMounted ? formatDate(new Date(), { weekday: 'long' }) : 'Syncing...'}
                         </span>
                     </div>
-                    <Can permission="hrms.attendance.manage">
-                        <button onClick={() => setShowAdd(true)} className="px-8 py-3 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95">
-                            Override Log
-                        </button>
-                    </Can>
+                    {isMounted && (
+                        <Can permission="hrms.attendance.manage">
+                            <button
+                                onClick={() => handleBulkAction('present')}
+                                className="px-6 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-emerald-500/10 active:scale-95"
+                            >
+                                Authorize Bulk Presence
+                            </button>
+                        </Can>
+                    )}
+                    {isMounted && (
+                        <Can permission="hrms.attendance.manage">
+                            <button onClick={() => setShowAdd(true)} className="px-8 py-3 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                                Override Log
+                            </button>
+                        </Can>
+                    )}
                 </div>
             </div>
 
@@ -276,14 +288,24 @@ export default function AttendancePage() {
                                         </td>
                                         <td className="py-6 px-10">
                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                                                <Can permission="hrms.attendance.manage">
-                                                    <button onClick={() => { setForm({ ...a, employee: a.employee?._id || a.employee || '' }); setEditingAtt(a); setShowAdd(true); }} className="p-3 rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl hover:shadow-[var(--primary-500)]/20">
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    <button onClick={() => handleDelete(a._id)} className="p-3 rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/20 transition-all shadow-xl hover:shadow-rose-500/20">
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </Can>
+                                                {isMounted && (
+                                                    <>
+                                                        <Can permission="hrms.attendance.manage">
+                                                            <button
+                                                                onClick={() => { setForm({ ...a, employee: a.employee?._id || a.employee || '', date: a.date?.split('T')[0] || '' }); setEditingAtt(a); setShowAdd(true); }}
+                                                                className="h-9 w-9 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl"
+                                                            >
+                                                                <Edit size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(a._id)}
+                                                                className="h-9 w-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </Can>
+                                                    </>
+                                                )}
                                                 {!canManageAttendance && (
                                                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-overlay)] rounded-xl border border-[var(--border)]">
                                                         <ShieldCheck size={12} className="text-emerald-500" />

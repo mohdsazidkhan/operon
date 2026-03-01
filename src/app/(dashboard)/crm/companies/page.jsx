@@ -26,6 +26,11 @@ export default function CompaniesPage() {
     const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_COMPANY);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const canCreate = usePermission('crm.companies.create');
 
@@ -151,11 +156,14 @@ export default function CompaniesPage() {
                             className="pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-4 focus:ring-[var(--primary-500)]/10 focus:border-[var(--primary-500)] transition-all w-64 shadow-sm"
                         />
                     </div>
-                    <Can permission="crm.companies.create">
-                        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-2xl font-bold text-sm transition-all shadow-xl shadow-[var(--primary-500)]/20 active:scale-95">
-                            <Plus size={18} /> New Company
-                        </button>
-                    </Can>
+                    {isMounted && (
+                        <Can permission="crm.companies.create">
+                            <button onClick={() => { setForm(EMPTY_COMPANY); setEditingId(null); setShowAdd(true); }}
+                                className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                                <Plus size={18} /> New Company
+                            </button>
+                        </Can>
+                    )}
                 </div>
             </div>
 
@@ -189,14 +197,16 @@ export default function CompaniesPage() {
                                         <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{co.industry}</p>
                                     </div>
                                 </div>
-                                <div className="flex gap-2 sm:opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                                    <Can permission="crm.companies.edit">
-                                        <button onClick={() => handleEdit(co)} className="p-3 rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] transition-all border border-[var(--border)] active:scale-90"><Edit size={16} /></button>
-                                    </Can>
-                                    <Can permission="crm.companies.delete">
-                                        <button onClick={() => handleDelete(co._id)} className="p-3 rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-all border border-rose-500/20 active:scale-90"><Trash2 size={16} /></button>
-                                    </Can>
-                                </div>
+                                {isMounted && (
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                                        <Can permission="crm.companies.edit">
+                                            <button onClick={() => handleEdit(co)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90" title="Modify Node"><Edit size={16} /></button>
+                                        </Can>
+                                        <Can permission="crm.companies.delete">
+                                            <button onClick={() => handleDelete(co._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                        </Can>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 text-sm relative z-10">

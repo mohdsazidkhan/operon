@@ -19,6 +19,11 @@ export default function ContactsPage() {
     const [editingContact, setEditingContact] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_CONTACT);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const fetchContacts = async () => {
         setLoading(true);
@@ -144,11 +149,14 @@ export default function ContactsPage() {
                             className="pl-10 pr-4 py-3 rounded-2xl text-[10px] font-black bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-[var(--primary-500)]/10 transition-all w-64 shadow-inner"
                         />
                     </div>
-                    <Can permission="crm.contacts.create">
-                        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-6 py-3 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:scale-105 active:scale-95">
-                            <Plus size={16} /> Connection
-                        </button>
-                    </Can>
+                    {isMounted && (
+                        <Can permission="crm.contacts.create">
+                            <button onClick={() => { setForm(EMPTY_CONTACT); setEditingContact(null); setShowAdd(true); }}
+                                className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                                <Plus size={18} /> New Contact
+                            </button>
+                        </Can>
+                    )}
                 </div>
             </div>
 
@@ -181,20 +189,16 @@ export default function ContactsPage() {
                                     </div>
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
-                                    <Can permission="crm.contacts.edit">
-                                        <button onClick={() => {
-                                            setForm({ ...c, city: c.address?.city || '', country: c.address?.country || '', company: c.company?._id || c.company || '' });
-                                            setEditingContact(c);
-                                            setShowAdd(true);
-                                        }} className="p-2.5 rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all">
-                                            <Edit size={16} />
-                                        </button>
-                                    </Can>
-                                    <Can permission="crm.contacts.delete">
-                                        <button onClick={() => handleDelete(c._id)} className="p-2.5 rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/20 transition-all">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </Can>
+                                    {isMounted && (
+                                        <>
+                                            <Can permission="crm.contacts.edit">
+                                                <button onClick={() => openEdit(c)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90" title="Modify Record"><Edit size={16} /></button>
+                                            </Can>
+                                            <Can permission="crm.contacts.delete">
+                                                <button onClick={() => handleDelete(c._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                            </Can>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 

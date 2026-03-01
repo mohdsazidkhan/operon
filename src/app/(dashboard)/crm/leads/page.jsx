@@ -39,6 +39,11 @@ export default function LeadsPage() {
     const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_LEAD);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const canDelete = usePermission('crm.leads.delete');
 
@@ -181,11 +186,14 @@ export default function LeadsPage() {
                         Neural Lead Acquisition • {leads.length} Active Nodes
                     </p>
                 </div>
-                <Can permission="crm.leads.create">
-                    <button onClick={() => setShowAdd(true)} className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95 border-none">
-                        <Plus size={18} /> Add Prospect Node
-                    </button>
-                </Can>
+                {isMounted && (
+                    <Can permission="crm.leads.create">
+                        <button onClick={() => { setForm(EMPTY_LEAD); setEditingId(null); setShowAdd(true); }}
+                            className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                            <Plus size={18} /> New Lead
+                        </button>
+                    </Can>
+                )}
             </div>
 
             {/* Stage Flux Filters */}
@@ -252,12 +260,16 @@ export default function LeadsPage() {
                                         </div>
                                         <div className="flex gap-3">
                                             <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] border border-[var(--border)]"><Eye size={16} /></button>
-                                            <Can permission="crm.leads.edit">
-                                                <button onClick={() => handleEdit(lead)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-blue-500 border border-[var(--border)]"><Edit size={16} /></button>
-                                            </Can>
-                                            <Can permission="crm.leads.delete">
-                                                <button onClick={() => handleDelete(lead._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/10"><Trash2 size={16} /></button>
-                                            </Can>
+                                            {isMounted && (
+                                                <>
+                                                    <Can permission="crm.leads.edit">
+                                                        <button onClick={() => openEdit(lead)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl"><Edit size={16} /></button>
+                                                    </Can>
+                                                    <Can permission="crm.leads.delete">
+                                                        <button onClick={() => handleDelete(lead._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl"><Trash2 size={16} /></button>
+                                                    </Can>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -315,12 +327,16 @@ export default function LeadsPage() {
                                             <td className="py-8 px-10 text-right">
                                                 <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 duration-500">
                                                     <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-white border border-[var(--border)] transition-all transform active:scale-90" title="Expand Node"><Eye size={18} /></button>
-                                                    <Can permission="crm.leads.edit">
-                                                        <button onClick={() => handleEdit(lead)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-raised)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all transform active:scale-90" title="Recalibrate Node"><Edit size={18} /></button>
-                                                    </Can>
-                                                    <Can permission="crm.leads.delete">
-                                                        <button onClick={() => handleDelete(lead._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all transform active:scale-90" title="Purge Node"><Trash2 size={18} /></button>
-                                                    </Can>
+                                                    {isMounted && (
+                                                        <>
+                                                            <Can permission="crm.leads.edit">
+                                                                <button onClick={() => openEdit(lead)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90" title="Modify Vector"><Edit size={16} /></button>
+                                                            </Can>
+                                                            <Can permission="crm.leads.delete">
+                                                                <button onClick={() => handleDelete(lead._id)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/10 transition-all shadow-xl active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                                            </Can>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

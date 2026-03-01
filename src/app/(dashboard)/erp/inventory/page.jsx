@@ -19,6 +19,11 @@ export default function InventoryPage() {
     const [showStockMove, setShowStockMove] = useState(null); // Product ID
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_PRODUCT);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     const [stockAdjustment, setStockAdjustment] = useState({ quantity: 0, type: 'add' });
 
     const canManage = usePermission('erp.inventory.manage');
@@ -241,16 +246,18 @@ export default function InventoryPage() {
                                     <Package size={28} />
                                 </div>
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-500">
-                                    <Can permission="erp.inventory.manage">
-                                        <button onClick={() => { setForm({ ...p }); setEditingProduct(p); setShowAdd(true); }}
-                                            className="p-3.5 rounded-2xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90">
-                                            <Edit size={18} />
-                                        </button>
-                                        <button onClick={() => handleDelete(p._id)}
-                                            className="p-3.5 rounded-2xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/20 transition-all shadow-xl active:scale-90">
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </Can>
+                                    {isMounted && (
+                                        <Can permission="erp.inventory.manage">
+                                            <button onClick={() => { setForm({ ...p }); setEditingProduct(p); setShowAdd(true); }}
+                                                className="p-3.5 rounded-2xl bg-[var(--surface-overlay)] text-[var(--text-muted)] hover:text-[var(--primary-500)] border border-[var(--border)] transition-all shadow-xl active:scale-90">
+                                                <Edit size={18} />
+                                            </button>
+                                            <button onClick={() => handleDelete(p._id)}
+                                                className="p-3.5 rounded-2xl bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 border border-rose-500/20 transition-all shadow-xl active:scale-90">
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </Can>
+                                    )}
                                 </div>
                             </div>
 
