@@ -665,13 +665,13 @@ export default function RolesPage() {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Role Name *</label>
-                        <input value={newRoleData.name} onChange={e => setNewRoleData(p => ({ ...p, name: e.target.value }))}
+                        <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                             placeholder="e.g. Regional Sales Manager"
                             className="w-full px-3 py-2 rounded-xl bg-[var(--surface-overlay)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]" />
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Module</label>
-                        <select value={newRoleData.module} onChange={e => setNewRoleData(p => ({ ...p, module: e.target.value }))}
+                        <select value={form.module} onChange={e => setForm(p => ({ ...p, module: e.target.value }))}
                             className="w-full px-3 py-2 rounded-xl bg-[var(--surface-overlay)] border border-[var(--border)] text-sm text-[var(--text-primary)]">
                             <option value="global">Global</option>
                             <option value="crm">CRM</option>
@@ -681,7 +681,7 @@ export default function RolesPage() {
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Description</label>
-                        <textarea value={newRoleData.description} onChange={e => setNewRoleData(p => ({ ...p, description: e.target.value }))}
+                        <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
                             placeholder="What can this role do?"
                             rows={3}
                             className="w-full px-3 py-2 rounded-xl bg-[var(--surface-overlay)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] resize-none" />
@@ -691,7 +691,7 @@ export default function RolesPage() {
                             className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-muted)] hover:bg-[var(--surface-overlay)] transition-all">
                             Cancel
                         </button>
-                        <button onClick={createRole} disabled={creating || !newRoleData.name}
+                        <button onClick={createRole} disabled={creating || !form.name}
                             className="flex-1 py-2.5 rounded-xl bg-[var(--primary-500)] text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50">
                             {creating ? 'Creating…' : 'Create Role'}
                         </button>

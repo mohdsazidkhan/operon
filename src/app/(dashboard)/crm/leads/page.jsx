@@ -5,9 +5,11 @@ import dynamic from 'next/dynamic';
 import toast from 'react-hot-toast';
 import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 import Can from '@/components/ui/Can';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Sparkles, Zap, TrendingUp, Target } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Eye, Sparkles, Zap, TrendingUp, Target, Download, Upload, FileText } from 'lucide-react';
 import { cn, formatCurrency, getInitials } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
+import Pagination from '@/components/ui/Pagination';
+import { exportToXLSX, importFromXLSX, exportToPDF } from '@/utils/exportUtils';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 import { useThemeStore } from '@/store/useThemeStore';
@@ -39,6 +41,9 @@ export default function LeadsPage() {
     const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_LEAD);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const [total, setTotal] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -50,9 +55,13 @@ export default function LeadsPage() {
     const fetchLeads = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/leads?status=${filter === 'all' ? '' : filter}&search=${search}`);
+            const res = await fetch(`/api/leads?status=${filter === 'all' ? '' : filter}&search=${search}&page=${page}&limit=10`);
             const data = await res.json();
-            if (data.success) setLeads(data.data);
+            if (data.success) {
+                setLeads(data.data);
+                setPages(data.pages);
+                setTotal(data.total);
+            }
         } catch (err) {
             console.error('Failed to fetch leads:', err);
         } finally {
@@ -60,7 +69,7 @@ export default function LeadsPage() {
         }
     };
 
-    useEffect(() => { fetchLeads(); }, [filter, search]);
+    useEffect(() => { fetchLeads(); }, [filter, search, page]);
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -104,6 +113,44 @@ export default function LeadsPage() {
                 fetchLeads();
             } else toast.error(data.message);
         } catch { toast.error('Purge failed'); }
+    };
+
+    const handleExportXLSX = () => {
+        const exportData = leads.map(l => ({
+            Name: l.name,
+            Email: l.email,
+            Phone: l.phone,
+            Company: l.company,
+            Position: l.position,
+            Status: l.status,
+            Value: l.value,
+            Score: l.score,
+            Industry: l.industry,
+            Source: l.source
+        }));
+        exportToXLSX(exportData, 'leads-export');
+        toast.success('Leads exported to XLSX');
+    };
+
+    const handleExportPDF = () => {
+        const headers = ['Name', 'Company', 'Status', 'Value', 'Score'];
+        const data = leads.map(l => [l.name, l.company, l.status, formatCurrency(l.value), `${l.score}%`]);
+        exportToPDF(headers, data, 'Leads Pipeline Report', 'leads-report');
+        toast.success('Leads exported to PDF');
+    };
+
+    const handleImportXLSX = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await importFromXLSX(file);
+            console.log('Imported Data:', data);
+            toast.success(`${data.length} leads parsed from file. (Simulated)`);
+            e.target.value = '';
+        } catch (err) {
+            toast.error('Import failed');
+            console.error(err);
+        }
     };
 
     const statusCounts = STATUS_OPTIONS.slice(1).reduce((acc, s) => {
@@ -187,12 +234,26 @@ export default function LeadsPage() {
                     </p>
                 </div>
                 {isMounted && (
-                    <Can permission="crm.leads.create">
-                        <button onClick={() => { setForm(EMPTY_LEAD); setEditingId(null); setShowAdd(true); }}
-                            className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
-                            <Plus size={18} /> New Lead
-                        </button>
-                    </Can>
+                    <div className="flex flex-wrap items-center gap-4">
+                        <label className="flex items-center gap-4 px-6 py-4 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all border border-[var(--border)] shadow-xl cursor-pointer active:scale-95">
+                            <Upload size={16} /> Import
+                            <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportXLSX} />
+                        </label>
+                        <div className="flex bg-[var(--surface-overlay)] rounded-[2rem] border border-[var(--border)] overflow-hidden shadow-xl">
+                            <button onClick={handleExportXLSX} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all border-r border-[var(--border)] flex items-center gap-2">
+                                <Download size={16} /> XLSX
+                            </button>
+                            <button onClick={handleExportPDF} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-2">
+                                <FileText size={16} /> PDF
+                            </button>
+                        </div>
+                        <Can permission="crm.leads.create">
+                            <button onClick={() => { setForm(EMPTY_LEAD); setEditingId(null); setShowAdd(true); }}
+                                className="flex items-center gap-4 px-10 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl hover:scale-105 active:scale-95">
+                                <Plus size={18} /> New Lead
+                            </button>
+                        </Can>
+                    </div>
                 )}
             </div>
 
@@ -343,6 +404,9 @@ export default function LeadsPage() {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                        <div className="px-10 pb-10">
+                            <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
                         </div>
                     </div>
                 </div>

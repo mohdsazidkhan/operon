@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Search, Plus, Filter, MoreVertical, Edit3, Trash2, ArrowUpDown, ChevronDown, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Package, Search, Plus, Filter, MoreVertical, Edit3, Trash2, ArrowUpDown, ChevronDown, CheckCircle2, ShieldAlert, Download, Upload, FileText } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
+import Pagination from '@/components/ui/Pagination';
+import { exportToXLSX, importFromXLSX, exportToPDF } from '@/utils/exportUtils';
 
 const EMPTY_PRODUCT = { name: '', sku: '', description: '', category: '', price: '', cost: '', stock: '', unit: 'piece', status: 'active' };
 
@@ -14,13 +16,30 @@ export default function ProductsLedger({ initialProducts = [] }) {
     const [categoryFilter, setCategoryFilter] = useState('ALL');
     const [showAdd, setShowAdd] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
     const [form, setForm] = useState(EMPTY_PRODUCT);
 
     const fetchProducts = async () => {
-        const res = await fetch('/api/products');
-        const data = await res.json();
-        if (data.success) setProducts(data.data);
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/products?search=${search}&category=${categoryFilter === 'ALL' ? '' : categoryFilter}&page=${page}&limit=10`);
+            const data = await res.json();
+            if (data.success) {
+                setProducts(data.data);
+                setPages(data.pages);
+                setTotal(data.total);
+            }
+        } catch (err) {
+            console.error('Failed to fetch products:', err);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    useEffect(() => { fetchProducts(); }, [search, categoryFilter, page]);
 
     const handleAdd = async (e) => {
         e.preventDefault();
@@ -46,12 +65,36 @@ export default function ProductsLedger({ initialProducts = [] }) {
 
     const categories = ['ALL', ...new Set(products.map(p => p.category?.toUpperCase() || 'UNCATEGORIZED'))];
 
-    const filteredProducts = products.filter(p => {
-        const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-            p.sku.toLowerCase().includes(search.toLowerCase());
-        const matchesCategory = categoryFilter === 'ALL' || p.category?.toUpperCase() === categoryFilter;
-        return matchesSearch && matchesCategory;
-    });
+    const handleExportXLSX = () => {
+        const exportData = products.map(p => ({
+            Name: p.name,
+            SKU: p.sku,
+            Category: p.category,
+            Price: p.price,
+            Stock: p.stock,
+            Status: p.status
+        }));
+        exportToXLSX(exportData, 'products-inventory');
+        toast.success('Inventory exported to XLSX');
+    };
+
+    const handleExportPDF = () => {
+        const headers = ['Name', 'SKU', 'Category', 'Price', 'Stock'];
+        const data = products.map(p => [p.name, p.sku, p.category, formatCurrency(p.price), p.stock]);
+        exportToPDF(headers, data, 'Inventory Status Report', 'inventory-report');
+        toast.success('Inventory exported to PDF');
+    };
+
+    const handleImportXLSX = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await importFromXLSX(file);
+            console.log('Imported Products:', data);
+            toast.success(`${data.length} items parsed. (Simulated)`);
+            e.target.value = '';
+        } catch { toast.error('Import failed'); }
+    };
 
     const totalPortfolioValue = products.reduce((s, p) => s + (p.price * p.stock || 0), 0);
     const avgMargin = 42.5;
@@ -104,7 +147,7 @@ export default function ProductsLedger({ initialProducts = [] }) {
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Active SKUs', value: products.length, icon: Package, color: 'text-[var(--primary-500)]' },
+                    { label: 'Active SKUs', value: total, icon: Package, color: 'text-[var(--primary-500)]' },
                     { label: 'Avg Unit Margin', value: `${avgMargin}%`, icon: CheckCircle2, color: 'text-emerald-500' },
                     { label: 'Critical Thresholds', value: products.filter(p => p.stock < 10).length, icon: ShieldAlert, color: 'text-rose-500' },
                 ].map((stat, i) => (
@@ -134,7 +177,7 @@ export default function ProductsLedger({ initialProducts = [] }) {
                         />
                     </div>
                     <div className="flex items-center gap-2 p-1.5 bg-[var(--surface-overlay)] border border-[var(--border)] rounded-2xl overflow-x-auto scrollbar-hide">
-                        {categories.slice(0, 4).map(cat => (
+                        {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setCategoryFilter(cat)}
@@ -146,11 +189,21 @@ export default function ProductsLedger({ initialProducts = [] }) {
                                 {cat}
                             </button>
                         ))}
-                        <button className="px-3 py-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"><ChevronDown size={14} /></button>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    <button className="h-14 w-14 rounded-2xl bg-[var(--surface-overlay)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center justify-center"><Filter size={20} /></button>
+                <div className="flex flex-wrap items-center gap-4">
+                    <label className="flex items-center gap-4 px-6 py-4 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all border border-[var(--border)] shadow-xl cursor-pointer active:scale-95">
+                        <Upload size={16} /> Import
+                        <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportXLSX} />
+                    </label>
+                    <div className="flex bg-[var(--surface-overlay)] rounded-[2rem] border border-[var(--border)] overflow-hidden shadow-xl">
+                        <button onClick={handleExportXLSX} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all border-r border-[var(--border)] flex items-center gap-2">
+                            <Download size={16} /> XLSX
+                        </button>
+                        <button onClick={handleExportPDF} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-2">
+                            <FileText size={16} /> PDF
+                        </button>
+                    </div>
                     <button onClick={() => setShowAdd(true)} className="h-14 px-8 rounded-2xl bg-[var(--primary-500)] text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[var(--primary-500)]/20 hover:scale-105 transition-all flex items-center gap-3">
                         <Plus size={18} /> Add Product
                     </button>
@@ -181,13 +234,13 @@ export default function ProductsLedger({ initialProducts = [] }) {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border)]">
-                            {filteredProducts.length === 0 ? (
+                            {products.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="p-20 text-center">
                                         <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.5em]">No products found</p>
                                     </td>
                                 </tr>
-                            ) : filteredProducts.map(p => (
+                            ) : products.map(p => (
                                 <tr key={p._id} className="group hover:bg-white/[0.02] transition-colors">
                                     <td className="p-8">
                                         <div className="flex items-center gap-5">
@@ -245,6 +298,9 @@ export default function ProductsLedger({ initialProducts = [] }) {
                             ))}
                         </tbody>
                     </table>
+                </div>
+                <div className="px-10 pb-10 border-t border-[var(--border)] pt-10">
+                    <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
                 </div>
             </div>
         </div>

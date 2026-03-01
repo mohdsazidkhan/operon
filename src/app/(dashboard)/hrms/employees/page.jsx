@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, UserPlus, Mail, Calendar, Users, Edit, Trash2, ShieldCheck, Briefcase } from 'lucide-react';
+import { Search, UserPlus, Mail, Calendar, Users, Edit, Trash2, ShieldCheck, Briefcase, Download, Upload, FileText } from 'lucide-react';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
 import Can from '@/components/ui/Can';
 import { usePermission } from '@/hooks/usePermission';
 import toast from 'react-hot-toast';
+import Pagination from '@/components/ui/Pagination';
+import { exportToXLSX, importFromXLSX, exportToPDF } from '@/utils/exportUtils';
 
 const EMPTY_EMP = {
     name: '', email: '', phone: '', department: '', position: '',
@@ -23,6 +25,9 @@ export default function EmployeesPage() {
     const [editingEmp, setEditingEmp] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_EMP);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const [total, setTotal] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -34,9 +39,13 @@ export default function EmployeesPage() {
     const fetchEmployees = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/employees?search=${search}&department=${dept === 'all' ? '' : dept}`);
+            const res = await fetch(`/api/employees?search=${search}&department=${dept === 'all' ? '' : dept}&page=${page}&limit=8`);
             const data = await res.json();
-            if (data.success) setEmployees(data.data);
+            if (data.success) {
+                setEmployees(data.data);
+                setPages(data.pages);
+                setTotal(data.total);
+            }
         } catch (err) {
             console.error('Failed to fetch employees:', err);
         } finally {
@@ -44,7 +53,7 @@ export default function EmployeesPage() {
         }
     };
 
-    useEffect(() => { fetchEmployees(); }, [search, dept]);
+    useEffect(() => { fetchEmployees(); }, [search, dept, page]);
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -148,16 +157,30 @@ export default function EmployeesPage() {
                         Current Strength • {employees.length} Personnel
                     </p>
                 </div>
-                {isMounted && (
-                    <Can permission="hrms.employees.create">
-                        <button
-                            onClick={() => setShowAdd(true)}
-                            className="flex items-center gap-4 px-8 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95"
-                        >
-                            <UserPlus size={18} /> New Hire
+                <div className="flex flex-wrap items-center gap-4">
+                    <label className="flex items-center gap-4 px-6 py-4 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all border border-[var(--border)] shadow-xl cursor-pointer active:scale-95">
+                        <Upload size={16} /> Import
+                        <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportXLSX} />
+                    </label>
+                    <div className="flex bg-[var(--surface-overlay)] rounded-[2rem] border border-[var(--border)] overflow-hidden shadow-xl">
+                        <button onClick={handleExportXLSX} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all border-r border-[var(--border)] flex items-center gap-2">
+                            <Download size={16} /> XLSX
                         </button>
-                    </Can>
-                )}
+                        <button onClick={handleExportPDF} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-2">
+                            <FileText size={16} /> PDF
+                        </button>
+                    </div>
+                    {isMounted && (
+                        <Can permission="hrms.employees.create">
+                            <button
+                                onClick={() => setShowAdd(true)}
+                                className="flex items-center gap-4 px-8 py-4 bg-[var(--text-primary)] hover:bg-[var(--primary-500)] text-[var(--surface)] hover:text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:scale-105 active:scale-95"
+                            >
+                                <UserPlus size={18} /> New Hire
+                            </button>
+                        </Can>
+                    )}
+                </div>
             </div>
 
             {/* Dept Filter */}
@@ -293,6 +316,9 @@ export default function EmployeesPage() {
                     ))}
                 </div>
             )}
+            <div className="px-4">
+                <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
+            </div>
         </div>
     );
 }

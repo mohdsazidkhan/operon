@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import Can from '@/components/ui/Can';
 import { usePermission } from '@/hooks/usePermission';
-import { Plus, Search, Edit, Trash2, Eye, Send, Printer, FileText } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Send, Printer, FileText, Download, Upload } from 'lucide-react';
 import { cn, formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import Modal, { FormField, FormActions, inputCls } from '@/components/ui/Modal';
+import Pagination from '@/components/ui/Pagination';
+import { exportToXLSX, importFromXLSX, exportToPDF } from '@/utils/exportUtils';
 
 const STATUS_OPTIONS = ['all', 'paid', 'sent', 'draft', 'overdue'];
 
@@ -30,6 +32,9 @@ export default function InvoicesPage() {
     const [editingInvoice, setEditingInvoice] = useState(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState(EMPTY_INVOICE);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const [total, setTotal] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -41,10 +46,12 @@ export default function InvoicesPage() {
     const fetchInvoices = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/invoices?status=${filter === 'all' ? '' : filter}&search=${search}`);
+            const res = await fetch(`/api/invoices?status=${filter === 'all' ? '' : filter}&search=${search}&page=${page}&limit=10`);
             const data = await res.json();
             if (data.success) {
                 setInvoices(data.data);
+                setPages(data.pages);
+                setTotal(data.total);
             }
         } catch (err) {
             console.error('Failed to fetch invoices:', err);
@@ -70,7 +77,7 @@ export default function InvoicesPage() {
     useEffect(() => {
         fetchInvoices();
         fetchDropdowns();
-    }, [filter, search]);
+    }, [filter, search, page]);
 
     const handleAddItem = () => {
         setForm(p => ({
@@ -140,6 +147,40 @@ export default function InvoicesPage() {
             }
         } catch { toast.error('Transmission failed'); }
         finally { setSaving(false); }
+    };
+
+    const handleExportXLSX = () => {
+        const exportData = invoices.map(inv => ({
+            Number: inv.invoiceNumber,
+            Customer: inv.customer?.name,
+            Company: inv.company?.name,
+            Total: inv.total,
+            Status: inv.status,
+            IssueDate: inv.issueDate,
+            DueDate: inv.dueDate
+        }));
+        exportToXLSX(exportData, 'invoices-export');
+        toast.success('Invoices exported to XLSX');
+    };
+
+    const handleExportPDF = () => {
+        const headers = ['Number', 'Customer', 'Status', 'Total', 'Due Date'];
+        const data = invoices.map(inv => [inv.invoiceNumber, inv.customer?.name || '—', inv.status, formatCurrency(inv.total), formatDate(inv.dueDate)]);
+        exportToPDF(headers, data, 'Invoices Ledger Report', 'invoices-report');
+        toast.success('Invoices exported to PDF');
+    };
+
+    const handleImportXLSX = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await importFromXLSX(file);
+            console.log('Imported Invoices:', data);
+            toast.success(`${data.length} invoices parsed. (Simulated)`);
+            e.target.value = '';
+        } catch (err) {
+            toast.error('Import failed');
+        }
     };
 
     const handleDownload = (inv) => {
@@ -224,9 +265,18 @@ export default function InvoicesPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="flex items-center gap-4 px-8 py-4 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all border border-[var(--border)] shadow-xl active:scale-95">
-                        <Printer size={18} /> Hard Copy
-                    </button>
+                    <label className="flex items-center gap-4 px-6 py-4 bg-[var(--surface-overlay)] hover:bg-[var(--surface-raised)] text-[var(--text-primary)] rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all border border-[var(--border)] shadow-xl cursor-pointer active:scale-95">
+                        <Upload size={16} /> Import
+                        <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportXLSX} />
+                    </label>
+                    <div className="flex bg-[var(--surface-overlay)] rounded-[2rem] border border-[var(--border)] overflow-hidden shadow-xl">
+                        <button onClick={handleExportXLSX} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all border-r border-[var(--border)] flex items-center gap-2">
+                            <Download size={16} /> XLSX
+                        </button>
+                        <button onClick={handleExportPDF} className="px-6 py-4 hover:bg-[var(--surface-raised)] text-[var(--text-primary)] font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-2">
+                            <FileText size={16} /> PDF
+                        </button>
+                    </div>
                     {isMounted && (
                         <Can permission="erp.invoices.create">
                             <button onClick={() => { setForm(EMPTY_INVOICE); setEditingInvoice(null); setShowAdd(true); }}
@@ -355,6 +405,9 @@ export default function InvoicesPage() {
                             ))}
                         </tbody>
                     </table>
+                </div>
+                <div className="px-10 pb-10">
+                    <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
                 </div>
             </div>
         </div>
