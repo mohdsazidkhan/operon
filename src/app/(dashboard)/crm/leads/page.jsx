@@ -97,7 +97,7 @@ export default function LeadsPage() {
         finally { setSaving(false); }
     };
 
-    const handleEdit = (lead) => {
+    const openEdit = (lead) => {
         setForm({ ...lead });
         setEditingId(lead._id);
         setShowAdd(true);

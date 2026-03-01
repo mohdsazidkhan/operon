@@ -99,6 +99,37 @@ export default function EmployeesPage() {
         } catch { toast.error('Delete failed'); }
     };
 
+    const handleExportXLSX = () => {
+        const exportData = employees.map(e => ({
+            Name: e.name,
+            Email: e.email,
+            Department: e.department,
+            Position: e.position,
+            Salary: e.salary,
+            Status: e.status
+        }));
+        exportToXLSX(exportData, 'employees-list');
+        toast.success('Employees exported to XLSX');
+    };
+
+    const handleExportPDF = () => {
+        const headers = ['Name', 'Dept', 'Position', 'Salary'];
+        const data = employees.map(e => [e.name, e.department, e.position, formatCurrency(e.salary)]);
+        exportToPDF(headers, data, 'Personnel Registry Report', 'employees-report');
+        toast.success('Personnel report exported to PDF');
+    };
+
+    const handleImportXLSX = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await importFromXLSX(file);
+            console.log('Imported Personnel:', data);
+            toast.success(`${data.length} records parsed. (Simulated)`);
+            e.target.value = '';
+        } catch { toast.error('Import failed'); }
+    };
+
     const DEPTS = ['all', 'Engineering', 'Sales', 'HR', 'Finance', 'Marketing', 'Design'];
 
     return (

@@ -124,6 +124,17 @@ export default function ContactsPage() {
         } catch { toast.error('Import failed'); }
     };
 
+    const openEdit = (contact) => {
+        setForm({
+            ...contact,
+            city: contact.address?.city || '',
+            country: contact.address?.country || '',
+            company: contact.company?._id || contact.company || ''
+        });
+        setEditingContact(contact);
+        setShowAdd(true);
+    };
+
     const handleDelete = async (id) => {
         if (!window.confirm('Archive this contact permanently?')) return;
         try {
