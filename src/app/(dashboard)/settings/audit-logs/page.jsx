@@ -14,6 +14,19 @@ const ACTION_COLORS = {
     export: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
 };
 
+const renderDetails = (details) => {
+    if (!details) return '—';
+    if (typeof details === 'string') return details;
+    if (typeof details === 'object') {
+        try {
+            return JSON.stringify(details).replace(/[{}"]/g, '').replace(/:/g, ': ');
+        } catch {
+            return '[Object]';
+        }
+    }
+    return String(details);
+};
+
 export default function AuditLogPage() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -80,6 +93,7 @@ export default function AuditLogPage() {
                                         <span className="text-xs text-[var(--text-muted)]">{formatRelativeTime(log.createdAt)}</span>
                                     </div>
                                     <p className="text-sm font-semibold text-[var(--text-primary)]">{log.resource}</p>
+                                    <p className="text-xs text-[var(--text-muted)] truncate">{renderDetails(log.details || log.description)}</p>
                                     <p className="text-xs text-[var(--text-muted)]">{log.user?.name || log.userName || 'System'}</p>
                                 </div>
                             ))}
@@ -114,7 +128,9 @@ export default function AuditLogPage() {
                                                 <span className={cn('text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border', ACTION_COLORS[log.action] || '')}>{log.action}</span>
                                             </td>
                                             <td className="py-3.5 px-5 text-sm text-[var(--text-secondary)]">{log.resource}</td>
-                                            <td className="py-3.5 px-5 text-xs text-[var(--text-muted)] max-w-[200px] truncate">{log.details || log.description || '—'}</td>
+                                            <td className="py-3.5 px-5 text-xs text-[var(--text-muted)] max-w-[200px] truncate" title={typeof log.details === 'object' ? JSON.stringify(log.details) : (log.details || log.description)}>
+                                                {renderDetails(log.details || log.description)}
+                                            </td>
                                             <td className="py-3.5 px-5 text-xs font-mono text-[var(--text-muted)]">{log.ipAddress || '—'}</td>
                                         </tr>
                                     ))}
