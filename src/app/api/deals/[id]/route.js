@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const deal = await Deal.findById(id)
             .populate('assignedTo', 'name avatar email')
@@ -28,7 +28,7 @@ export async function PUT(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         await dbConnect();
 
@@ -57,7 +57,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const deal = await Deal.findByIdAndDelete(id);
         if (!deal) return NextResponse.json({ success: false, message: 'Deal not found' }, { status: 404 });

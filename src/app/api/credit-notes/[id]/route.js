@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
+import dbConnect from '@/lib/db/dbConnect';
 import CreditNote from '@/models/CreditNote';
 
 export async function GET(req, { params }) {
     try {
         await dbConnect();
-        const cn = await CreditNote.findById(params.id).populate('customer', 'name email phone').populate('invoice', 'invoiceNumber total').lean();
+        const cn = await CreditNote.findById((await params).id).populate('customer', 'name email phone').populate('invoice', 'invoiceNumber total').lean();
         if (!cn) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: cn });
     } catch (err) {
@@ -22,7 +22,7 @@ export async function PUT(req, { params }) {
             body.subtotal = body.items.reduce((s, i) => s + i.total, 0);
             body.total = body.subtotal + (body.tax || 0);
         }
-        const cn = await CreditNote.findByIdAndUpdate(params.id, body, { new: true });
+        const cn = await CreditNote.findByIdAndUpdate((await params).id, body, { new: true });
         if (!cn) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: cn });
     } catch (err) {
@@ -33,7 +33,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
     try {
         await dbConnect();
-        await CreditNote.findByIdAndDelete(params.id);
+        await CreditNote.findByIdAndDelete((await params).id);
         return NextResponse.json({ success: true, message: 'Deleted' });
     } catch (err) {
         return NextResponse.json({ success: false, message: err.message }, { status: 500 });

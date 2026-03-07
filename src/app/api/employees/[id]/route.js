@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const emp = await Employee.findById(id).populate('manager', 'name avatar position');
         if (!emp) return NextResponse.json({ success: false, message: 'Employee not found' }, { status: 404 });
@@ -24,7 +24,7 @@ export async function PUT(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         await dbConnect();
         const emp = await Employee.findByIdAndUpdate(id, body, { new: true, runValidators: true });
@@ -41,7 +41,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         await Employee.findByIdAndDelete(id);
 

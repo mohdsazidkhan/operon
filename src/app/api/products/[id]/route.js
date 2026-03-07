@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const product = await Product.findById(id);
         if (!product) return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });
@@ -24,7 +24,7 @@ export async function PUT(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         await dbConnect();
         const product = await Product.findByIdAndUpdate(id, body, { new: true, runValidators: true });
@@ -41,7 +41,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const product = await Product.findByIdAndDelete(id);
         if (!product) return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });

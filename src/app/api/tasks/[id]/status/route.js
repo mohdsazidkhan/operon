@@ -8,7 +8,7 @@ export async function PATCH(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         const { status } = await req.json();
 
         await dbConnect();

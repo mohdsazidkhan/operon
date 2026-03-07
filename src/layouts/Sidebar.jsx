@@ -91,6 +91,8 @@ const navSections = [
     },
 ];
 
+import Image from 'next/image';
+
 export default function Sidebar({ collapsed }) {
     const pathname = usePathname();
     const { isDark, logoSize, setSidebarOpen } = useThemeStore();
@@ -128,9 +130,11 @@ export default function Sidebar({ collapsed }) {
             <div className="flex items-center justify-between p-4 border-b border-[var(--sidebar-border)]">
                 {!collapsed && (
                     <Link href="/dashboard" className="flex items-center gap-2">
-                        <img
+                        <Image
                             src={isDark ? "/logo-dark.png" : "/logo-light.png"}
                             alt="OPERON Logo"
+                            width={150}
+                            height={150}
                             style={{ height: `${logoSize}px` }}
                             className="w-auto object-contain"
                         />
@@ -138,9 +142,11 @@ export default function Sidebar({ collapsed }) {
                 )}
                 {collapsed && (
                     <Link href="/dashboard" className="flex items-center justify-center w-full">
-                        <img
+                        <Image
                             src={isDark ? "/logo-dark-sm.png" : "/logo-light-sm.png"}
                             alt="O"
+                            width={50}
+                            height={50}
                             style={{ height: `${Math.min(logoSize, 50)}px`, width: `${Math.min(logoSize, 50)}px` }}
                             className="object-contain"
                         />

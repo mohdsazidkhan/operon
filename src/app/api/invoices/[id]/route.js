@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         await dbConnect();
-        const invoice = await Invoice.findById(params.id)
+        const invoice = await Invoice.findById((await params).id)
             .populate('customer', 'name email phone address')
             .populate('company', 'name address')
             .populate('createdBy', 'name');
@@ -30,7 +30,7 @@ export async function PUT(req, { params }) {
             body.total = subtotal + (body.tax || 0);
         }
         await dbConnect();
-        const invoice = await Invoice.findByIdAndUpdate(params.id, body, { new: true })
+        const invoice = await Invoice.findByIdAndUpdate((await params).id, body, { new: true })
             .populate('customer', 'name email')
             .populate('company', 'name');
         if (!invoice) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
@@ -45,7 +45,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         await dbConnect();
-        await Invoice.findByIdAndDelete(params.id);
+        await Invoice.findByIdAndDelete((await params).id);
         return NextResponse.json({ success: true, message: 'Deleted' });
     } catch (err) {
         return NextResponse.json({ success: false, message: err.message }, { status: 500 });

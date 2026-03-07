@@ -27,9 +27,8 @@ const purchaseOrderSchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
 }, { timestamps: true });
 
-purchaseOrderSchema.pre('save', function (next) {
+purchaseOrderSchema.pre('save', function () {
     if (!this.poNumber) this.poNumber = `PO-${Date.now()}`;
-    next();
 });
 
 export default mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', purchaseOrderSchema);

@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Operon - Enterprise Unified Dashboard
 
-## Getting Started
+Operon is a professional, high-performance enterprise dashboard application built with **Next.js 15**, **MongoDB**, and **Tailwind CSS**. It provides a unified visual experience for Managing CRM, ERP, and HRMS data with a focus on premium aesthetics and developer-friendly architecture.
 
-First, run the development server:
+## 🚀 Key Features
 
+- **Unified Dashboard**: Seamlessly switch between CRM, ERP, and HR modules.
+- **Premium Aesthetics**: Glassmorphism, smooth animations (Framer Motion), and dynamic dark/light modes.
+- **Micro-Services Ready**: Clean separation of concerns with dedicated API routes and data-access layers.
+- **Real-time Analytics**: Interactive charts powered by ApexCharts.
+- **Role-based Access**: Comprehensive demo roles predefined for immediate testing.
+- **Responsive Design**: Fully optimized for Desktop, Tablet, and Mobile views.
+
+## 🛠️ Technology Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS + Vanilla CSS Variables
+- **Icons**: Lucide React
+- **Animations**: Framer Motion
+- **Database**: MongoDB (Mongoose ODM)
+- **State Management**: Zustand
+- **Forms**: React Hook Form
+- **Authentication**: JWT Based with custom middleware
+
+## 📦 Installation & Setup
+
+### 1. Prerequisite
+- Node.js 18+ 
+- MongoDB Instance (Local or Atlas)
+
+### 2. Clone and Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd operon
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Configuration
+Copy `.env.example` to `.env` and fill in your credentials:
+```bash
+cp .env.example .env
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 4. Seed Demo Data
+Populate your database with professional demo data:
+```bash
+npm run seed
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 5. Start Development
+```bash
+npm run dev
+```
 
-## Learn More
+## 🏗️ Production Build
+To create an optimized production build:
+```bash
+npm run build
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app`: Next.js App Router (Pages, Layouts, API)
+- `src/components`: Reusable UI and Dashboard components
+- `src/lib`: Utility functions and database access layer
+- `src/store`: Global state management with Zustand
+- `scripts`: Maintenance and seeding scripts
+- `public`: Static assets (Logos, images)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 License
+Check your purchase agreement for licensing details.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Created with ❤️ for professional enterprise solutions.

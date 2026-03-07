@@ -10,7 +10,7 @@ export const PUT = withPermission('settings.users.manage', async (req, { params 
 
         await dbConnect();
 
-        const userToUpdate = await User.findOne({ _id: params.id, organization: admin.organization });
+        const userToUpdate = await User.findOne({ _id: (await params).id, organization: admin.organization });
         if (!userToUpdate) {
             return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
         }

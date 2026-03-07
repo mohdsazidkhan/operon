@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         await dbConnect();
-        const contact = await Contact.findById(params.id).populate('owner', 'name avatar').populate('company', 'name');
+        const contact = await Contact.findById((await params).id).populate('owner', 'name avatar').populate('company', 'name');
         if (!contact) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: contact });
     } catch (err) {
@@ -22,7 +22,7 @@ export async function PUT(req, { params }) {
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         const body = await req.json();
         await dbConnect();
-        const contact = await Contact.findByIdAndUpdate(params.id, body, { new: true }).populate('owner', 'name avatar').populate('company', 'name');
+        const contact = await Contact.findByIdAndUpdate((await params).id, body, { new: true }).populate('owner', 'name avatar').populate('company', 'name');
         if (!contact) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: contact });
     } catch (err) {
@@ -35,7 +35,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         await dbConnect();
-        await Contact.findByIdAndDelete(params.id);
+        await Contact.findByIdAndDelete((await params).id);
         return NextResponse.json({ success: true, message: 'Deleted' });
     } catch (err) {
         return NextResponse.json({ success: false, message: err.message }, { status: 500 });

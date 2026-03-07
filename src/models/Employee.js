@@ -24,11 +24,10 @@ const employeeSchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
 }, { timestamps: true });
 
-employeeSchema.pre('save', function (next) {
+employeeSchema.pre('save', function () {
     if (!this.employeeId) {
         this.employeeId = `EMP-${Date.now()}`;
     }
-    next();
 });
 
 export default mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

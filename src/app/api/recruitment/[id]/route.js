@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
+import dbConnect from '@/lib/db/dbConnect';
 import Recruitment from '@/models/Recruitment';
 
 export async function GET(req, { params }) {
     try {
         await dbConnect();
-        const job = await Recruitment.findById(params.id).lean();
+        const job = await Recruitment.findById((await params).id).lean();
         if (!job) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: job });
     } catch (err) {
@@ -17,7 +17,7 @@ export async function PUT(req, { params }) {
     try {
         await dbConnect();
         const body = await req.json();
-        const job = await Recruitment.findByIdAndUpdate(params.id, body, { new: true });
+        const job = await Recruitment.findByIdAndUpdate((await params).id, body, { new: true });
         if (!job) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: job });
     } catch (err) {
@@ -28,7 +28,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
     try {
         await dbConnect();
-        await Recruitment.findByIdAndDelete(params.id);
+        await Recruitment.findByIdAndDelete((await params).id);
         return NextResponse.json({ success: true, message: 'Deleted' });
     } catch (err) {
         return NextResponse.json({ success: false, message: err.message }, { status: 500 });

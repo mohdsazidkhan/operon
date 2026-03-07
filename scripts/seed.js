@@ -147,8 +147,106 @@ const TaskSchema = new mongoose.Schema({
 
 const NotificationSchema = new mongoose.Schema({
     title: String, message: String, type: String, priority: String,
-    read: { type: Boolean, default: false },
+    isRead: { type: Boolean, default: false },
     user: mongoose.Schema.Types.ObjectId, organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const AnnouncementSchema = new mongoose.Schema({
+    title: String, content: String, type: String, audience: String, audienceValue: String,
+    isPinned: Boolean, expiresAt: Date, author: mongoose.Schema.Types.ObjectId, authorName: String,
+    organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const AuditLogSchema = new mongoose.Schema({
+    user: mongoose.Schema.Types.ObjectId, action: String, module: String, resourceId: mongoose.Schema.Types.ObjectId,
+    details: mongoose.Schema.Types.Mixed, ipAddress: String, userAgent: String,
+    organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const BudgetSchema = new mongoose.Schema({
+    name: String, department: String, fiscalYear: String, period: String,
+    categories: [{ name: String, allocated: Number, spent: Number, variance: Number }],
+    totalAllocated: Number, totalSpent: Number, status: String, notes: String,
+    approvedBy: mongoose.Schema.Types.ObjectId, organization: mongoose.Schema.Types.ObjectId,
+    createdBy: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const CreditNoteSchema = new mongoose.Schema({
+    creditNoteNumber: String, invoice: mongoose.Schema.Types.ObjectId, customer: mongoose.Schema.Types.ObjectId,
+    company: mongoose.Schema.Types.ObjectId, items: [{ description: String, quantity: Number, price: Number, total: Number }],
+    subtotal: Number, tax: Number, total: Number, reason: String, status: String,
+    issuedDate: Date, notes: String, organization: mongoose.Schema.Types.ObjectId, createdBy: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const DepartmentSchema = new mongoose.Schema({
+    name: String, code: String, description: String, manager: mongoose.Schema.Types.ObjectId,
+    parentDepartment: mongoose.Schema.Types.ObjectId, budget: Number, headcount: Number,
+    isActive: Boolean, organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const EmailSchema = new mongoose.Schema({
+    sender: { name: String, email: String }, recipients: [{ name: String, email: String }],
+    subject: String, content: String, snippet: String, folder: String, isRead: Boolean, isStarred: Boolean,
+    attachments: [{ name: String, size: Number, type: String, url: String }], labels: [String],
+    organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const MessageSchema = new mongoose.Schema({
+    sender: mongoose.Schema.Types.ObjectId, receiver: mongoose.Schema.Types.ObjectId, channelId: String,
+    text: String, type: String, attachments: [{ name: String, url: String }], readBy: [mongoose.Schema.Types.ObjectId],
+    organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const NoteSchema = new mongoose.Schema({
+    title: String, content: String, color: String, isPinned: Boolean, tags: [String],
+    isArchived: Boolean, owner: mongoose.Schema.Types.ObjectId, organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const ProjectSchema = new mongoose.Schema({
+    name: String, description: String, status: String, priority: String, startDate: Date, dueDate: Date,
+    completedDate: Date, budget: Number, spent: Number, progress: Number,
+    owner: mongoose.Schema.Types.ObjectId, team: [mongoose.Schema.Types.ObjectId],
+    client: String, tags: [String], organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const PurchaseOrderSchema = new mongoose.Schema({
+    poNumber: String, vendor: mongoose.Schema.Types.ObjectId, vendorName: String,
+    items: [{ description: String, quantity: Number, unitPrice: Number, total: Number, product: mongoose.Schema.Types.ObjectId, sku: String }],
+    subtotal: Number, tax: Number, shipping: Number, total: Number, amountPaid: Number,
+    status: String, orderDate: Date, expectedDelivery: Date, receivedDate: Date,
+    paymentTerms: String, notes: String, createdBy: mongoose.Schema.Types.ObjectId,
+    organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const RecruitmentSchema = new mongoose.Schema({
+    jobTitle: String, department: mongoose.Schema.Types.ObjectId, departmentName: String,
+    description: String, requirements: String, type: String, location: String,
+    salaryMin: Number, salaryMax: Number, status: String, postedDate: Date, closingDate: Date,
+    positions: Number, hiringManager: mongoose.Schema.Types.ObjectId,
+    applications: [{ applicantName: String, email: String, status: String, appliedAt: Date }],
+    organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const VaultFileSchema = new mongoose.Schema({
+    name: String, size: Number, type: String, url: String, folder: String,
+    owner: mongoose.Schema.Types.ObjectId, organization: mongoose.Schema.Types.ObjectId,
+    isPublic: Boolean, tags: [String],
+}, { timestamps: true });
+
+const PerformanceSchema = new mongoose.Schema({
+    employee: mongoose.Schema.Types.ObjectId, reviewer: mongoose.Schema.Types.ObjectId,
+    period: String, periodType: String,
+    goals: [{ title: String, description: String, targetValue: Number, actualValue: Number, weight: Number, status: String }],
+    ratings: { quality: Number, productivity: Number, teamwork: Number, communication: Number, initiative: Number },
+    overallScore: Number, strengths: String, improvements: String, comments: String, reviewerComments: String,
+    status: String, submittedAt: Date, reviewedAt: Date, organization: mongoose.Schema.Types.ObjectId,
+}, { timestamps: true });
+
+const VendorSchema = new mongoose.Schema({
+    name: String, code: String, email: String, phone: String, website: String,
+    contactPerson: String, address: { street: String, city: String, state: String, country: String, zip: String },
+    category: String, paymentTerms: String, status: String, rating: Number,
+    organization: mongoose.Schema.Types.ObjectId,
 }, { timestamps: true });
 
 const PermissionSchema = new mongoose.Schema({
@@ -205,6 +303,20 @@ const Leave = mongoose.models.Leave || mongoose.model('Leave', LeaveSchema);
 const Event = mongoose.models.Event || mongoose.model('Event', EventSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema);
 const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+const Announcement = mongoose.models.Announcement || mongoose.model('Announcement', AnnouncementSchema);
+const AuditLog = mongoose.models.AuditLog || mongoose.model('AuditLog', AuditLogSchema);
+const Budget = mongoose.models.Budget || mongoose.model('Budget', BudgetSchema);
+const CreditNote = mongoose.models.CreditNote || mongoose.model('CreditNote', CreditNoteSchema);
+const Department = mongoose.models.Department || mongoose.model('Department', DepartmentSchema);
+const Email = mongoose.models.Email || mongoose.model('Email', EmailSchema);
+const Message = mongoose.models.Message || mongoose.model('Message', MessageSchema);
+const Note = mongoose.models.Note || mongoose.model('Note', NoteSchema);
+const Project = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
+const PurchaseOrder = mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', PurchaseOrderSchema);
+const Recruitment = mongoose.models.Recruitment || mongoose.model('Recruitment', RecruitmentSchema);
+const VaultFile = mongoose.models.VaultFile || mongoose.model('VaultFile', VaultFileSchema);
+const Performance = mongoose.models.Performance || mongoose.model('Performance', PerformanceSchema);
+const Vendor = mongoose.models.Vendor || mongoose.model('Vendor', VendorSchema);
 const Permission = mongoose.models.Permission || mongoose.model('Permission', PermissionSchema);
 const Role = mongoose.models.Role || mongoose.model('Role', RoleSchema);
 const UserRole = mongoose.models.UserRole || mongoose.model('UserRole', UserRoleSchema);
@@ -225,6 +337,11 @@ async function seed() {
         Expense.deleteMany({}), Invoice.deleteMany({}), Payroll.deleteMany({}),
         Attendance.deleteMany({}), Leave.deleteMany({}), Event.deleteMany({}),
         Task.deleteMany({}), Notification.deleteMany({}),
+        Announcement.deleteMany({}), AuditLog.deleteMany({}), Budget.deleteMany({}),
+        CreditNote.deleteMany({}), Department.deleteMany({}), Email.deleteMany({}),
+        Message.deleteMany({}), Note.deleteMany({}), Project.deleteMany({}),
+        PurchaseOrder.deleteMany({}), Recruitment.deleteMany({}),
+        VaultFile.deleteMany({}), Performance.deleteMany({}), Vendor.deleteMany({}),
         Permission.deleteMany({}), Role.deleteMany({}), UserRole.deleteMany({}),
     ]);
     console.log('✅ Cleared!\n');
@@ -384,7 +501,7 @@ async function seed() {
         { name: 'Vendor Portal', email: process.env.VENDOR_PORTAL_EMAIL, pass: process.env.VENDOR_PORTAL_PASS, role: 'vendor_portal', slug: 'vendor_portal' },
     ];
 
-    let adminUser, managerUser;
+    let adminUser, managerUser, superAdminUser;
     for (const u of demoUsers) {
         if (!u.email || !u.pass) continue;
         const hashedPassword = await bcrypt.hash(u.pass, 12);
@@ -400,6 +517,7 @@ async function seed() {
 
         if (u.slug === 'org_admin') adminUser = user;
         if (u.slug === 'operations_manager') managerUser = user;
+        if (u.slug === 'super_admin') superAdminUser = user;
 
         // Assign RBAC Role
         await UserRole.create({
@@ -597,11 +715,114 @@ async function seed() {
     // ── Notifications ──
     console.log('🔔 Creating notifications...');
     await Notification.insertMany([
-        { title: 'New Lead Added', message: 'Carlos Mendez from StartupMX has been added as a new lead.', type: 'info', priority: 'low', read: false, user: adminUser._id, organization: org._id },
-        { title: 'Invoice Overdue', message: 'Invoice INV-2024-003 for Nova Systems is now overdue by 15 days.', type: 'warning', priority: 'high', read: false, user: adminUser._id, organization: org._id },
-        { title: 'Deal Won 🎉', message: 'Nova Analytics Package deal has been marked as Won! Value: $98,000.', type: 'success', priority: 'high', read: true, user: managerUser._id, organization: org._id },
-        { title: 'Leave Request Pending', message: 'Rahul Verma has submitted a sick leave request for Mar 3-5.', type: 'info', priority: 'medium', read: false, user: adminUser._id, organization: org._id },
-        { title: 'Payroll Processed', message: 'March 2024 payroll for 5 employees has been processed successfully.', type: 'success', priority: 'medium', read: true, user: adminUser._id, organization: org._id },
+        { title: 'Welcome to Operon!', message: 'Your super admin account is ready to use.', type: 'info', priority: 'high', isRead: false, user: superAdminUser._id, organization: org._id },
+        { title: 'System Update', message: 'New ERP modules have been installed.', type: 'success', priority: 'high', isRead: true, user: superAdminUser._id, organization: org._id },
+        { title: 'New Lead Added', message: 'Carlos Mendez from StartupMX has been added as a new lead.', type: 'info', priority: 'low', isRead: false, user: adminUser._id, organization: org._id },
+        { title: 'Invoice Overdue', message: 'Invoice INV-2024-003 for Nova Systems is now overdue by 15 days.', type: 'warning', priority: 'high', isRead: false, user: adminUser._id, organization: org._id },
+        { title: 'Deal Won 🎉', message: 'Nova Analytics Package deal has been marked as Won! Value: $98,000.', type: 'success', priority: 'high', isRead: true, user: managerUser._id, organization: org._id },
+        { title: 'Leave Request Pending', message: 'Rahul Verma has submitted a sick leave request for Mar 3-5.', type: 'info', priority: 'medium', isRead: false, user: adminUser._id, organization: org._id },
+        { title: 'Payroll Processed', message: 'March 2024 payroll for 5 employees has been processed successfully.', type: 'success', priority: 'medium', isRead: true, user: adminUser._id, organization: org._id },
+    ]);
+
+    // ── Departments ──
+    console.log('🏢 Creating departments...');
+    const depts = await Department.insertMany([
+        { name: 'Engineering', code: 'DEPT-ENG', description: 'Software development and DevOps', manager: employees[6]._id, budget: 500000, headcount: 15, isActive: true, organization: org._id },
+        { name: 'Sales', code: 'DEPT-SALES', description: 'Sales and business development', manager: employees[2]._id, budget: 300000, headcount: 10, isActive: true, organization: org._id },
+        { name: 'Human Resources', code: 'DEPT-HR', description: 'Talent management and payroll', manager: employees[3]._id, budget: 150000, headcount: 5, isActive: true, organization: org._id },
+    ]);
+
+    // ── Announcements ──
+    console.log('📢 Creating announcements...');
+    await Announcement.insertMany([
+        { title: 'Annual General Meeting', content: 'Our AGM will be held on April 15th at 10:00 AM in the main conference hall.', type: 'event', audience: 'all', isPinned: true, author: adminUser._id, authorName: 'Admin', organization: org._id },
+        { title: 'New Policy: Remote Work', content: 'We are updating our remote work policy. Please check the handbook.', type: 'policy', audience: 'all', isPinned: false, author: adminUser._id, authorName: 'Admin', organization: org._id },
+    ]);
+
+    // ── Budgets ──
+    console.log('💹 Creating budgets...');
+    await Budget.insertMany([
+        { name: 'Engineering Q1 Budget', department: 'Engineering', fiscalYear: '2024', period: 'quarterly', totalAllocated: 150000, totalSpent: 120000, status: 'approved', organization: org._id, createdBy: adminUser._id },
+        { name: 'Marketing Annual Budget', department: 'Marketing', fiscalYear: '2024', period: 'annual', totalAllocated: 500000, totalSpent: 50000, status: 'active', organization: org._id, createdBy: adminUser._id },
+    ]);
+
+    // ── Projects ──
+    console.log('🏗️  Creating projects...');
+    await Project.insertMany([
+        { name: 'Operon Web App v3', description: 'Complete redesign of the web interface', status: 'active', priority: 'high', startDate: new Date(), dueDate: new Date(Date.now() + 90 * 86400000), budget: 50000, spent: 15000, progress: 30, owner: adminUser._id, team: [employees[0]._id, employees[1]._id], organization: org._id },
+        { name: 'Mobile App Launch', description: 'Launch iOS and Android versions', status: 'planning', priority: 'medium', startDate: new Date(), dueDate: new Date(Date.now() + 120 * 86400000), budget: 30000, spent: 0, progress: 10, owner: managerUser._id, team: [employees[7]._id], organization: org._id },
+    ]);
+
+    // ── Vendors ──
+    console.log('🤝 Creating vendors...');
+    const vendors = await Vendor.insertMany([
+        { name: 'Cloud Provider Inc', code: 'VND-CLD-01', email: 'billing@cloudprovider.com', website: 'https://cloudprovider.com', status: 'active', rating: 5, organization: org._id },
+        { name: 'Office Supplies Co', code: 'VND-OFFICE-01', email: 'sales@officesupplies.com', status: 'active', rating: 4, organization: org._id },
+    ]);
+
+    // ── Purchase Orders ──
+    console.log('📝 Creating purchase orders...');
+    await PurchaseOrder.insertMany([
+        { poNumber: 'PO-2024-001', vendor: vendors[0]._id, vendorName: vendors[0].name, subtotal: 5000, tax: 900, total: 5900, status: 'confirmed', orderDate: new Date(), organization: org._id, createdBy: adminUser._id },
+    ]);
+
+    // ── Recruitment ──
+    console.log('🔍 Creating recruitment data...');
+    await Recruitment.insertMany([
+        { jobTitle: 'Senior React Developer', department: depts[0]._id, departmentName: 'Engineering', status: 'open', type: 'full_time', location: 'Remote', salaryMin: 100000, salaryMax: 150000, organization: org._id, hiringManager: employees[6]._id },
+    ]);
+
+    // ── Vault Files ──
+    console.log('📂 Creating vault files...');
+    await VaultFile.insertMany([
+        { name: 'Employee_Handbook.pdf', size: 2400000, type: 'pdf', url: 'https://example.com/handbook.pdf', folder: 'HR', owner: adminUser._id, organization: org._id },
+        { name: 'Architecture_v2.png', size: 1200000, type: 'image', url: 'https://example.com/arch.png', folder: 'Engineering', owner: adminUser._id, organization: org._id },
+    ]);
+
+    // ── Emails & Messages ──
+    console.log('📧 Creating emails and messages...');
+    await Email.insertMany([
+        { sender: { name: 'Rahul Verma', email: 'rahul@operon.app' }, recipients: [{ name: 'Admin', email: process.env.SUPER_ADMIN_EMAIL }], subject: 'Design Feedback', content: 'Hey, I had some thoughts on the new dashboard design...', folder: 'inbox', isRead: false, organization: org._id },
+    ]);
+    await Message.insertMany([
+        { sender: adminUser._id, receiver: managerUser._id, text: 'Did you review the budget for March?', type: 'text', readBy: [], organization: org._id },
+    ]);
+
+    // ── Notes ──
+    console.log('🗒️  Creating notes...');
+    await Note.insertMany([
+        { title: 'Project Ideas', content: '1. AI Integration\n2. Real-time updates', color: 'yellow', isPinned: true, owner: adminUser._id, organization: org._id },
+    ]);
+
+    // ── Audit Logs ──
+    console.log('🕵️  Creating audit logs...');
+    await AuditLog.insertMany([
+        { user: adminUser._id, action: 'login', module: 'auth', details: { ip: '127.0.0.1' }, organization: org._id },
+        { user: adminUser._id, action: 'create', module: 'crm', details: { resource: 'Lead', id: leads[0]._id }, organization: org._id },
+    ]);
+
+    // ── Performance Reviews ──
+    console.log('📈 Creating performance reviews...');
+    await Performance.insertMany([
+        {
+            employee: employees[0]._id, reviewer: employees[3]._id, period: 'Q1 2024', periodType: 'quarterly',
+            goals: [
+                { title: 'Frontend Optimization', description: 'Improve LCP to < 2.5s', targetValue: 100, actualValue: 100, weight: 1, status: 'completed' },
+                { title: 'Feature Delivery', description: 'Deliver Dashboard v3', targetValue: 10, actualValue: 8, weight: 2, status: 'in_progress' }
+            ],
+            ratings: { quality: 5, productivity: 4, teamwork: 5, communication: 4, initiative: 5 },
+            overallScore: 4.6, strengths: 'Excellent technical skills and teamwork.', improvements: 'Focus on documentation.',
+            status: 'reviewed', reviewedAt: new Date(), organization: org._id
+        },
+        {
+            employee: employees[1]._id, reviewer: employees[6]._id, period: 'Q1 2024', periodType: 'quarterly',
+            goals: [
+                { title: 'API Refactoring', description: 'Reduce latency by 30%', targetValue: 30, actualValue: 35, weight: 1, status: 'completed' }
+            ],
+            ratings: { quality: 5, productivity: 5, teamwork: 4, communication: 3, initiative: 5 },
+            overallScore: 4.4, strengths: 'Very strong backend skills.', improvements: 'Better communication with frontend team.',
+            status: 'acknowledged', submittedAt: new Date(Date.now() - 5 * 86400000), reviewedAt: new Date(), organization: org._id
+        }
     ]);
 
     // ── RBAC: Permissions ────────────────────────────────────────────────
@@ -620,6 +841,7 @@ async function seed() {
     console.log(`   Orders:       8`);
     console.log(`   Events:       6`);
     console.log(`   Tasks:        9`);
+    console.log(`   Performance:  2`);
     console.log(`   Permissions:  ${permDefs.length}`);
     console.log(`   Roles:        ${seededRoles.length}`);
     console.log(`\n✅ Access USERS.md for all credentials.`);

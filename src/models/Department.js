@@ -12,11 +12,10 @@ const departmentSchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
 }, { timestamps: true });
 
-departmentSchema.pre('save', function (next) {
+departmentSchema.pre('save', function () {
     if (!this.code) {
         this.code = `DEPT-${Date.now()}`;
     }
-    next();
 });
 
 export default mongoose.models.Department || mongoose.model('Department', departmentSchema);

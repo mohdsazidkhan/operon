@@ -23,11 +23,10 @@ const invoiceSchema = new mongoose.Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
-invoiceSchema.pre('save', function (next) {
+invoiceSchema.pre('save', function () {
     if (!this.invoiceNumber) {
         this.invoiceNumber = `INV-${Date.now()}`;
     }
-    next();
 });
 
 export default mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);

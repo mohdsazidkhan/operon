@@ -21,11 +21,11 @@ export async function GET(req, { params }) {
         const Role = (await import('@/models/Role')).default;
         const UserRole = (await import('@/models/UserRole')).default;
 
-        const role = await Role.findById(params.id).populate('createdBy', 'name email').lean();
+        const role = await Role.findById((await params).id).populate('createdBy', 'name email').lean();
         if (!role) return NextResponse.json({ success: false, message: 'Role not found' }, { status: 404 });
 
         // Count how many users have this role in this org
-        const userCount = await UserRole.countDocuments({ role: params.id, organization: user.organization, isActive: true });
+        const userCount = await UserRole.countDocuments({ role: (await params).id, organization: user.organization, isActive: true });
 
         return NextResponse.json({ success: true, data: { ...role, userCount } });
     } catch (err) {
@@ -45,7 +45,7 @@ export async function PUT(req, { params }) {
         const Role = (await import('@/models/Role')).default;
         const body = await req.json();
 
-        const role = await Role.findById(params.id);
+        const role = await Role.findById((await params).id);
         if (!role) return NextResponse.json({ success: false, message: 'Role not found' }, { status: 404 });
 
         // System roles: only super_admin can edit; others can only edit org-specific custom roles
@@ -96,7 +96,7 @@ export async function DELETE(req, { params }) {
         await dbConnect();
         const Role = (await import('@/models/Role')).default;
 
-        const role = await Role.findById(params.id);
+        const role = await Role.findById((await params).id);
         if (!role) return NextResponse.json({ success: false, message: 'Role not found' }, { status: 404 });
         if (role.isSystem) {
             return NextResponse.json({ success: false, message: 'System roles cannot be deleted' }, { status: 403 });
@@ -138,7 +138,7 @@ export async function POST(req, { params }) {
 
         await dbConnect();
         const Role = (await import('@/models/Role')).default;
-        const source = await Role.findById(params.id).lean();
+        const source = await Role.findById((await params).id).lean();
         if (!source) return NextResponse.json({ success: false, message: 'Role not found' }, { status: 404 });
 
         const body = await req.json().catch(() => ({}));

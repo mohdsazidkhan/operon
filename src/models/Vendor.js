@@ -20,9 +20,8 @@ const vendorSchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
 }, { timestamps: true });
 
-vendorSchema.pre('save', function (next) {
+vendorSchema.pre('save', function () {
     if (!this.code) this.code = `VND-${Date.now()}`;
-    next();
 });
 
 export default mongoose.models.Vendor || mongoose.model('Vendor', vendorSchema);

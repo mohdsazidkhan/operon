@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const payroll = await Payroll.findById(id)
             .populate('employee', 'name avatar employeeId department position salary')
@@ -26,7 +26,7 @@ export async function PUT(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         await dbConnect();
         const payroll = await Payroll.findByIdAndUpdate(id, body, { new: true, runValidators: true });
@@ -43,7 +43,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         await Payroll.findByIdAndDelete(id);
 

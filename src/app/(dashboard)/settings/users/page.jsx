@@ -122,7 +122,7 @@ export default function UserManagementPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-primary)]">User Management</h1>
-                    <p className="text-[var(--text-muted)] text-sm mt-0.5">{users.length} users · {activeCount} active</p>
+                    <p className="text-[var(--text-muted)] text-sm mt-0.5">{users.length} users &middot; {activeCount} active</p>
                 </div>
                 <button onClick={() => { setForm(EMPTY_USER); setEditUser(null); setShowAdd(true); }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-[var(--primary-500)]/20">

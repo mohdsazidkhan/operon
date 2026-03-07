@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
+import dbConnect from '@/lib/db/dbConnect';
 import Project from '@/models/Project';
 
 export async function GET(req, { params }) {
     try {
         await dbConnect();
-        const project = await Project.findById(params.id)
+        const project = await Project.findById((await params).id)
             .populate('owner', 'name avatar')
             .populate('team', 'name avatar position department').lean();
         if (!project) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
@@ -19,7 +19,7 @@ export async function PUT(req, { params }) {
     try {
         await dbConnect();
         const body = await req.json();
-        const project = await Project.findByIdAndUpdate(params.id, body, { new: true });
+        const project = await Project.findByIdAndUpdate((await params).id, body, { new: true });
         if (!project) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: project });
     } catch (err) {
@@ -30,7 +30,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
     try {
         await dbConnect();
-        await Project.findByIdAndDelete(params.id);
+        await Project.findByIdAndDelete((await params).id);
         return NextResponse.json({ success: true, message: 'Deleted' });
     } catch (err) {
         return NextResponse.json({ success: false, message: err.message }, { status: 500 });

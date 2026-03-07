@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const order = await Order.findOne({ _id: id, organization: user.organization })
             .populate('company', 'name email phone address')
@@ -28,7 +28,7 @@ export async function PUT(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         await dbConnect();
         const order = await Order.findByIdAndUpdate(id, body, { new: true, runValidators: true });
@@ -45,7 +45,7 @@ export async function DELETE(req, { params }) {
         const user = await verifyAuth(req);
         if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         await dbConnect();
         const order = await Order.findByIdAndDelete(id);
         if (!order) return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
