@@ -5,8 +5,9 @@ import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import ThemeCustomizer from './ThemeCustomizer';
 import { useThemeStore } from '@/store/useThemeStore';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/useAuthStore';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 
 function Breadcrumb() {
@@ -31,8 +32,17 @@ function Breadcrumb() {
 
 export default function DashboardLayout({ children }) {
     const { sidebarCollapsed, sidebarOpen, setSidebarOpen, toggleSidebar, isRTL } = useThemeStore();
+    const { isAuthenticated, loading: authLoading } = useAuthStore();
+    const router = useRouter();
     const [customizerOpen, setCustomizerOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+
+    // Enforce authentication
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.replace('/login');
+        }
+    }, [isAuthenticated, authLoading, router]);
 
     // Global Cmd+K / Ctrl+K shortcut
     useEffect(() => {
@@ -40,6 +50,14 @@ export default function DashboardLayout({ children }) {
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, []);
+
+    if (authLoading || !isAuthenticated) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center bg-[var(--surface-raised)]">
+                <div className="w-10 h-10 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen overflow-hidden bg-[var(--surface-raised)]">

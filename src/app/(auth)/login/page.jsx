@@ -4,31 +4,46 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, LogIn, Zap, Shield, Sparkles, Globe, Cpu } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Eye, EyeOff, LogIn, Shield, Sparkles, Globe, Cpu } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
     const [showPwd, setShowPwd] = useState(false);
     const { isDark } = useThemeStore();
-    const { login, loading } = useAuthStore();
+    const { login, loading, isAuthenticated } = useAuthStore();
     const router = useRouter();
     const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm();
 
+    const [selectedRole, setSelectedRole] = useState('');
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.replace('/dashboard');
+        }
+    }, [isAuthenticated, router]);
+
+    // Auto-fill Super Admin credentials on mount
+    useEffect(() => {
+        const defaultEmail = 'superadmin@operon.app';
+        const defaultPassword = 'SuperAdmin@123';
+
+        setSelectedRole(`${defaultEmail}|${defaultPassword}`);
+        setValue('login_email', defaultEmail);
+        setValue('login_password', defaultPassword);
+    }, [setValue]);
+
     const onSubmit = async (data) => {
-        const result = await login(data.email, data.password);
+        const result = await login(data.login_email, data.login_password);
         if (result.success) {
             toast.success('Welcome back!');
             router.push('/dashboard');
         }
         else toast.error(result.message || 'Login failed');
-    };
-
-    const fillDemo = () => {
-        setValue('email', 'admin@operon.app');
-        setValue('password', 'Admin@123');
     };
 
     const FloatingIcon = ({ icon: Icon, delay, className }) => (
@@ -128,12 +143,13 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Email Address</label>
                             <input
-                                {...register('email', { required: 'Email required' })}
-                                type="email" placeholder="ADMIN@OPERON.COM"
+                                {...register('login_email', { required: 'Email required' })}
+                                type="text" placeholder="ADMIN@OPERON.COM"
+                                autoComplete="off"
                                 className="w-full px-5 py-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] font-bold text-sm tracking-wide focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:opacity-30"
                             />
                         </div>
@@ -145,8 +161,9 @@ export default function LoginPage() {
                             </div>
                             <div className="relative group">
                                 <input
-                                    {...register('password', { required: 'Key required' })}
+                                    {...register('login_password', { required: 'Key required' })}
                                     type={showPwd ? 'text' : 'password'} placeholder="••••••••"
+                                    autoComplete="new-password"
                                     className="w-full px-5 py-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] font-bold text-sm tracking-wide focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:opacity-30 pr-14"
                                 />
                                 <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-primary-500 transition-colors">
@@ -178,12 +195,14 @@ export default function LoginPage() {
 
                         <div className="flex flex-col gap-3">
                             <select
+                                value={selectedRole}
                                 onChange={(e) => {
                                     const val = e.target.value;
+                                    setSelectedRole(val);
                                     if (!val) return;
                                     const [email, pass] = val.split('|');
-                                    setValue('email', email);
-                                    setValue('password', pass);
+                                    setValue('login_email', email);
+                                    setValue('login_password', pass);
                                     toast.success(`${email.split('@')[0]} loaded`);
                                 }}
                                 className="w-full h-14 px-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] text-[11px] font-bold uppercase tracking-wider focus:outline-none focus:border-primary-500 transition-all cursor-pointer"
