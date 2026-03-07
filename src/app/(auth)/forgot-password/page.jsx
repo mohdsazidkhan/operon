@@ -9,6 +9,19 @@ import { motion } from 'framer-motion';
 import { useThemeStore } from '@/store/useThemeStore';
 import { cn } from '@/lib/utils';
 
+import Image from 'next/image';
+
+const FloatingIcon = ({ icon: Icon, delay, className }) => (
+    <motion.div
+        initial={{ y: 0, opacity: 0 }}
+        animate={{ y: [-20, 20, -20], opacity: [0.1, 0.3, 0.1] }}
+        transition={{ duration: 6, repeat: Infinity, delay }}
+        className={`absolute pointer-events-none ${className}`}
+    >
+        <Icon size={120} />
+    </motion.div>
+);
+
 export default function ForgotPasswordPage() {
     const { isDark } = useThemeStore();
     const [sent, setSent] = useState(false);
@@ -23,17 +36,6 @@ export default function ForgotPasswordPage() {
             toast.error('Failed to send email. Check your connection.');
         }
     };
-
-    const FloatingIcon = ({ icon: Icon, delay, className }) => (
-        <motion.div
-            initial={{ y: 0, opacity: 0 }}
-            animate={{ y: [-20, 20, -20], opacity: [0.1, 0.3, 0.1] }}
-            transition={{ duration: 6, repeat: Infinity, delay }}
-            className={`absolute pointer-events-none ${className}`}
-        >
-            <Icon size={120} />
-        </motion.div>
-    );
 
     return (
         <div className="min-h-screen flex text-[var(--text-primary)] transition-colors duration-500 overflow-hidden bg-[var(--surface-raised)]">
@@ -52,13 +54,18 @@ export default function ForgotPasswordPage() {
                     className="relative z-10"
                 >
                     <div className="flex items-center gap-3">
-                        <motion.img
+                        <motion.div
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 1 }}
-                            src={isDark ? "/logo-dark.png" : "/logo-light.png"}
-                            alt="OPERON Logo"
-                            className="h-12 w-auto object-contain"
-                        />
+                        >
+                            <Image
+                                src={isDark ? "/logo-dark.png" : "/logo-light.png"}
+                                alt="OPERON Logo"
+                                width={150}
+                                height={150}
+                                className="h-12 w-auto object-contain"
+                            />
+                        </motion.div>
                     </div>
                 </motion.div>
 
@@ -96,9 +103,11 @@ export default function ForgotPasswordPage() {
             {/* Form Section */}
             <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative">
                 <div className="absolute top-8 left-8 lg:hidden">
-                    <img
+                    <Image
                         src={isDark ? "/logo-dark.png" : "/logo-light.png"}
                         alt="OPERON Logo"
+                        width={100}
+                        height={100}
                         className="h-8 w-auto object-contain"
                     />
                 </div>

@@ -8,8 +8,18 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, UserPlus, Sparkles, Shield, Globe, Cpu } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
-import api from '@/services/api';
-import toast from 'react-hot-toast';
+import Image from 'next/image';
+
+const FloatingIcon = ({ icon: Icon, delay, className }) => (
+    <motion.div
+        initial={{ y: 0, opacity: 0 }}
+        animate={{ y: [-20, 20, -20], opacity: [0.1, 0.3, 0.1] }}
+        transition={{ duration: 6, repeat: Infinity, delay }}
+        className={`absolute pointer-events-none ${className}`}
+    >
+        <Icon size={120} />
+    </motion.div>
+);
 
 export default function RegisterPage() {
     const [showPwd, setShowPwd] = useState(false);
@@ -29,17 +39,6 @@ export default function RegisterPage() {
         }
     };
 
-    const FloatingIcon = ({ icon: Icon, delay, className }) => (
-        <motion.div
-            initial={{ y: 0, opacity: 0 }}
-            animate={{ y: [-20, 20, -20], opacity: [0.1, 0.3, 0.1] }}
-            transition={{ duration: 6, repeat: Infinity, delay }}
-            className={`absolute pointer-events-none ${className}`}
-        >
-            <Icon size={120} />
-        </motion.div>
-    );
-
     return (
         <div className="min-h-screen flex text-[var(--text-primary)] transition-colors duration-500 overflow-hidden bg-[var(--surface-raised)]">
             {/* Branding Panel */}
@@ -57,13 +56,18 @@ export default function RegisterPage() {
                     className="relative z-10"
                 >
                     <div className="flex items-center gap-3">
-                        <motion.img
+                        <motion.div
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 1 }}
-                            src={isDark ? "/logo-dark.png" : "/logo-light.png"}
-                            alt="OPERON Logo"
-                            className="h-12 w-auto object-contain"
-                        />
+                        >
+                            <Image
+                                src={isDark ? "/logo-dark.png" : "/logo-light.png"}
+                                alt="OPERON Logo"
+                                width={150}
+                                height={150}
+                                className="h-12 w-auto object-contain"
+                            />
+                        </motion.div>
                     </div>
                 </motion.div>
 
@@ -101,9 +105,11 @@ export default function RegisterPage() {
             {/* Form Section */}
             <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative overflow-y-auto">
                 <div className="absolute top-8 left-8 lg:hidden">
-                    <img
+                    <Image
                         src={isDark ? "/logo-dark.png" : "/logo-light.png"}
                         alt="OPERON Logo"
+                        width={100}
+                        height={100}
                         className="h-8 w-auto object-contain"
                     />
                 </div>

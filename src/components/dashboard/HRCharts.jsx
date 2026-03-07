@@ -1,5 +1,6 @@
 'use client';
 
+import { Users } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useThemeStore } from '@/store/useThemeStore';
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
